@@ -1,1 +1,1 @@
-log("hello")
+toastLog("hello")
