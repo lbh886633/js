@@ -3,7 +3,7 @@
 
 var tempSave = {
     firstEnvi: 0,
-    privacy: 0,
+    privacy: 30,
     NUMBER: 0,
     自动打码: false,
     version: "9",
