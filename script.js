@@ -2116,7 +2116,7 @@ function getFansList(fansNameList, fansList, all) {
                         //  发送私信
                         if(ui.getsay.checked){
                             if(isNaN(tempSave.NUMBER)) tempSave.NUMBER = 1;
-                            let newMsg = (++tempSave.NUMBER) + tempSave.getSayMessage;
+                            let newMsg = Date.now().toString().substring(10) + tempSave.getSayMessage;
                             let re = sayHello(newMsg);
                             if(re){
                                 console.info("消息发送状态", re.status);
@@ -2823,6 +2823,7 @@ function sayHello(f, msg){
         message: re.msg,
         perfix: re.perfix,
         suffix: re.suffix,
+        status: re.status?0:1,
         accountUsername: accountInfo.username,
         fansUsername: f.username,
     });
@@ -3157,7 +3158,21 @@ function replyMsg() {
     for (let i = 新消息.length; 0 <= i; i--) {
         // 避免因为空对象导致失败
         新消息[i].params = null;
-        server.add("record", server.excludeNull(新消息[i]));
+        /* {
+            message: re.msg,
+            perfix: re.perfix,
+            suffix: re.suffix,
+            status: re.status?0:1,
+            accountUsername: accountInfo.username,
+            fansUsername: f.username,
+        } */
+        try{
+            console.verbose(新消息[i]);
+            server.add("record", server.excludeNull(新消息[i]));
+        } catch(e){
+            log(e);
+            log("上传新消息失败！");
+        }
     }
     addFans(fans,Fans)
 }
