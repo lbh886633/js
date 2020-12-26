@@ -804,7 +804,7 @@ function 还原模式() {
                 }
 
                 // 以下操作执行前先判断简介和链接
-                if(accountInfo.url != ui.wz.text()){
+                if(false && accountInfo.url != ui.wz.text()){
                     log("修改链接")
                     let 编辑信息 = textContains("Edit ").visibleToUser().findOne(2000)
                     if(编辑信息){
@@ -834,7 +834,7 @@ function 还原模式() {
                         返回首页()
                     }
                 }
-                if(accountInfo.BI != ui.jj.text()){
+                if(false && accountInfo.BI != ui.jj.text()){
                     // 修改简介
                     log("修改简介")
                     let 编辑信息 = textContains("Edit ").visibleToUser().findOne(2000)

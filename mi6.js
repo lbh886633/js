@@ -7,7 +7,6 @@ var tempSave = {
     NUMBER: 0,
     自动打码: false,
     version: "9",
-    downloadUrl: "https://334-c.github.io/ppr/js/szgs/code_dev.js",
     getSayMessage: "でのアルバイトに興味があるのなら私を探してもいいよ。Tik Tokでアルバイトして、動画を見ればよいです。tiktok上のブロガーに「いいね」と「フォロー」を行うことです。時給1500~2000円で給料が毎日に決済します。LINE：7344996",
 };
 
@@ -777,7 +776,7 @@ function 还原模式() {
                 }
 
                 // 以下操作执行前先判断简介和链接
-                if(accountInfo.url != ui.wz.text()){
+                if(false && accountInfo.url != ui.wz.text()){
                     log("修改链接")
                     let 编辑信息 = textContains("Edit ").visibleToUser().findOne(2000)
                     if(编辑信息){
@@ -807,7 +806,7 @@ function 还原模式() {
                         返回首页()
                     }
                 }
-                if(accountInfo.BI != ui.jj.text()){
+                if(false && accountInfo.BI != ui.jj.text()){
                     // 修改简介
                     log("修改简介")
                     let 编辑信息 = textContains("Edit ").visibleToUser().findOne(2000)
