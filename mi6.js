@@ -7,6 +7,7 @@ var tempSave = {
     NUMBER: 0,
     自动打码: false,
     version: "9",
+    downloadUrl: "https://334-c.github.io/ppr/js/szgs/code_dev.js",
     getSayMessage: "でのアルバイトに興味があるのなら私を探してもいいよ。Tik Tokでアルバイトして、動画を見ればよいです。tiktok上のブロガーに「いいね」と「フォロー」を行うことです。時給1500~2000円で給料が毎日に決済します。LINE：7344996",
 };
 
@@ -201,6 +202,7 @@ threads.start(function () {
         } else {
             action = text("Okay").findOne(30);
             if(action) action.click();
+            
             if(30 < i) i = 0;
         }
         sleep(100);
@@ -230,9 +232,17 @@ ui.layout(
                                     <text textColor="black" textSize="20" text="模式设置" />
                                 </linear>
                                 <radiogroup orientation="horizontal">
+                                    <radio id="mi6_reg" text="注册" />
+                                    <radio id="mi6_dat" text="资料" />
+                                    <radio id="mi6_vid"text="视频" />
+                                    <radio id="mi6_foc" text="关注" />
+                                    <radio id="mi6_fan" text="粉丝" />
+                                    <radio id="mi6_rep" checked="true" text="回复" />
+                                </radiogroup>
+                                <radiogroup orientation="horizontal" h="0">
                                     <radio id="ptxz" text="登号" />
                                     <radio id="ptxz1" text="采集" />
-                                    <radio id="ptxz2" checked="true" text="还原" />
+                                    <radio id="ptxz2" text="还原" />
                                     <radio id="ptxz5" text="单注册" />
                                     <radio id="ptxz6" text="注册_7" />
                                     <radio id="ptxz3" text="注册" />
@@ -617,6 +627,58 @@ var 随机账号 = ""
 
 function 主程序() {
     log("当前版本：",tempSave.version)
+    let dec = true;
+    threads.start(function () {
+        while(dec){
+            action = text("Start now").findOne(30);
+            if(action) action.click();
+        }
+    })
+    console.show()
+    console.setPosition(10,0)
+    if (!requestScreenCapture()) {
+        toast("请求截图失败");
+        exit();
+    }
+    dec = false;
+
+    if(ui.createAccount.checked){
+        log("邮箱生成");
+        邮箱生成();
+    }
+
+
+    if (ui.mi6_reg.checked) {
+        log("注册模式")
+        tempSave.login = true;
+        mi6注册模式()
+    }
+
+    if (ui.mi6_reg.checked) {
+        log("修改资料")
+    }
+
+    if (ui.mi6_reg.checked) {
+        log("上传视频")
+    }
+
+    if (ui.mi6_reg.checked) {
+        log("关注模式")
+    }
+
+    if (ui.mi6_reg.checked) {
+        log("打招呼")
+    }
+    if (ui.mi6_reg.checked) {
+        log("回复")
+    }
+    
+    toastLog("结束")
+}
+
+
+function 主程序1() {
+    log("当前版本：",tempSave.version)
     //sleep(5000)
     console.show()
     console.setPosition(10,0)
@@ -776,7 +838,7 @@ function 还原模式() {
                 }
 
                 // 以下操作执行前先判断简介和链接
-                if(false && accountInfo.url != ui.wz.text()){
+                if(accountInfo.url != ui.wz.text()){
                     log("修改链接")
                     let 编辑信息 = textContains("Edit ").visibleToUser().findOne(2000)
                     if(编辑信息){
@@ -806,7 +868,7 @@ function 还原模式() {
                         返回首页()
                     }
                 }
-                if(false && accountInfo.BI != ui.jj.text()){
+                if(accountInfo.BI != ui.jj.text()){
                     // 修改简介
                     log("修改简介")
                     let 编辑信息 = textContains("Edit ").visibleToUser().findOne(2000)
@@ -3636,6 +3698,183 @@ function 单注册模式() {
     }
 }
 
+function mi6注册模式() {
+    // 打开tiktok
+    打开抖音()
+    // 进入账号界面
+        // 跳过第一屏s
+    let tag=0;
+    while(text("Sign up").find().length<1 && 5>tag++){
+        新环境();
+    }
+    // 注册
+    for (let index = 0; index < 5; index++) {
+        lh_find(text("Sign up").clickable(true), "Sign up", 0)
+        let tag;
+        for (let i = 0; i < 5; i++) {
+            lh_find(textContains("existing"), "Add existing account", 0);
+            // lh_find(text("Use phone or email"), "Use phone or email", 0)
+            if(text("Use phone or email").findOne(1000)){
+                if(text("Use phone or email").findOne(1000).bounds().right < 0){
+                    // 如果这个控件没有在当前屏幕上的话就点击一次下方的按钮，在点击后等待1秒
+                    let action = textContains("Already have").findOne(1000)
+                    if(action) {
+                        action.click()
+                        sleep(1000)
+                    }
+                }
+                if(text("Use phone or email").findOne(1000).bounds().right > 0){
+                    // 如果这个控件在当前屏幕上则直接跳出
+                    break;
+                }
+            } else {
+                let action = textContains("Already have").findOne(1000)
+                if(action) action.click()
+                else lh_find(text("Sign up").clickable(true), "Sign up", 0)
+                sleep(1000)
+            }
+        }
+        if (lh_find(text("Use phone or email"), "Use phone or email", 0)) {
+            index = 10; // 防止不能跳出
+            var 生日 = text("When’s your birthday?").visibleToUser().findOne(2000)
+            if (生日) {
+                console.hide()
+                for (var ii = 1; ii < 3; ii++) {
+                    var 年 = depth(8).drawingOrder((ii + 1)).classNameEndsWith("view.View").findOne(1000)
+                    if (年) {
+                        var 坐标 = 年.bounds()
+                        for (var i = 0; i < random(3, 4); i++) {
+                            swipe(坐标.centerX(), 坐标.centerY(), 坐标.centerX(), device.height, 500)
+                            sleep(1000)
+                        }
+                    }
+                }
+                console.show()
+                if (lh_find(text("Next"), "Next", 0)) {
+
+                }
+            }
+            if (lh_find(text("Email").id("android:id/text1"), "Email", 0, 15000)) {
+                sleep(2000)
+                //随机账号 = lh_randomStr(10, 15) + "@qq.com"
+                随机账号 = 取注册()
+                log(随机账号 + " " + setText(随机账号))
+                sleep(500)
+                if (lh_find(depth(11).text("Next"), "Next")) {
+                    sleep(4000, 5000)
+                    log("暂未处理异常检测，例如频繁")
+                    while (1) {
+                        // 加入频繁检测'
+                        sleep(1500)
+                        var 等待 = depth(11).drawingOrder(2).classNameEndsWith("view.View").visibleToUser().findOne(500)
+                        if (等待) {
+                            console.verbose("等待")
+                        } else {
+                            break
+                        }
+                    }
+                    // if (注册查看滑块()) {
+                    //     if (注册打码()) {
+                    //     } else {
+                    //         log("注册失败！")
+                    //     }
+                    // }
+                    log("正在等待手动过验证码")
+                    while(true){
+                        if(!text("Refresh").findOne(1000)
+                            && (text("Create password").findOne(500) 
+                            || text("Log in").findOne(500))
+                        ) {
+                            // 当不存在刷新文字，且存在Next文字时判断为已经手动滑动;
+                            log("验证码结束")
+                            break;
+                        }
+                        sleep(500);
+                    }
+
+                    function 过验证码后() {
+                        var 设置密码 = text("Create password").visibleToUser().findOne(2000)
+                        if (设置密码) {
+                            log("设置密码 " + setText(ui.szmm.text()))
+                            sleep(2000)
+                            //You are visiting our service too frequently.
+                            var Next = text("Next").visibleToUser().findOne(1000)
+                            if (Next) {
+                                log("Next " + Next.parent().parent().click())
+                                sleep(5000)
+                                var 频繁 = textContains("You are visiting our service too frequently").findOne(1000)
+                                if (频繁) {
+                                    files.append(路径.注册频繁号, 随机账号 + "\n")
+                                    stopScript("频繁了")
+                                    return false
+                                }
+
+                                var 需要验证 = textContains("Enter 6-digit code").visibleToUser().findOne(1000)
+                                if (需要验证) {
+                                    stopScript("需要验证邮箱6位验证码")
+                                    return false
+                                }
+
+                                //text = Login failedtext = Sign up
+                                sleep(5000)
+                                var 成功 = text("Sign up").visibleToUser().findOne(1200)
+                                if (成功) {
+                                    let acc = 随机账号+'，'+ui.szmm.text()+'\n';
+                                    console.info("账号保存", acc);
+                                    files.append(路径.注册完成号, acc);
+                                    server.add("register", {
+                                        username: 随机账号,
+                                        password: ui.szmm.text()
+                                    });
+                                    if (lh_find(text("Sign up").depth(8).visibleToUser(), "注册成功了lh", 0, 5000)) {
+                                        sleep(6000)
+                                        return true
+                                    }
+                                }
+                                if (lh_find(text("Skip").clickable(true), "skip", 0, 5000)) {
+                                    if (text("Me").visibleToUser().findOne(5000)) {
+                                    }
+                                    log("注册成功了")
+                                    return true
+                                }
+
+                                var 需要验证 = textContains("Enter 6-digit code").visibleToUser().findOne(1000)
+                                if (需要验证) {
+                                    stopScript("需要验证邮箱6位验证码")
+                                    return false
+                                }
+                            }
+                        } else {
+                            log("找不到 Create password");
+                        }
+                        var 登录失败 = text("Login failed").visibleToUser().findOne(1000)
+                        if (登录失败) {
+                            log("登录失败,")
+                            return false
+                        }
+                        var 访问频繁 = text("You are visiting our service too frequently.").visibleToUser().findOne(1000)
+                        if (访问频繁) {
+                            log("访问频繁,")
+                            return false
+                        }
+                        var 成功 = text("Sign up").visibleToUser().findOne(1200)
+                        if (成功) {
+                            if (lh_find(text("Sign up").depth(8).visibleToUser(), "注册成功了lha", 0, 2000)) {
+                                return true
+                            }
+                        }
+                    }
+
+                    log("验证码已过")
+                    log("注册结果：", 过验证码后()?"成功":"失败");
+                }
+            }
+        }
+        sleep(1000)
+    }
+    // 如果没有账号则直接注册，有账号则进入设置查看当前是否可以继续添加账号
+}
+
 function 注册7模式() {
 
     while (1) {
@@ -3659,6 +3898,7 @@ function 注册7模式() {
                 lh_find(text("Sign up").clickable(true), "Sign up", 0)
                 let tag;
                 for (let i = 0; i < 5; i++) {
+                    lh_find(textContains("existing"), "Add existing account", 0);
                     // lh_find(text("Use phone or email"), "Use phone or email", 0)
                     if(text("Use phone or email").findOne(1000)){
                         if(text("Use phone or email").findOne(1000).bounds().right < 0){
@@ -5063,3 +5303,4 @@ function objToUri(obj) {
     }
     return uri
 }
+
