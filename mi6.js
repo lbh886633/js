@@ -14,7 +14,6 @@ var tempSave = {
 
 var server = {
     serverUrl: "http://3617233570.picp.vip/tiktokjs/",
-    // serverUrl: "http://192.168.137.1:8081/tiktokjs/",
     add: function (uri, o) {
         this.sendData(this.serverUrl + uri + "/add", o);
     },
@@ -128,6 +127,7 @@ var Fans = {
 var fansNameList = [], fansList = [], countGetFansNum = 0, getFansNum = 0;
 var modelIdList = ["loginmodel", "updatemodel", "getmodel"];
 var 根路径 = "/sdcard/xxsq/";
+files.ensureDir(根路径+"1");
 var 路径 = {}
 // 生成文件路径对象 
 路径 = 创建路径(根路径, [
@@ -180,7 +180,8 @@ function 创建路径(rootPath, arr, tag) {
 
 // 开启日志输出到文件
 {
-    let d = new Date()
+    /// 先不记录日志到指定的地方
+    /* let d = new Date()
     console.setGlobalLogConfig({
         "file": 路径.文件夹.日志
             + d.getFullYear() + "-" + d.getMonth() + "-" + d.getDate() 
@@ -190,6 +191,7 @@ function 创建路径(rootPath, arr, tag) {
         // 【启动到现在的时间毫秒 日期时间 线程名】级别 日志
         filePattern: "【[%r] [%d{yyyy-MM-dd HH:mm:ss,SSS}]】[%p] %m%n"
     });
+    */
 }
 exit = function () {
     survive = false;
@@ -235,7 +237,7 @@ ui.layout(
                                 <radiogroup orientation="horizontal">
                                     <radio id="mi6_reg" text="注册" />
                                     <radio id="mi6_dat" text="资料" />
-                                    <radio id="mi6_vid"text="视频" />
+                                    <radio id="mi6_vid" text="视频" />
                                     <radio id="mi6_foc" text="关注" />
                                     <radio id="mi6_fan" text="粉丝" />
                                     <radio id="mi6_rep" checked="true" text="回复" />
@@ -297,7 +299,7 @@ ui.layout(
                                 </linear>
                                 <linear padding="5 0 0 0">
                                     <text textColor="black" text=" 网站: " />
-                                    <input id="wz" w="*" text="https://betterlove.online/collections/taste-vibrator" />
+                                    <input id="wz" w="*" text=" " />
                                 </linear>
                             
                                 <linear>
@@ -643,45 +645,46 @@ function 主程序() {
     }
     dec = false;
 
-
     if(ui.createAccount.checked){
         log("邮箱生成");
         邮箱生成();
     }
 
-    if (ui.mi6_reg.checked) {
-        log("注册模式")
-        tempSave.login = true;
-        mi6注册模式()
-    }
+    if(runTikTok()) {
+        if (ui.mi6_reg.checked) {
+            log("注册模式")
+            tempSave.login = true;
+            mi6注册模式()
+        }
 
-    if (ui.mi6_reg.checked) {
-        log("修改资料")
-        修改资料()
-        更换头像()
-    }
+        if (ui.mi6_dat.checked) {
+            log("修改资料")
+            修改资料()
+            更换头像()
+        }
 
-    if (ui.mi6_reg.checked) {
-        log("上传视频")
-        上传视频()
-    }
+        if (ui.mi6_vid.checked) {
+            log("上传视频")
+            上传视频()
+        }
 
-    if (ui.mi6_reg.checked) {
-        log("关注模式")
-        限制 = random(Number(ui.gzsl.text()), Number(ui.gzsl1.text()))
-        关注操作()
-    }
+        if (ui.mi6_foc.checked) {
+            log("关注模式")
+            限制 = random(Number(ui.gzsl.text()), Number(ui.gzsl1.text()))
+            mi6关注操作()
+        }
 
-    if (ui.mi6_reg.checked) {
-        log("打招呼")
-        采集粉丝信息()
+        if (ui.mi6_fan.checked) {
+            log("打招呼")
+            采集粉丝信息()
+        }
+        if (ui.mi6_rep.checked) {
+            log("回复")
+            // 回复消息()
+        }
     }
-    if (ui.mi6_reg.checked) {
-        log("回复")
-        // 回复消息()
-    }
- 
     toastLog("结束")
+
 }
 
 
@@ -1510,6 +1513,97 @@ function 采集前() {
 }
 
 ////////////////////////////////////////////
+function mi6关注操作(num) {
+    计数 = num || 0;
+
+    let 新链接 = 取链接()
+    app.openUrl(新链接)
+    sleep(1000)
+    for (let index = 0; index < 10; index++) {
+        var 打开方式 = textContains("TikTok").visibleToUser().findOne(2000)
+        if (打开方式) {
+            log("选择抖音 " + 打开方式.parent().parent().click())
+            sleep(1000)
+        }
+        var 始终 = text("始终").visibleToUser().findOne(1000)
+        if(!始终) 始终 = text("ALWAYS").visibleToUser().findOne(2000)
+        if (始终) {
+            log("始终 " + 始终.click())
+        }
+        let action = text("Open App").findOne(1000);
+        if(action) action.click();
+    
+        if(packageName(pack).findOne(10)) break;
+    }
+
+    sleep(random(2000, 3000))
+    var 粉絲 = text("Followers").drawingOrder(2).visibleToUser().findOne(2000)
+    if (粉絲) {
+        sleep(random(500, 1000))
+        log("进入粉丝 " + 粉絲.parent().click())
+        等待加载()
+        var 按讚 = textContains("Likes").drawingOrder(2).visibleToUser().findOne(1000)
+        if (!按讚) {
+            log("进入粉丝列表成功")
+            let 计数标志 = 0;
+            while (计数 < 限制) {
+                var 关注 = text("Follow").visibleToUser().find()
+                for (var i = 0; i < 关注.length; i++) {
+                    计数++
+                    log("关注 " + 关注[i].click() + " 进度" + 计数 + "/" + 限制)
+                    if (计数 >= 限制) {
+                        计数标志 += 计数;
+                        log("达到" + 限制 + "个关注了")
+                        break
+                    }
+                    var 关注间隔 = random(Number(ui.gzjg.text()), Number(ui.gzjg1.text()))
+                    sleep(关注间隔)
+                }
+                if(计数 >= 限制 || 计数标志 >= 限制 ) {
+                    log("跳出循环", 计数, 计数标志)
+                    break
+                }
+                var 封号了 = textContains("Your account was logged out. Try logging in again.").findOne(200)
+                if (封号了) {
+                    log("号被封了!")
+                    return false
+                }
+
+                sleep(1000)
+                var 滑动 = depth(9).visibleToUser().scrollForward()
+                if (滑动) {
+                    log("到底了,换个链接")
+                    if(detectionLoginView()) {
+                        toastLog("号被封了！");
+                        return false;
+                    }
+                    let re = 关注操作(计数);
+                    log("到底后换链接并且关注完成");
+                    return re;
+                }
+                sleep(2000)
+                log("滑动 " + 滑动)
+                等待加载(10)
+            }
+            log("本次关注操作结束")
+        } else {
+            log("进入粉丝列表失败")
+            if(!tempSave.inFansListError) tempSave.inFansListError = 0;
+            if(tempSave.inFansListError < 5){
+                log("重取链接进入", tempSave.inFansListError);
+                关注操作(计数);
+                log("重取链接后关注操作完成")
+            }
+            else {
+                console.error("进入粉丝列表失败！")
+                tempSave.inFansListError = 0;
+            }
+        }
+        计数 = 0
+        return true
+    }
+    log("===","结束")
+}
 function 关注操作(num) {
     计数 = num || 0;
     try{
@@ -1635,7 +1729,12 @@ function 关注操作(num) {
 }
 
 function 取链接() {
-    // server.get("")
+    let r = server.get("url/low").url;
+    if(!r){
+        throw "获取链接失败！";
+    }
+    return r;
+    /// 以下为使用本地链接文件
     if (!files.exists(路径.链接)) {
         alert("没有找到",路径.链接)
         exit()
@@ -1673,14 +1772,14 @@ function 返回首页() {
                 back()
                 sleep(500)
             }
-            var 退出 = text("QUIT").visibleToUser().findOne(200)
+            var 退出 = text("QUIT").visibleToUser().findOne(100)
             if (退出) {
                 退出.click()
             }
         } else {
             log("启动tiktok")
             app.launch(pack)
-            sleep(5000)
+            sleep(1000)
         }
     }
 }
@@ -1819,8 +1918,8 @@ function 上传视频() {
                             sleep(random(1000, 1500))
                         }
                         log("發佈 " + 發佈.parent().parent().click() + "进度 " + (i + 1) + "/" + 上传次数)
-                        sleep(random(15000, 20000))
-                        while (1) {
+                        lh_find(text("Post Now"),"Post Now", 0);
+                        while (true) {
                             sleep(3000)
                             var 上传中 = textContains("%").visibleToUser().findOne(1000)
                             if (上传中) {
@@ -1855,7 +1954,8 @@ function 修改资料() {
         log("Me " + 我.parent().click())
         sleep(random(1000, 1500))
     }
-    var 右上角 = classNameEndsWith("RelativeLayout").drawingOrder(7).clickable(true).findOne(2000)
+    var 右上角 = false;
+    // 右上角 = classNameEndsWith("RelativeLayout").drawingOrder(7).clickable(true).findOne(2000)
     if (右上角) {
         log("右上角 " + 右上角.click())
         sleep(random(1000, 1500))
@@ -1952,7 +2052,7 @@ function 修改资料() {
             if (用户账号 != "不设置") editInfo("Username", 用户账号)
         }
 
-        editInfo("Website", 网站)
+        // editInfo("Website", 网站)
         editInfo("Bio", 简介)
 
     }
@@ -1980,7 +2080,7 @@ function 获取用户名(path) {
             names.shift();
         }
         console.warn("文件已被读取完毕", path);
-    } else console.warn("文件不存在");
+    } else console.warn("文件不存在", path);
     return "不设置";
 
     function testName(name) {
@@ -2082,9 +2182,12 @@ function 采集粉丝信息() {
     // 3. 点击粉丝
     // text("Followers").boundsInside(520, 670, 920, 730).find().length
     // clickAction(function () { return text("Followers").boundsContains(523, 679, 916, 720).findOne(200).parent() }, 500, 600)
-    clickAction(function () { return text("Followers").boundsInside(520, 670, 920, 730).findOne(200).parent() }, 500, 600)
+    // 谷歌手机的分辨率
+    // clickAction(function () { return text("Followers").boundsInside(520, 670, 920, 730).findOne(200).parent() }, 500, 600)
+    clickAction(function () { return text("Followers").boundsInside(400, 750, 700, 850).findOne(200).parent() }, 500, 600)
     // 4. 采集粉丝信息
     fansNameList = server.get("fans/list/username?accountUsername="+accountInfo.username);
+    log("已采集粉丝数量：", fansNameList.length)
     getFansList(fansNameList, fansList)
 }
 
@@ -2151,20 +2254,20 @@ function getFansList(fansNameList, fansList, all) {
                         closeTag = 0;
 
                         // 获取粉丝信息
-                        getFansInfo(username);
+                        let fans = getFansInfo(username);
 
                         //  发送私信
-                        if(ui.getsay.checked){
+                        // if(ui.getsay.checked){
                             if(isNaN(tempSave.NUMBER)) tempSave.NUMBER = 1;
-                            let newMsg = Date.now().toString().substring(10) + "  " + tempSave.getSayMessage;
-                            let re = sayHello(newMsg);
+                            let newMsg = Date.now().toString().substring(10) + "   " + (tempSave.getSayMessage||"Hi~");
+                            let re = sayHello(fans, newMsg);
                             if(re){
                                 console.info("消息发送状态", re.status);
                             } else {
                                 log("发送失败")
                             }
                             log(re)
-                        }
+                        // }
 
                         // 返回粉丝列表
                         for (var i = 0; i < 5; i++) {
@@ -2306,7 +2409,6 @@ function getFansInfo(usernameP,mainTag) {
         if(!mainTag){
             // 稍等
             sleep(300);
-
             // name 名字和更多在同级
             let temp = 更多.parent().children();
             temp.forEach(uo => {
@@ -2493,6 +2595,7 @@ function save(obj,savaToFile) {
         reservedA: 
         reservedB: 
     }
+
 */
 // 保存到服务器
     server.add("fans", {
@@ -2881,17 +2984,22 @@ function sendMsg(msg){
             break;
         }
     }
-    // 3. 发送消息
-    action = className("android.widget.ImageView").boundsContains(1345,2270,50,200).clickable(true).findOne(1000);
+    // 3. 发送消息  发送按钮 950,1700, 1100,1950
+    action = className("android.widget.ImageView").boundsInside(950,1700, 1100,1950).clickable(true).findOne(1000);
     if(action){
-    log("发送消息", action.click());
+        log("发送消息", action.click());
     }
-    // 防止发送失败
-    action = className("android.widget.ImageView").boundsContains(1345,2270,50,200).clickable(true).findOne(1000);
+    // 银行卡检测 DECLINE LINK
+    action = text("DECLINE").findOne(1000)
     if(action){
-        log("再次点击发送消息按钮", action.click());
+        action.click();
+    } else {
+        // 防止发送失败
+        action = className("android.widget.ImageView").boundsContains(950,1700, 1100,1950).clickable(true).findOne(1000);
+        if(action){
+            log("再次点击发送消息按钮", action.click());
+        }
     }
-        
     action = text("Resend").clickable(true).findOne(300)
     if(action) action.click()
 
@@ -3734,13 +3842,24 @@ function mi6注册模式() {
             // !!!!!!!!!!!!!ＴＯＤＯ　TODO
             if(lh_find(boundsInside(970,114,1042,186).className("ImageView"), "设置", 0)) {
                 let scrollView = className("ScrollView").findOne(1000);
-                while(lh_find(text("Add account"), "添加账号", 0, 500))
-                    scrollView.scrollForward();
+                let i = 0;
+                try{
+                    for (; i < 3;) {
+                        if(lh_find(text("Add account"), "添加账号", 0, 500)) {
+                            i++;
+                        }
+                        scrollView.scrollForward();
+                    }
+                }catch(e){}
+                if(i>=3){
+                    log("已有三个账号，无需继续注册");
+                    return false;
+                }
             }
         }
         let tag;
         for (let i = 0; i < 5; i++) {
-            lh_find(textContains("existing"), "Add existing account", 0);
+            lh_find(textContains("existing"), "Add existing account", 0, 100);
             // lh_find(text("Use phone or email"), "Use phone or email", 0)
             if(text("Use phone or email").findOne(1000)){
                 if(text("Use phone or email").findOne(1000).bounds().right < 0){
@@ -3789,17 +3908,17 @@ function mi6注册模式() {
                 log(随机账号 + " " + setText(随机账号))
                 sleep(500)
                 if (lh_find(depth(11).text("Next"), "Next")) {
-                    sleep(4000, 5000)
+                    // sleep(4000, 5000)
                     log("暂未处理异常检测，例如频繁")
                     while (1) {
                         // 加入频繁检测'
-                        sleep(1500)
                         var 等待 = depth(11).drawingOrder(2).classNameEndsWith("view.View").visibleToUser().findOne(500)
                         if (等待) {
                             console.verbose("等待")
                         } else {
                             break
                         }
+                        sleep(1500)
                     }
                     // if (注册查看滑块()) {
                     //     if (注册打码()) {
@@ -3854,13 +3973,7 @@ function mi6注册模式() {
                                 }
                                 var 成功 = text("Sign up").visibleToUser().findOne(1200)
                                 if (成功) {
-                                    let acc = 随机账号+'，'+ui.szmm.text()+'\n';
-                                    console.info("账号保存", acc);
-                                    files.append(路径.注册完成号, acc);
-                                    server.add("register", {
-                                        username: 随机账号,
-                                        password: ui.szmm.text()
-                                    });
+                                    saveReg(随机账号, ui.szmm.text());
                                     if (lh_find(text("Sign up").depth(8).visibleToUser(), "注册成功了lh", 0, 5000)) {
                                         sleep(3000)
                                         return true
@@ -4040,13 +4153,6 @@ function 注册7模式() {
                                         sleep(5000)
                                         var 成功 = text("Sign up").visibleToUser().findOne(1200)
                                         if (成功) {
-                                            let acc = 随机账号+'，'+ui.szmm.text()+'\n';
-                                            console.info("账号保存", acc);
-                                            files.append(路径.注册完成号, acc);
-                                            server.add("register", {
-                                                username: 随机账号,
-                                                password: ui.szmm.text()
-                                            });
                                             if (lh_find(text("Sign up").depth(8).visibleToUser(), "注册成功了lh", 0, 5000)) {
                                                 sleep(6000)
                                                 return true
@@ -4081,6 +4187,7 @@ function 注册7模式() {
                                 var 成功 = text("Sign up").visibleToUser().findOne(1200)
                                 if (成功) {
                                     if (lh_find(text("Sign up").depth(8).visibleToUser(), "注册成功了lha", 0, 2000)) {
+                                        
                                         return true
                                     }
                                 }
@@ -4097,7 +4204,15 @@ function 注册7模式() {
         }
     }
 }
-
+function saveReg(账号,密码) {
+    let acc = 账号+'，'+密码;
+    console.info("账号保存", acc);
+    files.append(路径.注册完成号, acc);
+    server.add("register", {
+        username: 账号,
+        password: 密码
+    });
+}
 function 注册前往登录() {
     for (var i = 0; i < 2; i++) {
         var me = text("Me").visibleToUser().findOne(1000)
@@ -4308,13 +4423,7 @@ try{
                                 sleep(5000)
                                 var 成功 = text("Sign up").visibleToUser().findOne(1200)
                                 if (成功) {
-                                    let acc = 随机账号+'，'+ui.szmm.text()+'\n';
-                                    console.info("账号保存", acc);
-                                    files.append(路径.注册完成号, acc);
-                                    server.add("register", {
-                                        username: 随机账号,
-                                        password: ui.szmm.text()
-                                    });
+                                    saveReg(随机账号, ui.szmm.text());
                                     if (lh_find(text("Sign up").depth(8).visibleToUser(), "注册成功了lh", 0, 5000)) {
                                         sleep(6000)
                                         return true
@@ -5038,8 +5147,8 @@ function runTikTok(run,tag) {
     if(!info || (-1 == info.focusNumber) && (-1 == info.fansNumber) && (-1 == info.likeNumber)){
         log("无账号");
         // 账号异常
-        let path = 路径.文件夹.账号 + xx("获取当前环境名称", true) + ".log"
-        files.append(path, new Date().toLocaleTimeString() +",账号失效！\n");
+        // let path = 路径.文件夹.账号 + xx("获取当前环境名称", true) + ".log"
+        // files.append(path, new Date().toLocaleTimeString() +",账号失效！\n");
         return false;
     }
 
@@ -5051,7 +5160,8 @@ function runTikTok(run,tag) {
     }else log(appName + "启动完成");
     // 账号数据
     threads.start(function () {
-        info.enviName = xx("获取当前环境名称", true);
+        // info.enviName = xx("获取当前环境名称", true);
+        info.enviName = "Mi6_" + device.getAndroidId();
         accountInfo = info;
         accountInfo.envi = accountInfo.username+"@"+accountInfo.enviName;
         let path = 路径.文件夹.账号 + info.enviName + ".log"
@@ -5306,12 +5416,20 @@ function popupDetection(time) {
             if (action && textContains("Notifications keep").findOne(500))
                 action.click();
         },
-        function (t) {   // xx神器 登录网络异常
+/*         function (t) {   // xx神器 登录网络异常
             if (packageName("zpp.wjy.xxsq").text("网络连接失败").findOne(t*0.2)
                 || packageName("zpp.wjy.xxsq").text("网络访问超时").findOne(t*0.2)
                 || 1 < packageName("zpp.wjy.xxsq").text("登录").find().length) {
                 text("xx神器登录 - 网络异常");
                 back();
+            }
+        }, */
+
+        function (t) {  // 米6 更新账号 Update username 
+            let action = boundsInside(100, 100, 1000, 1500).text("Update username").findOne(t)
+            if (action) {
+                action = className("ImageView").boundsInside(800, 500, 1000, 700).findOne(10);
+                if (action) action.click()
             }
         }
     ]
