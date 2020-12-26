@@ -4030,17 +4030,22 @@ try{
                             //You are visiting our service too frequently.
                             var Next = text("Next").visibleToUser().findOne(1000)
                             if (Next) {
+
                                 log("Next " + Next.parent().parent().click())
                                 
                                 // 等待转圈
                                 while (1) {
                                     sleep(1500)
-                                    var 等待 = text("Next").findOne(2000).parent().findOne(className("android.view.View"))
-                                    if (等待) {
-                                        console.verbose("等待")
-                                    } else {
-                                        sleep(1000)
-                                        break
+                                    try{
+                                        var 等待 = text("Next").findOne(2000).parent().findOne(className("android.view.View"))
+                                        if (等待) {
+                                            console.verbose("等待")
+                                        } else {
+                                            sleep(1000)
+                                            break
+                                        }
+                                    } catch(e){
+                                        break;
                                     }
                                 }
 
