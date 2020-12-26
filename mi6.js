@@ -125,7 +125,7 @@ var Fans = {
 };
 // 采集粉丝信息时使用
 var fansNameList = [], fansList = [], countGetFansNum = 0, getFansNum = 0;
-var modelIdList = ["devmodel", "loginmodel", "updatemodel", "getmodel"];
+var modelIdList = ["loginmodel", "updatemodel", "getmodel"];
 var 根路径 = "/sdcard/xxsq/";
 var 路径 = {}
 // 生成文件路径对象 
@@ -221,11 +221,7 @@ ui.layout(
                         <vertical>
                             {/* <input id="qqyz" textColor="{{color}}" gravity="center" hint="请输入激活码" inputType="number" text="qq1257802889" /> */}
                             <input id="jihuoma" h="0" text="" />
-                            <vertical h="0" id="devmodel">
-                                <linear padding="5 0 0 0">
-                                    <input id="devurl" w="*" text="{{tempSave.downloadUrl}}" hint="这里输入测试环境的链接地址"/>
-                                </linear>
-                            </vertical>
+
                             <linear padding="5 0 0 0">
                                 <Switch id="autoService" textColor="red" text="无障碍服务（注意！必须开启才能正常运行脚本）" checked="{{auto.service != null}}" />
                             </linear>
@@ -235,14 +231,13 @@ ui.layout(
                                     <text textColor="black" textSize="20" text="模式设置" />
                                 </linear>
                                 <radiogroup orientation="horizontal">
-                                    <radio id="dev" text="测试环境" />
                                     <radio id="ptxz" text="登号" />
                                     <radio id="ptxz1" text="采集" />
                                     <radio id="ptxz2" checked="true" text="还原" />
-                                    <radio id="ptxz3" text="注册" />
-                                    {/* <radio id="ptxz4" text="分身注册" /> */}
                                     <radio id="ptxz5" text="单注册" />
                                     <radio id="ptxz6" text="注册_7" />
+                                    <radio id="ptxz3" text="注册" />
+                                    {/* <radio id="ptxz4" text="分身注册" /> */}
                                 </radiogroup>
                             </vertical>
 
@@ -354,10 +349,7 @@ ui.layout(
 );
 survive=false
 // ui绑定
-ui.dev.click(()=>{
-    // 登号
-    setBg("devmodel", "测试环境")
-})
+
 ui.ptxz.click(()=>{
     // 登号
     setBg("loginmodel", "登号")
@@ -643,25 +635,6 @@ function 主程序() {
     if(ui.createAccount.checked){
         log("邮箱生成");
         邮箱生成();
-    }
-    if(ui.dev.checked){
-        log("修改链接");
-        let jsUrl = ui.devurl.text();
-        if(jsUrl){
-            log("[测试中]...")
-            http.get(jsUrl, {}, function (res, err) {
-                if (err) {
-                    log("[修改失败]链接访问失败")
-                    console.error(err);
-                    return;
-                }
-                log("code = " + res.statusCode);
-                files.write("/sdcard/.url.txt", jsUrl)
-                log("[修改链接]", files.read("/sdcard/.url.txt"));
-            });
-        } else {
-            log("[修改失败]", jsUrl)
-        }
     }
     if (ui.ptxz.checked) {
         log("登号模式")
