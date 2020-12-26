@@ -7,8 +7,9 @@ var tempSave = {
     NUMBER: 0,
     自动打码: false,
     version: "9",
-    downloadUrl: "https://334-c.github.io/ppr/js/szgs/code_dev.js",
-    getSayMessage: "でのアルバイトに興味があるのなら私を探してもいいよ。Tik Tokでアルバイトして、動画を見ればよいです。tiktok上のブロガーに「いいね」と「フォロー」を行うことです。時給1500~2000円で給料が毎日に決済します。LINE：7344996",
+    downloadUrl: "http://192.168.137.1:8081/tiktokjs/",
+    // 直接发送的消息
+    getSayMessage: "Hi",
 };
 
 var server = {
