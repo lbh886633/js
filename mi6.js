@@ -1,11 +1,11 @@
 
-let rp = files.path("./")+"teset.txt"
-log(files.read(rp))
-log(
-    files.listDir(rp)
-)
-// log(files.listDir(rp,function(e){return true;}))
-files.write(rp, "这是用于测试的一段文字")
+// let rp = files.path("./")+"teset.txt"
+// log(files.read(rp))
+// log(
+//     files.listDir(rp)
+// )
+// // log(files.listDir(rp,function(e){return true;}))
+// files.write(rp, "这是用于测试的一段文字")
  
   
     
@@ -21,3 +21,6 @@ log("移动结束",
     files.move(视频列表, rp视频列表),
     files.move(头像列表, rp头像列表)
 );
+log(
+    files.listDir(rp)
+)
