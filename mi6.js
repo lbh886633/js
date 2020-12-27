@@ -659,25 +659,15 @@ function 主程序() {
         // 路径.文件夹.视频列表
         let rp = files.path("./");
         rp = files.join(rp,"xxsq");
-        confirm("是否移动视频与头像文件到\n" + rp).then(value=>{
-            if(value){
-                // 确保存在路径
-                files.ensureDir(files.join(rp,"1"));
-                let q = 路径.文件夹.视频列表;
-                let vi = 0;
-                files.listDir(q, function (fn) {
-                    vi++;
-                    files.move(files.join(q,fn), files.join(rp,fn));
-                })
-                q = 路径.文件夹.头像列表;
-                let pi = 0;
-                files.listDir(q, function (fn) {
-                    pi++;
-                    files.move(files.join(q,fn), files.join(rp,fn));
-                })
-                log("移动视频"+vi+"个"+"\n移动头像"+pi+"个\n累计移动"+(vi+pi));
-            }
-        });
+        let value = dialogs.confirm("是否移动视频与头像文件到\n" + rp)
+        if (value) {
+            // 确保存在路径
+            files.ensureDir(files.join(rp, "1"));
+            log("移动结束",
+                files.move(路径.文件夹.视频列表, files.join(rp, "视频列表")),
+                files.move(路径.文件夹.头像列表, files.join(rp, "头像列表"))
+            );
+        }
     }
 
     if(runTikTok()) {
