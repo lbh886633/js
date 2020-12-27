@@ -651,6 +651,24 @@ function 主程序() {
     }
 
     if(runTikTok()) {
+        log("账号正常，还原成功")
+        // 开启一个新线程来保存账号
+        threads.start(function () {
+            let saveAcc = {
+                username: accountInfo.username,
+                isExceptoion: 0,
+                isInvalid: 0,
+                url: accountInfo.url,
+                name: accountInfo.enviName,
+                focus: server.numberToString(accountInfo.focusNumber),
+                fans: server.numberToString(accountInfo.fansNumber),
+                likes: server.numberToString(accountInfo.likeNumber),
+            }
+            server.add("account", saveAcc);
+        })
+
+
+
         if (ui.mi6_reg.checked) {
             log("注册模式")
             tempSave.login = true;
@@ -5434,19 +5452,13 @@ function popupDetection(time) {
         }
     ]
     try{
-        // action = text("OK").packageName(pack).findOne(100)
-        // if(action) lh_find(text("OK").packageName(pack), "点击OK按钮", 0, 200);
-        // action = text("OK").packageName(pack).findOnce()
-        // if(action.length>0) text("Skip").findOne(100).click();
         for (let i = 0; i < funList.length; i++) {
             funList[i](parseInt(time/funList.length));
         }
     }catch(err){
+        // 极低概率会出现控件消失或者就是脚本被关闭了，所以不用处理
         console.info("3");
-        // 极低概率会出现控件消失，不用处理
     }
-    // action = ;
-    // if(action.length>0) ;
 }
 
 // 登录界面检测
