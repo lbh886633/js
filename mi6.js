@@ -11,9 +11,12 @@ let rp = files.path("./");
 log(rp)
 rp = files.join(rp,"xxsq");
 log("路径",rp)
+let img = files.readBytes("/sdcard/xxsq/头像列表/1.png")
+
 log(
-    files.move("/sdcard/xxsq/头像列表/1.png", rp)
+    files.writeBytes(rp,img)
 )
+
 log(files.isFile("/sdcard/xxsq/头像列表/1.png"))
 exit();
 let rp视频列表 = files.join(rp, "视频列表");
