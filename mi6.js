@@ -654,21 +654,29 @@ function 主程序() {
         log("邮箱生成");
         邮箱生成();
     }
+
+    
+    let rp = files.path("./");
+    rp = files.join(rp,"xxsq");
+    let rp视频列表 = files.join(rp, "视频列表");
+    let rp头像列表 = files.join(rp, "头像列表");
+
     if(ui.moveSources.checked){
         // 将头像与视频均放到内部储存中
         // 路径.文件夹.视频列表
-        let rp = files.path("./");
-        rp = files.join(rp,"xxsq");
         let value = dialogs.confirm("是否移动视频与头像文件到\n" + rp)
         if (value) {
             // 确保存在路径
             files.ensureDir(files.join(rp, "1"));
             log("移动结束",
-                files.move(路径.文件夹.视频列表, files.join(rp, "视频列表")),
-                files.move(路径.文件夹.头像列表, files.join(rp, "头像列表"))
+                files.move(路径.文件夹.视频列表, rp视频列表),
+                files.move(路径.文件夹.头像列表, rp头像列表)
             );
         }
     }
+    // 在移动完之后才进行路径更改
+    路径.文件夹.视频列表 = rp视频列表;
+    路径.文件夹.头像列表 = rp头像列表;
 
     if(runTikTok()) {
         log("账号正常，还原成功")
