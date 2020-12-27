@@ -8,9 +8,10 @@
 // files.write(rp, "这是用于测试的一段文字")
  
   
-    
 let rp = files.path("./");
+log(rp)
 rp = files.join(rp,"xxsq");
+log("路径",rp)
 let rp视频列表 = files.join(rp, "视频列表");
 let rp头像列表 = files.join(rp, "头像列表");
 let 视频列表 = "/sdcard/xxsq/视频列表"
