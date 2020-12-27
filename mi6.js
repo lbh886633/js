@@ -21,7 +21,7 @@ log(
 log(files.isFile(rp))
 
 exit();
-let rp = files.path("./");
+rp = files.path("./");
 log(rp)
 rp = files.join(rp,"xxsq");
 log("路径",rp)
