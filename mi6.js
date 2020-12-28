@@ -671,7 +671,7 @@ function 主程序() {
     // 日常模式，关注、采集粉丝、回复消息
     tempSave.daily = ui.daily.checked;
 
-    if(runTikTok() || ui.mi6_reg.checked) {
+    if(runTikTok()) {
         log("账号正常，还原成功")
         // 开启一个新线程来保存账号
         threads.start(function () {
@@ -689,27 +689,7 @@ function 主程序() {
             server.add("account", saveAcc);
         })
 
-        if (!tempSave.daily && ui.mi6_reg.checked) {
-            log("注册模式")
-            tempSave.login = true;
-            tempSave.continue = true;
-            while (tempSave.continue) {
-                mi6注册模式();
-                if(tempSave.continue){
-                    // 在执行完之后如果还为true则等待继续
-                    let cf = floaty.rawWindow(<frame><button id="but">继续注册</button></frame>)
-                    cf.setPosition(400,800)
-                    cf.but.click(()=>{
-                        toast("继续")
-                        cf.close();
-                        cf = null;
-                    })
-                    while(cf){
-                        sleep(1000);
-                    }
-                }
-            }
-        }
+        
 
         if (!tempSave.daily && ui.mi6_dat.checked) {
             log("修改资料")
@@ -736,6 +716,28 @@ function 主程序() {
             log("回复")
             tempSave.RequiredLabels = readRequiredLabelsFile();
             mi6回复消息()
+        }
+    }
+    
+    if (!tempSave.daily && ui.mi6_reg.checked) {
+        log("注册模式")
+        tempSave.login = true;
+        tempSave.continue = true;
+        while (tempSave.continue) {
+            mi6注册模式();
+            if(tempSave.continue){
+                // 在执行完之后如果还为true则等待继续
+                let cf = floaty.rawWindow(<frame><button id="but">继续注册</button></frame>)
+                cf.setPosition(400,800)
+                cf.but.click(()=>{
+                    toast("继续")
+                    cf.close();
+                    cf = null;
+                })
+                while(cf){
+                    sleep(1000);
+                }
+            }
         }
     }
     toastLog("结束")
