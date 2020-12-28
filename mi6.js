@@ -129,7 +129,7 @@ var Fans = {
 // 采集粉丝信息时使用
 var fansNameList = [], fansList = [], countGetFansNum = 0, getFansNum = 0;
 var modelIdList = ["loginmodel", "updatemodel", "getmodel"];
-var 根路径 = "/sdcard/xxsq/";
+var 根路径 = "/sdcard/xxxx/";
 files.ensureDir(根路径+"1");
 var 路径 = {}
 // 生成文件路径对象 
@@ -4161,6 +4161,10 @@ function mi6注册模式() {
                 try{
                     for (; i < 3;) {
                         if(lh_find(text("Add account"), "添加账号", 0, 500)) {
+                            // 出现注册/登录页面则跳出
+                            if(0 < textContains("Continue with").findOne()) {
+                                break;
+                            }
                             i++;
                         }
                         scrollView.scrollForward();
