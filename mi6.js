@@ -235,7 +235,7 @@ ui.layout(
                             </linear>
                             
 
-                            <vertical  bg="#404EC9A2">
+                            <vertical id="modelmenu" bg="#404EC9A2">
                                 <linear padding="5 0 0 0">
                                     <text textColor="black" textSize="20" text="模式设置" />
                                 </linear>
@@ -247,6 +247,7 @@ ui.layout(
                                     <radio id="mi6_fan" text="粉丝" />
                                     <radio id="mi6_rep" checked="true" text="回复" />
                                 </radiogroup>
+                                
                                 <radiogroup orientation="horizontal" h="0">
                                     <radio id="ptxz" text="登号" />
                                     <radio id="ptxz1" text="采集" />
@@ -259,10 +260,11 @@ ui.layout(
                             </vertical>
                             <linear>
                                     <checkbox id="createAccount" text="生成邮箱" />
+                                    <checkbox id="daily" text="日常模式" />
                             </linear>
 
 
-                            <linear padding="5 0 0 0" marginBottom="40dp">
+                            <linear padding="5 0 0 0" margin="40dp">
                                 <button id="ok" w="*" h="auto" layout_gravity="bottom" style="Widget.AppCompat.Button.Colored" text="启动" />
                             </linear>
 
@@ -370,7 +372,6 @@ ui.layout(
 );
 survive=false
 // ui绑定
-
 ui.ptxz.click(()=>{
     // 登号
     setBg("loginmodel", "登号")
@@ -395,7 +396,13 @@ ui.ptxz6.click(()=>{
     // 单注册
     setBg("loginmodel", "注册_7")
 })
-
+ui.daily.click((v)=>{
+    if(v.checked){
+        ui.modelmenu.setBackgroundColor(colors.parseColor("#44221100"));
+    } else {
+        ui.modelmenu.setBackgroundColor(colors.parseColor("#404EC9A2"));
+    }
+})
 // s = encodeURI(s)
 
 //创建选项菜单(右上角)
@@ -661,8 +668,8 @@ function 主程序() {
         邮箱生成();
     }
 
-    
-
+    // 日常模式，关注、采集粉丝、回复消息
+    tempSave.daily = ui.daily.checked;
 
     if(runTikTok()) {
         log("账号正常，还原成功")
@@ -682,7 +689,7 @@ function 主程序() {
             server.add("account", saveAcc);
         })
 
-        if (ui.mi6_reg.checked) {
+        if (!tempSave.daily && ui.mi6_reg.checked) {
             log("注册模式")
             tempSave.login = true;
             tempSave.continue = true;
@@ -704,28 +711,28 @@ function 主程序() {
             }
         }
 
-        if (ui.mi6_dat.checked) {
+        if (!tempSave.daily && ui.mi6_dat.checked) {
             log("修改资料")
             修改资料()
             更换头像()
         }
 
-        if (ui.mi6_vid.checked) {
+        if (!tempSave.daily && ui.mi6_vid.checked) {
             log("上传视频")
             上传视频();
         }
 
-        if (ui.mi6_foc.checked) {
+        if (tempSave.daily || ui.mi6_foc.checked) {
             log("关注模式")
             限制 = random(Number(ui.gzsl.text()), Number(ui.gzsl1.text()))
             mi6关注操作()
         }
 
-        if (ui.mi6_fan.checked) {
+        if (tempSave.daily || ui.mi6_fan.checked) {
             log("打招呼")
             采集粉丝信息()
         }
-        if (ui.mi6_rep.checked) {
+        if (tempSave.daily || ui.mi6_rep.checked) {
             log("回复")
             tempSave.RequiredLabels = readRequiredLabelsFile();
             mi6回复消息()
