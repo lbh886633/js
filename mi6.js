@@ -671,7 +671,7 @@ function 主程序() {
     // 日常模式，关注、采集粉丝、回复消息
     tempSave.daily = ui.daily.checked;
 
-    if(runTikTok()) {
+    if(runTikTok() || ui.mi6_reg.checked) {
         log("账号正常，还原成功")
         // 开启一个新线程来保存账号
         threads.start(function () {
