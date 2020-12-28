@@ -712,13 +712,15 @@ function 主程序() {
             log("打招呼")
             采集粉丝信息()
         }
+        
         if (tempSave.daily || ui.mi6_rep.checked) {
             log("回复")
+            返回首页()
             tempSave.RequiredLabels = readRequiredLabelsFile();
             mi6回复消息()
         }
     }
-    
+
     if (!tempSave.daily && ui.mi6_reg.checked) {
         log("注册模式")
         tempSave.login = true;
@@ -5447,9 +5449,14 @@ function runTikTok(run,tag) {
         log("账号信息检测")
         try{
             // 点击个人信息，没有点击的情况下不会去尝试获取信息
-            if(text("Me").findOne(2000).parent().click())
+            if(text("Me").findOne(2000).parent().click()) {
+                if(!tempSave.daily && ui.mi6_reg.checked){
+                    log("注册模式")
+                    return false;
+                }
                 // 获取到个人信息s
                 info = getFansInfo("个人信息", true);
+            }
             // 跳过刚开始时的默认值 0 ，在次数达到3次之后0也是有效值
             if (!((info.focusNumber <= 0) && (info.fansNumber <= 0) && (info.likeNumber <= 0)) 
                 || 3 < tagI)
