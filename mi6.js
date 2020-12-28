@@ -167,6 +167,7 @@ var 路径 = {}
     { 日志: "日志" }
 ], "/")
 路径.注册完成号="/sdcard/DCIM/邮箱.txt";
+files.ensureDir(路径.注册完成号);
 
 function 创建路径(rootPath, arr, tag) {
     let obj = {};
@@ -258,8 +259,7 @@ ui.layout(
                             </vertical>
                             <linear>
                                     <checkbox id="createAccount" text="生成邮箱" />
-                                    {/* <checkbox id="moveSources" text="移动资源" /> */}
-                                </linear>
+                            </linear>
 
 
                             <linear padding="5 0 0 0" marginBottom="40dp">
@@ -644,6 +644,8 @@ function 主程序() {
         while(dec){
             action = text("Start now").findOne(30);
             if(action) action.click();
+            action = text("立即开始").findOne(30);
+            if(action) action.click();
         }
     })
     console.show()
@@ -661,28 +663,6 @@ function 主程序() {
 
     
 
-    /// TODO
-    if(false /* ui.moveSources.checked */){
-        let rp = files.path("./");
-        rp = files.join(rp,"xxsq");
-        let rp视频列表 = files.join(rp, "视频列表");
-        let rp头像列表 = files.join(rp, "头像列表");
-        // 将头像与视频均放到内部储存中
-        // 路径.文件夹.视频列表
-        let value = dialogs.confirm("是否移动视频与头像文件到\n" + rp)
-        if (value) {
-            // 确保存在路径
-            files.ensureDir(files.join(rp, "1"));
-            log("移动结束",
-                files.move(路径.文件夹.视频列表, rp视频列表),
-                files.move(路径.文件夹.头像列表, rp头像列表)
-            );
-        }
-        // 在移动完之后才进行路径更改
-        ///TODO
-        路径.文件夹.视频列表 = rp视频列表;
-        路径.文件夹.头像列表 = rp头像列表;
-    }
 
     if(runTikTok()) {
         log("账号正常，还原成功")
@@ -693,7 +673,8 @@ function 主程序() {
                 isExceptoion: 0,
                 isInvalid: 0,
                 url: accountInfo.url,
-                name: accountInfo.enviName,
+                name: accountInfo.name,
+                device: accountInfo.enviName,
                 focus: server.numberToString(accountInfo.focusNumber),
                 fans: server.numberToString(accountInfo.fansNumber),
                 likes: server.numberToString(accountInfo.likeNumber),
@@ -704,7 +685,23 @@ function 主程序() {
         if (ui.mi6_reg.checked) {
             log("注册模式")
             tempSave.login = true;
-            mi6注册模式()
+            tempSave.continue = true;
+            while (tempSave.continue) {
+                mi6注册模式();
+                if(tempSave.continue){
+                    // 在执行完之后如果还为true则等待继续
+                    let cf = floaty.rawWindow(<frame><button id="but">继续注册</button></frame>)
+                    cf.setPosition(400,800)
+                    cf.but.click(()=>{
+                        toast("继续")
+                        cf.close();
+                        cf = null;
+                    })
+                    while(cf){
+                        sleep(1000);
+                    }
+                }
+            }
         }
 
         if (ui.mi6_dat.checked) {
@@ -877,7 +874,8 @@ function 还原模式() {
                         isExceptoion: 0,
                         isInvalid: 0,
                         url: accountInfo.url,
-                        name: accountInfo.enviName,
+                        name: accountInfo.name,
+                        device: accountInfo.enviName,
                         focus: server.numberToString(accountInfo.focusNumber),
                         fans: server.numberToString(accountInfo.fansNumber),
                         likes: server.numberToString(accountInfo.likeNumber),
@@ -2458,7 +2456,12 @@ function getFansInfo(usernameP,mainTag) {
             }
         }
 
-        if(!mainTag){
+        if(mainTag){
+            let title = id("title").findOne(500);
+            if(title){
+                name = title.text();
+            }
+        } else {
             // 稍等
             sleep(300);
             // name 名字和更多在同级
@@ -2529,6 +2532,7 @@ function getFansInfo(usernameP,mainTag) {
                 video = getVideoPlayerNumberInfo()
             }
             return {
+                name: name,
                 username: username,
                 focusNumber: focusNumber,
                 fansNumber: fansNumber,
@@ -2660,6 +2664,7 @@ function save(obj,savaToFile) {
         fans: server.numberToString(obj.fansNumber),
         likes: server.numberToString(obj.likeNumber),
         accountUsername: accountInfo.username,
+        device: accountInfo.enviName,
         reservedB: obj.BI,
     });
     return obj;
@@ -3427,7 +3432,7 @@ function mi6ReplyMsg() {
                 if(消.msg == 息.msg){
                     log("消息体相同")
                     let letTag = true;
-                    ///TODO 只匹配必要的信息 code perfix suffix msg 
+                    // 只匹配必要的信息 code perfix suffix msg 
                     for (let k in 消) {
                         if(消[k] != 息[k]) {
                             // 不相等，有一个属性不相等则跳出进行保存
@@ -3611,7 +3616,7 @@ function replyMsg() {
  */
 function getFansInfoByFansMsgView() {
     // 点击右上角的按钮
-    desc("More").findOne().click()
+    desc("More").findOne(1000).click()
     // 拿到头像控件
     let fans,username,name;
     for (let index = 0; index < 5; index++) {
@@ -4164,8 +4169,12 @@ function mi6注册模式() {
                         if(lh_find(text("Add account"), "添加账号", 0, 500)) {
                             i++;
                         }
+                        let action = textContains("existing").findOne(100);
+                        if(action) {
+                            action.parent().click();
+                        }
                         // 出现注册/登录页面则跳出
-                        if(textContains("Continue with").findOne()) {
+                        if(textContains("Continue with").findOne(100)) {
                             i--
                             break;
                         }
@@ -4174,6 +4183,7 @@ function mi6注册模式() {
                 }catch(e){}
                 if(i>=3){
                     log("已有三个账号，无需继续注册");
+                    tempSave.continue = false;
                     return false;
                 }
             }
@@ -4266,51 +4276,48 @@ function mi6注册模式() {
                             log("设置密码 " + setText(ui.szmm.text()))
                             sleep(2000)
                             //You are visiting our service too frequently.
-                            var Next = text("Next").visibleToUser().findOne(1000)
-                            if (Next) {
-                                log("Next " + Next.parent().parent().click())
-                                sleep(5000)
-                                var 频繁 = textContains("You are visiting our service too frequently").findOne(1000)
-                                if (频繁) {
-                                    files.append(路径.注册频繁号, 随机账号 + "\n")
-                                    stopScript("频繁了")
-                                    return false
-                                }
-
-                                var 需要验证 = textContains("Enter 6-digit code").visibleToUser().findOne(1000)
-                                if (需要验证) {
-                                    stopScript("需要验证邮箱6位验证码")
-                                    return false
-                                }
-
-                                //text = Login failedtext = Sign up
-                                sleep(5000)
-                                
-                                if (lh_find(text("Skip").clickable(true), "skip", 0, 1000)) {
-                                    if (text("Me").visibleToUser().findOne(1000)) {
+                            for (let wait = 0; wait < 4; wait++) {
+                                var Next = text("Next").visibleToUser().findOne(1000)
+                                if (Next) {
+                                    log("Next " + Next.parent().parent().click())
+                                    // 等待转圈
+                                    while (1) {
+                                        var 等待 = depth(8).drawingOrder(2).classNameEndsWith("view.View").visibleToUser().findOne(500)
+                                        if (等待) {
+                                            console.verbose("等待")
+                                        } else {
+                                            break;
+                                        }
+                                        sleep(1500)
                                     }
-                                    log("注册成功了")
-                                    return true
-                                }
-                                var 成功 = text("Sign up").visibleToUser().findOne(1200)
-                                if (成功) {
-                                    saveReg(随机账号, ui.szmm.text());
-                                    if (lh_find(text("Sign up").depth(8).visibleToUser(), "注册成功了lh", 0, 5000)) {
-                                        sleep(3000)
+
+                                    var 频繁 = textContains("You are visiting our service too frequently").findOne(1000)
+                                    if (频繁) {
+                                        files.append(路径.注册频繁号, 随机账号 + "\n")
+                                        stopScript("频繁了")
+                                        return false
+                                    }
+                                    
+                                    var 需要验证 = textContains("Enter 6-digit code").visibleToUser().findOne(1000)
+                                    if (需要验证) {
+                                        stopScript("需要验证邮箱6位验证码")
+                                        return false
+                                    }
+
+                                    if (lh_find(text("Skip").clickable(true), "skip", 0, 1000)) {
+                                        saveReg(随机账号, ui.szmm.text());
+                                        log("注册成功了")
                                         return true
                                     }
-                                }
-                                if (lh_find(text("Skip").clickable(true), "skip", 0, 3000)) {
-                                    if (text("Me").visibleToUser().findOne(2000)) {
-                                    }
-                                    log("注册成功了")
-                                    return true
-                                }
 
-                                var 需要验证 = textContains("Enter 6-digit code").visibleToUser().findOne(1000)
-                                if (需要验证) {
-                                    stopScript("需要验证邮箱6位验证码")
-                                    return false
+                                    var 成功 = text("Sign up").visibleToUser().findOne(1000)
+                                    if (成功) {
+                                        if (lh_find(text("Sign up").depth(8).visibleToUser(), "注册成功了lh", 0)) {
+                                            saveReg(随机账号, ui.szmm.text());
+                                            return true
+                                        }
+                                    }
+
                                 }
                             }
                         } else {
@@ -4335,7 +4342,9 @@ function mi6注册模式() {
                     }
 
                     log("验证码已过")
-                    log("注册结果：", 过验证码后()?"成功":"失败");
+                    // 失败返回fasle，在true的时候会跳出注册模式
+                    tempSave.continue = 过验证码后();
+                    log("注册结果：", tempSave.continue?"成功":"失败");
                 }
             }
         }
@@ -4655,10 +4664,7 @@ function 注册打码() {
 try{
     for (var ii = 0; ii < 3; ii++) {
         if (text("Me").visibleToUser().exists()) {
-            console.info("原保存账号 路径 /DCIM/zhuce.txt")
-            let acc = 随机账号+'，'+ui.szmm.text()+'\n';
-            log(acc);
-            files.append("/sdcard/DCIM/zhuce.txt", acc);
+            saveReg(随机账号, ui.szmm.text());
             log("注册成功了");
             return true
         }
@@ -4753,6 +4759,7 @@ try{
                                 if (lh_find(text("Skip").clickable(true), "skip", 0, 5000)) {
                                     if (text("Me").visibleToUser().findOne(5000)) {
                                     }
+                                    saveReg(随机账号, ui.szmm.text());
                                     log("注册成功了")
                                     return true
                                 }
@@ -5434,8 +5441,9 @@ function runTikTok(run,tag) {
             if(text("Me").findOne(2000).parent().click())
                 // 获取到个人信息s
                 info = getFansInfo("个人信息", true);
-            // 跳过刚开始时的默认值 0 ，在次数达到5次之后0也是有效值
-            if (!((info.focusNumber <= 0) && (info.fansNumber <= 0) && (info.likeNumber <= 0)) || 5 < tagI)
+            // 跳过刚开始时的默认值 0 ，在次数达到3次之后0也是有效值
+            if (!((info.focusNumber <= 0) && (info.fansNumber <= 0) && (info.likeNumber <= 0)) 
+                || 3 < tagI)
                 break;
         }catch(err){
             console.verbose("获取账号信息异常", err)
@@ -5459,10 +5467,10 @@ function runTikTok(run,tag) {
 
         // 检测是否是登录界面
         if(detectionLoginView()) back();
-        // log提示语句
-        console.verbose("等待" + appName + "启动中..." + tagI);
         // 标记自增
         tagI++;
+        // log提示语句
+        console.verbose("等待" + appName + "启动中..." + tagI);
     }
 
     if(!info || (-1 == info.focusNumber) && (-1 == info.fansNumber) && (-1 == info.likeNumber)){
