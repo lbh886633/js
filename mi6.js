@@ -1081,7 +1081,7 @@ function 打开抖音() {
                 // 点击 我 
                 clickAction(text("Me"), 50, 500);
                 // 检测是否在个人信息页面且未登录账号
-                if(text("Sign up").clickable(true).findOne(3000)){
+                if(text("Sign up").clickable(true).findOne(1000)){
                     return true;
                 }
                 if(text("Edit profile").findOnce()){
@@ -1811,17 +1811,18 @@ function 取链接() {
     }
 }
 
-function 返回首页() {
+function 返回首页(dayleTime) {
     log("返回首页中..")
+    dayleTime = dayleTime||2000;
     for (var i = 0; i < 10; i++) {
-        popupDetection(500);
+        popupDetection(dayleTime*0.25);
         if (packageName(pack).visibleToUser().exists()) {
-            sleep(1000)
+            sleep(dayleTime*0.5)
             if (text("Me").visibleToUser().exists()) {
                 break
             } else {
                 back()
-                sleep(500)
+                sleep(dayleTime*0.25)
             }
             var 退出 = text("QUIT").visibleToUser().findOne(100)
             if (退出) {
@@ -4146,15 +4147,15 @@ function mi6注册模式() {
     打开抖音()
     // 进入账号界面
         // 跳过第一屏s
-    let tag=0;
+    /* let tag=0;
     while(text("Sign up").find().length<1 && 5>tag++){
         新环境();
-    }
+    } */
     // 注册
     for (let index = 0; index < 5; index++) {
-        返回首页();
+        返回首页(1000);
         if(!lh_find(text("Sign up").clickable(true), "Sign up", 0)){
-            // !!!!!!!!!!!!!ＴＯＤＯ　TODO
+            // !!!!!!!!!!!!!ＴＯＤＯ　TODO 忘了
             if(lh_find(boundsInside(970,114,1042,186).className("ImageView"), "设置", 0)) {
                 let scrollView = className("ScrollView").findOne(1000);
                 let i = 0;
