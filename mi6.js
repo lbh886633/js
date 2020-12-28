@@ -4162,11 +4162,12 @@ function mi6注册模式() {
                 try{
                     for (; i < 3;) {
                         if(lh_find(text("Add account"), "添加账号", 0, 500)) {
-                            // 出现注册/登录页面则跳出
-                            if(0 < textContains("Continue with").findOne()) {
-                                break;
-                            }
                             i++;
+                        }
+                        // 出现注册/登录页面则跳出
+                        if(textContains("Continue with").findOne()) {
+                            i--
+                            break;
                         }
                         scrollView.scrollForward();
                     }
