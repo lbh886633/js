@@ -298,7 +298,7 @@ ui.layout(
                                 </linear>
                                 <linear padding="5 0 0 0">
                                     <text textColor="black" text="话题和视频标题: " />
-                                    <input id="htbt" w="*" text="click the link to find more lingerie fashion" />
+                                    <input id="htbt" w="*" text="Do you like me?" />
                                 </linear>
                                 <linear padding="5 0 0 0">
                                     <text textColor="black" text="@用户: " />
@@ -712,7 +712,7 @@ function 主程序() {
             log("打招呼")
             采集粉丝信息()
         }
-        
+
         if (tempSave.daily || ui.mi6_rep.checked) {
             log("回复")
             返回首页()
