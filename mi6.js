@@ -6,7 +6,7 @@ var tempSave = {
     privacy: 30,
     NUMBER: 0,
     自动打码: false,
-    version: "10",
+    version: "11",
     downloadUrl: "http://192.168.137.1:8081/tiktokjs/",
     // 直接发送的消息
     getSayMessage: "Hi",
