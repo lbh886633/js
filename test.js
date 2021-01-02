@@ -69,3 +69,20 @@
 <artifactId>mapper-spring-boot-starter</artifactId>
 <version>2.1.5</version>
 </dependency>
+
+
+getAll: function(storeName) {
+    var objectStore = this.db.transaction(storeName).objectStore(storeName);
+    objectStore.openCursor().onsuccess = function (event) {
+        var cursor = event.target.result;
+        if (cursor) {
+            console.log('Id: ' + cursor.key);
+            console.log('Name: ' + cursor.value.name);
+            console.log('Age: ' + cursor.value.age);
+            console.log('Email: ' + cursor.value.email);
+            cursor.continue();
+        } else {
+        console.log('没有更多数据了！');
+        }
+    };
+},
