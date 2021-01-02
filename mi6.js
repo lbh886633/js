@@ -2319,6 +2319,8 @@ function getFansList(fansNameList, fansList, all) {
 
                         //  发送私信
                         // if(ui.getsay.checked){
+                            // 随机拿到一条信息
+                            tempSave.getSayMessage = getHelloMessage();
                             if(isNaN(tempSave.NUMBER)) tempSave.NUMBER = 1;
                             let newMsg = Date.now().toString().substring(10) + "> " + (tempSave.getSayMessage||"Hi~");
                             let re = sayHello(fans, newMsg);
@@ -3810,14 +3812,14 @@ function 消息处理(fans,newMsgList){
         fansLabel = {};
     }
     // 使用单词去匹配词库并保存
-    for (let w in words) {  // 拿到当前单词
-        w = words[w];
+    for (let w in words) {  
+        w = words[w].toLowerCase();   // 拿到当前单词，并将当前单词转成小写
         for (let tag in tempSave.RequiredLabels) {   // 拿到当前标签内容 包括 label（标签） words（关键字） info（信息）
             tag = tempSave.RequiredLabels[tag].label;
             // label: '{"label": "国家","words": "usa", "info": ["where are you from?"]}'
             tag = JSON.parse(tag);
-            // 如果当前单词存在于标签中，则进行保存
-            if(-1 < tag.words.indexOf(w)){
+            // 如果当前单词存在于标签中，则进行保存，将其转换成小写
+            if(-1 < tag.words.toLowerCase().indexOf(w)){
                 // 判断是否存在当前标签，没有就创建
                 if(!fansLabel[tag.label]) {
                     fansLabel[tag.label]=[];
