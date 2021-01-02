@@ -1332,9 +1332,9 @@ function 读取账号() {
 function 随机滑动() {
     var x = device.width / 2 + random(-20, 20)
     var y = device.height * 0.85
-    var X1) = device.width / 2 + random(-20, 20)
-    var Y1) = device.height * 0.1
-    swipe(x, y, X1), Y1), random(1000, 1200))
+    var x1 = device.width / 2 + random(-20, 20)
+    var y1 = device.height * 0.1
+    swipe(x, y, x1, y1, random(1000, 1200))
 
 }
 
@@ -1374,15 +1374,15 @@ function lh_find(obj, msg, dj, time) {
 }
 
 
-function lh_范围点击(x, y, X1), Y1), msg) {
+function lh_范围点击(x, y, x1, y1, msg) {
     if (typeof x == "object") {
         var x坐标 = random(Number(x.left) + 3, Number(x.right) - 3)
         var y坐标 = random(Number(x.top) + 3, Number(x.bottom) - 3)
         console.log(y + " " + x坐标 + " " + y坐标)
     } else {
         msg = msg || ""
-        var x坐标 = random(x - 3, X1) - 3)
-        var y坐标 = random(y + 3, Y1) - 3)
+        var x坐标 = random(x - 3, x1 - 3)
+        var y坐标 = random(y + 3, y1 - 3)
         console.log(msg + " " + x坐标 + " " + y坐标)
     }
     sleep(random(900, 1000))
