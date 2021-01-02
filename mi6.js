@@ -2,15 +2,15 @@
 // https://lbh886633.github.io/js/script.js
 
 var tempSave = {
-    InsideX1: 0.9608,
-    InsideY1: 0.6653,
-    InsideX2: 1.0253,
-    InsideY2: 0.667,
+    InsideX1: 1,
+    InsideY1: 1,
+    InsideX2: 1,
+    InsideY2: 1,
     firstEnvi: 0,
     privacy: 30,
     NUMBER: 0,
     自动打码: false,
-    version: "10",
+    version: "11",
     downloadUrl: "http://192.168.137.1:8081/tiktokjs/",
     // 直接发送的消息
     getSayMessage: "Hi",
@@ -263,6 +263,7 @@ ui.layout(
                                 </radiogroup>
                             </vertical>
                             <linear>
+                                    <checkbox id="miniIcon" text="小图标" />
                                     <checkbox id="createAccount" text="生成邮箱" />
                                     <checkbox id="daily" text="日常模式" />
                             </linear>
@@ -670,6 +671,14 @@ function 主程序() {
     if(ui.createAccount.checked){
         log("邮箱生成");
         邮箱生成();
+    }
+    
+    if(ui.miniIcon.checked){
+        log("高DPI模式");
+        tempSave.InsideX1 = 0.9608;
+        tempSave.InsideY1 = 0.6653;
+        tempSave.InsideX2 = 1.0253;
+        tempSave.InsideY2 = 0.6670;
     }
 
     // 日常模式，关注、采集粉丝、回复消息
