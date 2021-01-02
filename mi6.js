@@ -2,6 +2,10 @@
 // https://lbh886633.github.io/js/script.js
 
 var tempSave = {
+    InsideX1: 0.9608,
+    InsideY1: 0.6653,
+    InsideX2: 1.0253,
+    InsideY2: 0.667,
     firstEnvi: 0,
     privacy: 30,
     NUMBER: 0,
@@ -1328,9 +1332,9 @@ function 读取账号() {
 function 随机滑动() {
     var x = device.width / 2 + random(-20, 20)
     var y = device.height * 0.85
-    var x1 = device.width / 2 + random(-20, 20)
-    var y1 = device.height * 0.1
-    swipe(x, y, x1, y1, random(1000, 1200))
+    var X1) = device.width / 2 + random(-20, 20)
+    var Y1) = device.height * 0.1
+    swipe(x, y, X1), Y1), random(1000, 1200))
 
 }
 
@@ -1370,15 +1374,15 @@ function lh_find(obj, msg, dj, time) {
 }
 
 
-function lh_范围点击(x, y, x1, y1, msg) {
+function lh_范围点击(x, y, X1), Y1), msg) {
     if (typeof x == "object") {
         var x坐标 = random(Number(x.left) + 3, Number(x.right) - 3)
         var y坐标 = random(Number(x.top) + 3, Number(x.bottom) - 3)
         console.log(y + " " + x坐标 + " " + y坐标)
     } else {
         msg = msg || ""
-        var x坐标 = random(x - 3, x1 - 3)
-        var y坐标 = random(y + 3, y1 - 3)
+        var x坐标 = random(x - 3, X1) - 3)
+        var y坐标 = random(y + 3, Y1) - 3)
         console.log(msg + " " + x坐标 + " " + y坐标)
     }
     sleep(random(900, 1000))
@@ -2240,12 +2244,11 @@ function 采集粉丝信息() {
     getFansNum = 0
     // 2. 点击 我 ，确保在个人信息页面
     clickAction(text("Me"), 50)
-    // 3. 点击粉丝
-    // text("Followers").boundsInside(520, 670, 920, 730).find().length
-    // clickAction(function () { return text("Followers").boundsContains(523, 679, 916, 720).findOne(200).parent() }, 500, 600)
     // 谷歌手机的分辨率
     // clickAction(function () { return text("Followers").boundsInside(520, 670, 920, 730).findOne(200).parent() }, 500, 600)
-    clickAction(function () { return text("Followers").boundsInside(400, 750, 700, 850).findOne(200).parent() }, 500, 600)
+    // mi6
+    // clickAction(function () { return text("Followers").boundsInside(400, 750, 700, 850).findOne(200).parent() }, 500, 600)
+    lh_find(text("Followers").boundsInside(parseInt(400*tempSave.InsideX1), parseInt(750*tempSave.InsideY1), parseInt(700*tempSave.InsideX2), parseInt(850*tempSave.InsideY2)), "粉丝", 0)
     // 4. 采集粉丝信息
     fansNameList = server.get("fans/list/username?accountUsername="+accountInfo.username);
     log("已采集粉丝数量：", fansNameList.length)
@@ -2576,7 +2579,7 @@ function getVideoPlayerNumberInfo() {
     log("获取个人视频播放量信息")
     let videoInfo = [];
     for (let i = 0; i < 5; i++) {
-        let videoList = className("androidx.recyclerview.widget.RecyclerView").boundsInside(0,1000, device.width,1600).findOne(200);
+        let videoList = className("androidx.recyclerview.widget.RecyclerView").boundsInside(0, parseInt(1000*tempSave.InsideY1), device.width, parseInt(1600*tempSave.InsideY2)).findOne(200);
         if (videoList) {
             videoList = videoList.children();
             for (let i = 0; i < videoList.length; i++) {
@@ -2706,7 +2709,7 @@ function mi6回复消息() {
         lh_find(className("android.widget.ImageView").clickable(true), "点击私信", 0)
         // 2.5. 获取列表，可以用于滚动
         actionRecycler = className("androidx.recyclerview.widget.RecyclerView")
-                .boundsInside(0, 200, device.width, device.height)
+                .boundsInside(0, parseInt(200*tempSave.InsideY1), device.width, device.height)
                 .findOne(1000);
         console.info(actionRecycler)
         // 当失败次数等于3的时候就跳出
@@ -2724,7 +2727,7 @@ function mi6回复消息() {
             if(!actionRecycler.scrollForward()){
                 sleep(100);
                 actionRecycler = className("androidx.recyclerview.widget.RecyclerView")
-                .boundsInside(0, 200, device.width, device.height)
+                .boundsInside(0, parseInt(200*tempSave.InsideY1), device.width, device.height)
                 .findOne(1000);
                 if(!actionRecycler.scrollForward()){
                     // 一般不会走这里，到了这里就等于需要重写上面的逻辑
@@ -2772,7 +2775,7 @@ function 回复消息() {
         let biu = action.findOne(className("android.widget.ImageView").clickable(true))
         biu.click()
         // 3. 获取所有有红气泡数量的好友
-        action = className("androidx.recyclerview.widget.RecyclerView").boundsContains(0, 201, 1440, 2434).findOne(1000);
+        action = className("androidx.recyclerview.widget.RecyclerView").boundsContains(0, parseInt(201*tempSave.InsideY1), parseInt(1440*tempSave.InsideX2), parseInt(2434*tempSave.InsideY2)).findOne(1000);
         for (let i = 0; i < 6; i++) {
             sleep(500)
             // 最多循环查看6次，本次没有新消息，那么循环次数就减2，也就是没有发现新消息则只查看2、3次
@@ -3113,12 +3116,12 @@ function sendMsg(msg){
         }
     }
     // 3. 发送消息  发送按钮 950,1700, 1100,1950
-    action = className("android.widget.ImageView").boundsInside(950,1700, 1100,1950).clickable(true).findOne(1000);
+    action = className("android.widget.ImageView").boundsInside( parseInt(950*tempSave.InsideX1), parseInt(1700*tempSave.InsideY1), parseInt(1100*tempSave.InsideX2), parseInt(1950*tempSave.InsideY2)).clickable(true).findOne(1000);
     if(action){
         log("发送消息", action.click());
     }
     // 3.1. 发送消息（按钮在中间部分时）  发送按钮 950,1700, 1100,1950
-    action = className("android.widget.ImageView").boundsInside(950,800, 1100,1950).clickable(true).find();
+    action = className("android.widget.ImageView").boundsInside( parseInt(950*tempSave.InsideX1), parseInt(800*tempSave.InsideY1), parseInt(1100*tempSave.InsideX2), parseInt(1950*tempSave.InsideY2)).clickable(true).find();
     if(action){
         // 点击最后一个
         log("发送消息(中)", action[action.length-1].click());
@@ -3130,7 +3133,7 @@ function sendMsg(msg){
         action.click();
     } else {
         // 防止发送失败
-        action = className("android.widget.ImageView").boundsContains(950,1700, 1100,1950).clickable(true).findOne(1000);
+        action = className("android.widget.ImageView").boundsContains( parseInt(950*tempSave.InsideX1), parseInt(1700*tempSave.InsideY1), parseInt(1100*tempSave.InsideX2), parseInt(1950*tempSave.InsideY2)).clickable(true).findOne(1000);
         if(action){
             log("再次点击发送消息按钮", action.click());
         }
@@ -3182,7 +3185,7 @@ function sendMsgBackup(msg){
         }
 
         // 3. 发送消息
-        action = className("android.widget.ImageView").boundsInside(1345,1400,1440,2434).clickable(true).findOne(1000);
+        action = className("android.widget.ImageView").boundsInside( parseInt(1345*tempSave.InsideX1), parseInt(1400*tempSave.InsideY1), parseInt(1440*tempSave.InsideX2), parseInt(2434*tempSave.InsideY2)).clickable(true).findOne(1000);
         if(action){
             log("发送消息");
             action.click()
@@ -3280,7 +3283,7 @@ function 获取消息(){
 }
 
 function mi6GetNewMsgList() {
-    let sendlist = boundsInside(900, 200, device.width, device.height).className("TextView").filter(function(uo){
+    let sendlist = boundsInside( parseInt(900*tempSave.InsideX1), parseInt(200*tempSave.InsideY1), device.width, device.height).className("TextView").filter(function(uo){
         let t = uo.text();
         return t.indexOf(":") < 0 && t.indexOf("-") < 0 && !isNaN(parseInt(t));
     }).find();
@@ -3294,9 +3297,9 @@ function mi6GetNewMsgList() {
  */
 function getNewMsgList() {
     // 3. 获取所有有红气泡数量的好友
-    let action = className("androidx.recyclerview.widget.RecyclerView").boundsContains(0, 201, 1440, 2434).findOne(1000);
+    let action = className("androidx.recyclerview.widget.RecyclerView").boundsContains(0, parseInt(201*tempSave.InsideY1), parseInt(1440*tempSave.InsideX2), parseInt(2434*tempSave.InsideY2)).findOne(1000);
     
-    list = boundsInside(900, 200, device.width, device.height).className("TextView").filter(function(uo){
+    list = boundsInside( parseInt(900*tempSave.InsideX1),  parseInt(200*tempSave.InsideY1), device.width, device.height).className("TextView").filter(function(uo){
         return uo.text().indexOf(":") < 0;
     }).find();
     let sendlist = [];
@@ -3306,7 +3309,7 @@ function getNewMsgList() {
             let msgNum = uo.findOne(
                 // 需要在指定的范围内 
                 // 限制在右边的一部分范围
-                boundsInside(1300, 0, 1400, device.height)
+                boundsInside( parseInt(1300*tempSave.InsideX1), 0,  parseInt(1400*tempSave.InsideX2), device.height)
                 // 是文本控件
                 .className("android.widget.TextView")
                 .filter(function(u){
@@ -3393,7 +3396,7 @@ function mi6ReplyMsg() {
     // ## 通过id拿
     let fans;
     try {
-        let fansName = className("TextView").boundsInside(100,110,device.width-100,182).findOne(3000).text();
+        let fansName = className("TextView").boundsInside( parseInt(100*tempSave.InsideX1), parseInt(110*tempSave.InsideY1), parseInt(device.width-(100*tempSave.InsideX2)), parseInt(182*tempSave.InsideY2)).findOne(3000).text();
         fans = server.get("fans/name/" + fansName + "?accountUsername=" + accountInfo.username)
     }catch(e) {}
 
@@ -3960,7 +3963,7 @@ function 搜索进入(str,tab,num){
     // 5. 点击第一个
     let i = 0;
     for (; i < 5; i++) {
-        let a = className("androidx.recyclerview.widget.RecyclerView").boundsContains(100,400,100,100).findOne(2000)
+        let a = className("androidx.recyclerview.widget.RecyclerView").boundsContains( parseInt(100*tempSave.InsideX1), parseInt(400*tempSave.InsideY1), parseInt(100*tempSave.InsideX2), parseInt(100*tempSave.InsideY2)).findOne(2000)
         if(a) {
             try{
                 a.children()[num||0].click()
@@ -4174,7 +4177,7 @@ function mi6注册模式() {
         返回首页(1000);
         if(!lh_find(text("Sign up").clickable(true), "Sign up", 0)){
             // !!!!!!!!!!!!!ＴＯＤＯ　TODO 忘了
-            if(lh_find(boundsInside(970,114,1042,186).className("ImageView"), "设置", 0)) {
+            if(lh_find(boundsInside( parseInt(970*tempSave.InsideX1), parseInt(114*tempSave.InsideY1), parseInt(1042*tempSave.InsideX2), parseInt(186*tempSave.InsideY2)).className("ImageView"), "设置", 0)) {
                 let scrollView = className("ScrollView").findOne(1000);
                 let i = 0;
                 try{
@@ -5772,9 +5775,9 @@ function popupDetection(time) {
         }, */
 
         function (t) {  // 米6 更新账号 Update username 
-            let action = boundsInside(100, 100, 1000, 1500).text("Update username").findOne(t)
+            let action = boundsInside( parseInt(100*tempSave.InsideX1), parseInt(100*tempSave.InsideY1), parseInt(1000*tempSave.InsideX2), parseInt(1500*tempSave.InsideY2)).text("Update username").findOne(t)
             if (action) {
-                action = className("ImageView").boundsInside(800, 500, 1000, 700).findOne(10);
+                action = className("ImageView").boundsInside( parseInt(800*tempSave.InsideX2), parseInt(500*tempSave.InsideY2), parseInt(1000*tempSave.InsideX2), parseInt(700*tempSave.InsideY2)).findOne(10);
                 if (action) action.click()
             }
         }
