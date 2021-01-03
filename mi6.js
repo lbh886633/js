@@ -259,6 +259,7 @@ ui.layout(
                                 </radiogroup>
                             </vertical>
                             <linear>
+                                    <checkbox id="repScript" text="回复脚本" />
                                     <checkbox id="createAccount" text="生成邮箱" />
                                     <checkbox id="daily" text="日常模式" />
                             </linear>
@@ -715,10 +716,15 @@ function 主程序() {
             }
 
             if (tempSave.daily || ui.mi6_rep.checked) {
-                log("回复")
-                返回首页()
-                tempSave.RequiredLabels = readRequiredLabelsFile();
-                mi6回复消息()
+                if(ui.repScript.checked){
+                    // 驱动脚本去进行回复
+                    驱动回复软件()
+                } else {
+                    log("回复")
+                    返回首页()
+                    tempSave.RequiredLabels = readRequiredLabelsFile();
+                    mi6回复消息()
+                }
             }
         }
         if (!tempSave.daily && ui.mi6_reg.checked) {
@@ -2238,7 +2244,6 @@ function 更换头像() {
 
 function 采集粉丝信息() {
     // 1. 初始化数据
-    
     返回首页()
     getFansNum = 0
     // 2. 点击 我 ，确保在个人信息页面
@@ -2280,7 +2285,6 @@ function getFansList(fansNameList, fansList, all) {
                                 return true;
                             return false;
                         }).findOne(3000)
-        
         if(!textContains("FOLLOWERS").findOne(500) || !FollowerParent) {
             log("未获取到粉丝列表！如果脚本卡住，请手动进入粉丝列表")
             sleep(3000);
@@ -5867,4 +5871,7 @@ function nextAccount() {
             log(err);
         }
     }
+}
+function 驱动回复软件() {
+    toastLog("暂未编写")
 }
