@@ -7,15 +7,17 @@
 // @author      -
 // @description 2021/1/1 下午8:17:31
 // @require https://code.jquery.com/jquery-2.1.4.min.js
+// @require https://cdn.jsdelivr.net/npm/vue
 // ==/UserScript==
 
 var user = {req: true};
 var number = 0;
 var lastCustomerTime;
 var lastCustomerId;
-var customerWaitCommit={};
-var customers={};
-var urlDomain = "nnn";
+var customerWaitCommit = {};
+var customers = {};
+var ec;
+var urlDomain = "http://localhost:8082";
 var indexDB = {
     db: null,
     dbName: "",
@@ -95,22 +97,19 @@ var indexDB = {
         console.log("inserted!");
         return status;
     },
-    getAll: function(storeName, callback) {
-      var reList = [];
-      var objectStore = this.db.transaction(storeName).objectStore(storeName);
-      objectStore.openCursor().onsuccess = function (event) {
-        var cursor = event.target.result;
+    getAll: function(storeName) {
+        var reList = [];
+        var objectStore = this.db.transaction(storeName).objectStore(storeName);
+        objectStore.openCursor().onsuccess = function (event) {
+            var cursor = event.target.result;
             if (cursor) {
                 if(cursor.value) {
                     reList.push(cursor.value);
                 }
                 cursor.continue();
-            } else {
-              if (typeof callback === "function"){
-                callback.call(this, reList);
-              }
             }
         };
+        return reList;
     },
     getDataByKey: function(storeName, key, callback) {
         var transaction = this.db.transaction(storeName, 'readwrite');
@@ -177,54 +176,73 @@ var indexDB = {
 }
 indexDB.init("counter", [
     {
-        name: "未提交客户数据",
+        // name: "未提交客户数据",
+        name: "客户数据",
         keyPath: "id",
         index: [
             {name: "客户id", key: "customer_id", property: {unique: true}},
             {name: "上一次聊天时间", key: "last_time", property: {unique: false}},
+            {name: "上一次聊天时间原文", key: "last_time_source", property: {unique: false}},
             {name: "用户id", key: "user_id"}
         ]
     },
     {
-        name: "已提交客户数据",
+        name: "用户数据",
         keyPath: "id",
         index: [
-            {name: "客户id", key: "customer_id", property: {unique: true}},
-            {name: "上一次聊天时间", key: "last_time", property: {unique: false}},
-            {name: "用户id", key: "user_id"}
+            {name: "用户id", key: "user_id", property: {unique: true}},
         ]
     }
 ]);
-var ec;
-var mainInte = setInterval(() => {
-  try{
-    if(1 < document.querySelector("#app").children[0].children.length) {
+/*
+    核心：
+        使用vue绑定特定的元素，当元素产生变化时进行记录
+        记录时优先检查是否对方id已经存在，如果未存在则进行保存
+        保存完毕后用户的记录加一
+        每小时计算一次数据库中的数据
+ */
+// 拿到用户信息
+// vue绑定聊天界面控件  v-model="msg"
+// 当控件变化时触发函数
 
+
+
+
+
+var mainInte = setInterval(() => {
+    if(1 < document.querySelector("#app").children[0].children.length) {
       var userInte = setInterval(()=>{
-        let startDetection = false;
         if(user.status){
-          calcNumber(function(){
-            console.log(customerWaitCommit.length+" ← 未提交客户，已提交客户 → "+customers.length)
-            startDetection = true;
-          })
+          customerWaitCommit = indexDB.getAll("未提交客户数据");
+          customers = indexDB.getAll("已提交客户数据");
+          customerWaitCommit.forEach(e=>console.log(e))
+          for (const k in customers) {
+            console.log(k)
+            try{
+              console.log(customers[k])
+            } catch(err) {}
+          }
+          console.log(customerWaitCommit.length+" ↑未提交数据，已提交数据↓ "+customers.length)
+          console.log("长度", customers.length)
+          console.log(customers)
+          upUi();
 
           var detectionCustomerInte = setInterval(()=>{
-            if(startDetection){
-              let msgArr = document.querySelector('[aria-label="消息列表。在消息中点击向右箭头即可打开消息上下文菜单。"]').children;
-              let customerId = msgArr[msgArr.length-1].getAttribute("data-id");
-              if(customerId != lastCustomerId) {
-                getCustomer(customerId);
-              }
-              if(30 < number++) {
-                commitCustomer();
-
-              }
+            let msgArr = document.querySelector('[aria-label="消息列表。在消息中点击向右箭头即可打开消息上下文菜单。"]').children;
+            let customerId = msgArr[msgArr.length-1].getAttribute("data-id");
+            if(customerId != lastCustomerId) {
+              getCustomer(customerId);
+            }
+            if(30 < number++) {
+              commitCustomer()
+              customerWaitCommit = indexDB.getAll("未提交客户数据");
+              customers = indexDB.getAll("已提交客户数据");
             }
           },1000);
           clearInterval(userInte);
         } else if(user.req){
           getUser();
-          calcNumber();
+          
         }
       }, 1000);
       clearInterval(mainInte)
@@ -233,46 +251,6 @@ var mainInte = setInterval(() => {
     console.log(err);
   }
 }, 1000);
-
-function calcNumber(fun) {
-  upUi("刷新数据")
-  indexDB.getAll("未提交客户数据", function (data) {
-    customerWaitCommit = data;
-
-    indexDB.getAll("已提交客户数据", function (data) {
-      customers = data;
-      let totalCustomer = customers.concat(customerWaitCommit);
-      let todayTime = new Date(new Date().toDateString());
-      let t = {
-        totalNumber: user.totalNumber,
-        todayNumber: user.todayNumber,
-        total: 0,
-        today: 0,
-        tempArr: []
-      }
-      totalCustomer.forEach(e=>{
-        if(e.customer_id && t.tempArr.indexOf(e.customer_id) < 0) {
-          t.tempArr.push(e.customer_id);
-          // 是客户，用户没有customer_id属性
-          if(user.id == e.user_id) {
-            // 确认是当前用户的客户
-            t.total++;
-            if(todayTime <= e.last_time) {
-              t.today++;
-            }
-          }
-        }
-      })
-      user.totalNumber = user.totalNumber-t.totalNumber+t.total;
-      user.todayNumber = user.todayNumber-t.todayNumber+t.today;
-      indexDB.updateDataByKey("已提交客户数据", user.id, user);
-      upUi("数据已刷新");
-      if(typeof fun == "function") {
-        fun()
-      }
-    });
-  });
-}
 
 function saveData() {
   customers.forEach(c=>indexDB.addData("已提交客户数据", [c]));
@@ -294,7 +272,7 @@ function getCustomer(customerId) {
           last_time_source: customerTimeSource,
         };
         indexDB.addData("未提交客户数据", [customerWaitCommit[customerId]]);
-        console.log("%c 保存结束" + customerId,'color:#E81224');
+        console.log("保存结束", customerId);
         
         if(!user.totalNumber) user.totalNumber = 0;
         user.totalNumber++;
@@ -412,14 +390,16 @@ function getUser() {
           console.log(user);
           indexDB.addData("已提交客户数据", [user]);
         }
-        upUi("时间将从  "+new Date(user.updateTime).toLocaleString()+"  开始计算");
+        upUi();
       })
+      console.log("时间将从  "+new Date(user.updateTime).toLocaleString()+"  开始计算")
     }
   ).fail(
     function(data) {
       user.req = true;
       user.status = true;
       console.log("连接失败！",data);
+      alert("连接失败！将会导致无法记录！请检查后台地址是否正确！");
       user.updateTime = new Date(new Date(Date.now()- 24*60*60*1000).toLocaleDateString())
 
       indexDB.getDataByKey("已提交客户数据", user.id, function (data) {
@@ -436,8 +416,9 @@ function getUser() {
           console.log(user);
           indexDB.addData("已提交客户数据", [user]);
         }
-        upUi("本地保存，时间将从  "+new Date(user.updateTime).toLocaleString()+"  开始计算");
+        upUi();
       })
+      console.log("本地保存，时间将从  "+new Date(user.updateTime).toLocaleString()+"  开始计算");
     }
   )
 }
@@ -495,15 +476,13 @@ function upUi(msg) {
   }
   try{
     ec.innerHTML = "当前用户：" + user.id;
-    ec.innerHTML += "<br>检测时间：" + new Date(user.updateTime).toLocaleString();
+    ec.innerHTML += "<br>检测时间：" + user.updateTime.toLocaleString();
     if(!user.totalNumber) user.totalNumber = 0;
     if(!user.todayNumber) user.todayNumber = 0;
-    ec.innerHTML += "<br>今日客户：" + user.todayNumber;
+    ec.innerHTML += "<br>今日新客户：" + user.todayNumber;
     ec.innerHTML += "<br>累计客户：" + user.totalNumber;
   } catch (err) {}
   if(msg) {
-    let originalHTML = ec.innerHTML;
     ec.innerHTML += "<br>" + msg;
-    setTimeout(() => ec.innerHTML = originalHTML, 3000);
   }
 }

@@ -544,8 +544,8 @@ ui.ok.click(function () {
         //threads.start(悬浮)
         threads.start(主程序)
     } else {
-        qd = 0;
-        toastLog("脚本已经启动了，再次点击可再次启动");
+        // qd = 0;
+        toastLog("脚本已经启动了~");
     }
 });
 
@@ -2245,10 +2245,10 @@ function 采集粉丝信息() {
     // clickAction(function () { return text("Followers").boundsContains(523, 679, 916, 720).findOne(200).parent() }, 500, 600)
     // 谷歌手机的分辨率
     // clickAction(function () { return text("Followers").boundsInside(520, 670, 920, 730).findOne(200).parent() }, 500, 600)
-    clickAction(function () { return text("Followers").boundsInside(400, 750, 700, 850).findOne(200).parent() }, 500, 600)
+    lh_find(text("Followers").boundsInside(400, 700, 700, 800), "粉丝", 0)
     // 4. 采集粉丝信息
     fansNameList = server.get("fans/list/username?accountUsername="+accountInfo.username);
-    log("已采集粉丝数量：", fansNameList.length)
+    log("已采集过的粉丝数量：", fansNameList.length)
     getFansList(fansNameList, fansList)
 }
 
@@ -2270,7 +2270,7 @@ function getFansList(fansNameList, fansList, all) {
     log("开始")
     let i=0, tempList = [], tempSave = [], closeTag;
     while(true){
-        等待加载()
+        等待加载(100, 500);
         // 获取粉丝列表父控件
         let FollowerParent = className("androidx.recyclerview.widget.RecyclerView").packageName(pack).filter(function(uo){
                             if(uo.bounds().right>device.width*0.5) 
@@ -5245,7 +5245,7 @@ function 等待加载(s,num){
     let i = 0
     sleep(s||2000)
     for (; i < num; i++) {
-        if(id("ac2").find().length==0) break
+        if(id("cd1").boundsInside(0,0, device.width,device.height).find().length==0) break
         if(i%5==0) console.verbose("等待加载中")
         sleep(300)
     }

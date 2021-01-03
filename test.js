@@ -69,3 +69,11 @@
 <artifactId>mapper-spring-boot-starter</artifactId>
 <version>2.1.5</version>
 </dependency>
+
+function log(p) {
+    if(p == "all") {
+      console.log(arguments)
+    } else {
+      arguments.forEach(m=>console.log(m))
+    }
+  }
