@@ -1,6 +1,6 @@
 "ui";
 // https://lbh886633.github.io/js/script.js
-var uti = "修改采集粉丝为全部模式，增强返回粉丝列表"
+var uti = "增加切换账号"
 var tempSave = {
     firstEnvi: 0,
     privacy: 30,
@@ -671,79 +671,81 @@ function 主程序() {
     // 日常模式，关注、采集粉丝、回复消息
     tempSave.daily = ui.daily.checked;
 
-    if(runTikTok()) {
-        log("账号正常，还原成功")
-        // 开启一个新线程来保存账号
-        threads.start(function () {
-            let saveAcc = {
-                username: accountInfo.username,
-                isExceptoion: 0,
-                isInvalid: 0,
-                url: accountInfo.url,
-                name: accountInfo.name,
-                device: accountInfo.enviName,
-                focus: server.numberToString(accountInfo.focusNumber),
-                fans: server.numberToString(accountInfo.fansNumber),
-                likes: server.numberToString(accountInfo.likeNumber),
+    let whileNumber = 0;
+    while(true) {
+        if(runTikTok()) {
+            log("账号正常，还原成功")
+            // 开启一个新线程来保存账号
+            threads.start(function () {
+                let saveAcc = {
+                    username: accountInfo.username,
+                    isExceptoion: 0,
+                    isInvalid: 0,
+                    url: accountInfo.url,
+                    name: accountInfo.name,
+                    device: accountInfo.enviName,
+                    focus: server.numberToString(accountInfo.focusNumber),
+                    fans: server.numberToString(accountInfo.fansNumber),
+                    likes: server.numberToString(accountInfo.likeNumber),
+                }
+                server.add("account", saveAcc);
+            })
+
+
+            if (!tempSave.daily && ui.mi6_dat.checked) {
+                log("修改资料")
+                修改资料()
+                更换头像()
             }
-            server.add("account", saveAcc);
-        })
 
-        
+            if (!tempSave.daily && ui.mi6_vid.checked) {
+                log("上传视频")
+                上传视频();
+            }
 
-        if (!tempSave.daily && ui.mi6_dat.checked) {
-            log("修改资料")
-            修改资料()
-            更换头像()
+            if (tempSave.daily || ui.mi6_foc.checked) {
+                log("关注模式")
+                限制 = random(Number(ui.gzsl.text()), Number(ui.gzsl1.text()))
+                mi6关注操作()
+            }
+
+            if (tempSave.daily || ui.mi6_fan.checked) {
+                log("打招呼")
+                采集粉丝信息()
+            }
+
+            if (tempSave.daily || ui.mi6_rep.checked) {
+                log("回复")
+                返回首页()
+                tempSave.RequiredLabels = readRequiredLabelsFile();
+                mi6回复消息()
+            }
         }
-
-        if (!tempSave.daily && ui.mi6_vid.checked) {
-            log("上传视频")
-            上传视频();
-        }
-
-        if (tempSave.daily || ui.mi6_foc.checked) {
-            log("关注模式")
-            限制 = random(Number(ui.gzsl.text()), Number(ui.gzsl1.text()))
-            mi6关注操作()
-        }
-
-        if (tempSave.daily || ui.mi6_fan.checked) {
-            log("打招呼")
-            采集粉丝信息()
-        }
-
-        if (tempSave.daily || ui.mi6_rep.checked) {
-            log("回复")
-            返回首页()
-            tempSave.RequiredLabels = readRequiredLabelsFile();
-            mi6回复消息()
-        }
-    }
-
-    if (!tempSave.daily && ui.mi6_reg.checked) {
-        log("注册模式")
-        tempSave.login = true;
-        tempSave.continue = true;
-        while (tempSave.continue) {
-            mi6注册模式();
-            if(tempSave.continue){
-                // 在执行完之后如果还为true则等待继续
-                let cf = floaty.rawWindow(<frame><button id="but">继续注册</button></frame>)
-                cf.setPosition(400,800)
-                cf.but.click(()=>{
-                    toast("继续")
-                    cf.close();
-                    cf = null;
-                })
-                while(cf){
-                    sleep(1000);
+        if (!tempSave.daily && ui.mi6_reg.checked) {
+            log("注册模式")
+            tempSave.login = true;
+            tempSave.continue = true;
+            while (tempSave.continue) {
+                mi6注册模式();
+                if(tempSave.continue){
+                    // 在执行完之后如果还为true则等待继续
+                    let cf = floaty.rawWindow(<frame><button id="but">继续注册</button></frame>)
+                    cf.setPosition(400,800)
+                    cf.but.click(()=>{
+                        toast("继续")
+                        cf.close();
+                        cf = null;
+                    })
+                    while(cf){
+                        sleep(1000);
+                    }
                 }
             }
         }
+        toastLog("结束 " + whileNumber++);
+        返回首页(500);
+        nextAccount()
     }
-    toastLog("结束")
-
 }
 
 
@@ -5509,6 +5511,8 @@ function runTikTok(run,tag) {
 
         // 检测是否是登录界面
         if(detectionLoginView()) back();
+        // 检测不在首页的情况
+        if( 1 < tagI) 返回首页();
         // 标记自增
         tagI++;
         // log提示语句
@@ -5837,3 +5841,30 @@ function objToUri(obj) {
     return uri
 }
 
+function nextAccount() {
+    返回首页(300)
+    for (let i = 0; i < 5; i++) {
+        try{
+            log("第" + i + "次切换账号");
+            if(id("title").findOne(1000).click()) {
+                accountList = className("android.view.ViewGroup").find()
+                let i = 0
+                for (; i < accountList; i++) {
+                    if(3 <= accountList[i].children().length) {
+                        break;
+                    }
+                }
+                // 下一个
+                if(accountList[i+1].click()) {
+                    log("切换中...");
+                    sleep(5000);
+                    返回首页(300);
+                    break;
+                }
+            }
+        }catch(err){
+            log("切换账号异常")
+            log(err);
+        }
+    }
+}
