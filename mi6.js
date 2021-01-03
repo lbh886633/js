@@ -1,6 +1,6 @@
 "ui";
 // https://lbh886633.github.io/js/script.js
-var uti = "还原到原来的dpi"
+var uti = "修改采集粉丝为全部模式，增强返回粉丝列表"
 var tempSave = {
     firstEnvi: 0,
     privacy: 30,
@@ -2236,6 +2236,7 @@ function 更换头像() {
 
 function 采集粉丝信息() {
     // 1. 初始化数据
+    
     返回首页()
     getFansNum = 0
     // 2. 点击 我 ，确保在个人信息页面
@@ -2249,7 +2250,7 @@ function 采集粉丝信息() {
     // 4. 采集粉丝信息
     fansNameList = server.get("fans/list/username?accountUsername="+accountInfo.username);
     log("已采集过的粉丝数量：", fansNameList.length)
-    getFansList(fansNameList, fansList)
+    getFansList(fansNameList, fansList, "all")
 }
 
 /**
@@ -2357,6 +2358,29 @@ function getFansList(fansNameList, fansList, all) {
                 }
             } catch (err) {
                 console.error("异常信息：", err)
+                console.log("再次尝试返回粉丝列表")
+                // 返回粉丝列表
+                for (var i = 0; i < 5; i++) {
+                    sleep(1000)
+                    if(text("Me").findOne(2000)) {
+                        console.log("似乎返回到了首页")
+                        返回首页();
+                        lh_find(text("Followers").boundsInside(400, 700, 700, 800), "粉丝", 0);
+                        等待加载();
+                        sleep(1000);
+                    }
+                    let fansList  = className("androidx.recyclerview.widget.RecyclerView").packageName(pack).filter(function(uo){
+                        if(uo.bounds().right>device.width*0.5) 
+                            return true;
+                        return false;
+                    }).findOne(2000)
+
+                    if (FollowerList.length-3 < fansList.children().length
+                        || FollowerList.length == fansList.children().length
+                    ) break
+                    else back()
+                }
+
             }
         }
 
