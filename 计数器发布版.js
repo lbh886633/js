@@ -7,17 +7,21 @@
 // @author      -
 // @description 2021/1/1 下午8:17:31
 // @require https://code.jquery.com/jquery-2.1.4.min.js
-// @require https://cdn.jsdelivr.net/npm/vue
 // ==/UserScript==
 
 var user = {req: true};
 var number = 0;
 var lastCustomerTime;
 var lastCustomerId;
-var customerWaitCommit = {};
-var customers = {};
-var ec;
-var urlDomain = "http://localhost:8082";
+var customerWaitCommit={};
+var customers={};
+var urlDomain = "http://utopia.utopia.utopia";
+var mTime = {
+  today: new Date(new Date().toDateString()),
+  oneday: 24*60*60*1000
+}
+mTime.yesterday = mTime.today - mTime.oneday;
+
 var indexDB = {
     db: null,
     dbName: "",
@@ -36,7 +40,6 @@ var indexDB = {
         }
         request.onsuccess = function (e) {
             _this.db = e.target.result;
-            console.log("DB " + name + " created");
         }
         request.onupgradeneeded = function (e) {
             var db = e.target.result;
@@ -97,19 +100,22 @@ var indexDB = {
         console.log("inserted!");
         return status;
     },
-    getAll: function(storeName) {
-        var reList = [];
-        var objectStore = this.db.transaction(storeName).objectStore(storeName);
-        objectStore.openCursor().onsuccess = function (event) {
-            var cursor = event.target.result;
+    getAll: function(storeName, callback) {
+      var reList = [];
+      var objectStore = this.db.transaction(storeName).objectStore(storeName);
+      objectStore.openCursor().onsuccess = function (event) {
+        var cursor = event.target.result;
             if (cursor) {
                 if(cursor.value) {
                     reList.push(cursor.value);
                 }
                 cursor.continue();
+            } else {
+              if (typeof callback === "function"){
+                callback.call(this, reList);
+              }
             }
         };
-        return reList;
     },
     getDataByKey: function(storeName, key, callback) {
         var transaction = this.db.transaction(storeName, 'readwrite');
@@ -174,75 +180,61 @@ var indexDB = {
         }
     }
 }
-indexDB.init("counter", [
+indexDB.init("__counter", [
     {
-        // name: "未提交客户数据",
-        name: "客户数据",
+        name: "customer_data",
         keyPath: "id",
         index: [
-            {name: "客户id", key: "customer_id", property: {unique: true}},
-            {name: "上一次聊天时间", key: "last_time", property: {unique: false}},
-            {name: "上一次聊天时间原文", key: "last_time_source", property: {unique: false}},
-            {name: "用户id", key: "user_id"}
+            {name: "customer_id", key: "customer_id", property: {unique: true}},
+            {name: "last_time", key: "last_time", property: {unique: false}},
+            {name: "user_id", key: "user_id"}
         ]
     },
     {
-        name: "用户数据",
+        name: "user_data",
         keyPath: "id",
         index: [
-            {name: "用户id", key: "user_id", property: {unique: true}},
+            {name: "user_id", key: "user_id"}
         ]
     }
 ]);
-/*
-    核心：
-        使用vue绑定特定的元素，当元素产生变化时进行记录
-        记录时优先检查是否对方id已经存在，如果未存在则进行保存
-        保存完毕后用户的记录加一
-        每小时计算一次数据库中的数据
- */
-// 拿到用户信息
-// vue绑定聊天界面控件  v-model="msg"
-// 当控件变化时触发函数
-
-
-
-
-
+var ec;
 var mainInte = setInterval(() => {
+  try{
     if(1 < document.querySelector("#app").children[0].children.length) {
       var userInte = setInterval(()=>{
+        let startDetection = false;
         if(user.status){
-          customerWaitCommit = indexDB.getAll("未提交客户数据");
-          customers = indexDB.getAll("已提交客户数据");
-          customerWaitCommit.forEach(e=>console.log(e))
-          for (const k in customers) {
-            console.log(k)
-            try{
-              console.log(customers[k])
-            } catch(err) {}
-          }
-          console.log(customerWaitCommit.length+" ↑未提交数据，已提交数据↓ "+customers.length)
-          console.log("长度", customers.length)
-          console.log(customers)
-          upUi();
-
+          try{
+          calcNumber(function(){
+            console.log("customer conut:",customerWaitCommit.length)
+            startDetection = true;
+          })
           var detectionCustomerInte = setInterval(()=>{
-            let msgArr = document.querySelector('[aria-label="消息列表。在消息中点击向右箭头即可打开消息上下文菜单。"]').children;
-            let customerId = msgArr[msgArr.length-1].getAttribute("data-id");
-            if(customerId != lastCustomerId) {
-              getCustomer(customerId);
+            let mr = document.querySelectorAll(".ManuallyRefresh");
+            if(0 < mr.length) {
+              console.log("manually refresh user data!");
+              calcNumber();
+              mr.forEach(e=>e.remove());
             }
-            if(30 < number++) {
-              commitCustomer()
-              customerWaitCommit = indexDB.getAll("未提交客户数据");
-              customers = indexDB.getAll("已提交客户数据");
+            if(startDetection){
+              let msgArr = document.querySelector('[aria-label="消息列表。在消息中点击向右箭头即可打开消息上下文菜单。"]').children;
+              let customerId = msgArr[msgArr.length-1].getAttribute("data-id");
+              if(customerId != lastCustomerId) {
+                getCustomer(customerId);
+              }
+              if(30 < number++) {
+                try{
+                  commitCustomer();
+                } catch (e) {}
+              }
             }
           },1000);
+        } catch(e){console.log(e)}
           clearInterval(userInte);
         } else if(user.req){
           getUser();
-          
+          calcNumber();
         }
       }, 1000);
       clearInterval(mainInte)
@@ -252,9 +244,41 @@ var mainInte = setInterval(() => {
   }
 }, 1000);
 
+function calcNumber(fun) {
+  upUi("刷新数据")
+  indexDB.getAll("customer_data", 
+    function (data) {
+      customerWaitCommit = data;
+      let t = {
+        yesterday: new Date(),
+        totalNumber: user.totalNumber,
+        todayNumber: user.todayNumber,
+        total: 0,
+        today: 0,
+        tempArr: []
+      }
+      customerWaitCommit.forEach(e => {
+        if(user.id == e.user_id) {
+          t.total++;
+          if(mTime.today <= e.update_time && mTime.yesterday <= e.last_time) {
+            t.today++;
+          }
+        }
+      });
+
+      user.totalNumber = user.totalNumber - t.totalNumber + t.total;
+      user.todayNumber = user.todayNumber - t.todayNumber + t.today;
+      indexDB.updateDataByKey("user_data", user.id, user);
+      upUi("数据已刷新");
+      if(typeof fun == "function") {
+        fun()
+      }
+    }
+  );
+}
 function saveData() {
-  customers.forEach(c=>indexDB.addData("已提交客户数据", [c]));
-  customerWaitCommit.forEach(c=>indexDB.addData("未提交客户数据", [c]));
+  customers.forEach(c=>indexDB.addData("user_data", [c]));
+  customerWaitCommit.forEach(c=>indexDB.addData("customer_data", [c]));
 }
 
 function getCustomer(customerId) {
@@ -262,7 +286,7 @@ function getCustomer(customerId) {
     let customerTimeSource = document.querySelector('[aria-label="消息列表。在消息中点击向右箭头即可打开消息上下文菜单。"]').children[0].children[0].children[0].innerText;
     let customerTime =anyTime(customerTimeSource);
     if(user.updateTime <= customerTime) {
-      console.log("当前客户id信息：", customerId);
+      console.log("current customer: ", customerId.substring(0, customerId.indexOf("@")).substring(customerId.indexOf("_")+1));
       if(!customers[customerId] && !customerWaitCommit[customerId]){
         customerWaitCommit[customerId] = {
           id: customerId,
@@ -270,31 +294,35 @@ function getCustomer(customerId) {
           user_id: user.id,
           last_time: customerTime,
           last_time_source: customerTimeSource,
+          update_time: new Date()
         };
-        indexDB.addData("未提交客户数据", [customerWaitCommit[customerId]]);
-        console.log("保存结束", customerId);
-        
-        if(!user.totalNumber) user.totalNumber = 0;
-        user.totalNumber++;
-        if(!user.todayNumber) user.todayNumber = 0;
-        user.todayNumber++;
-        indexDB.updateDataByKey("已提交客户数据", user.id, user);
-        upUi("新客户:" + customerId.substring(0, customerId.indexOf("@")).substring(customerId.indexOf("_")+1));
-        lastCustomerTime = customerTime;
-        lastCustomerId = customerId;
+        indexDB.getDataByKey("customer_data", customerId, function (customer) {
+          if(!customer) {
+            indexDB.addData("customer_data", [customerWaitCommit[customerId]]);
+            console.log("%c save end" + customerId,'color:#E81224');
+            if(!user.totalNumber) user.totalNumber = 0;
+            user.totalNumber++;
+            if(!user.todayNumber) user.todayNumber = 0;
+            user.todayNumber++;
+            indexDB.updateDataByKey("user_data", user.id, user);
+            upUi("新客户:" + customerId.substring(0, customerId.indexOf("@")).substring(customerId.indexOf("_")+1));
+            lastCustomerTime = customerTime;
+            lastCustomerId = customerId;
+          }
+        });
       }
-    } else {
-      console.log('%c 判定为不是一个新增的客户：' + customerId,'color:#0074E8');
     }
   }
 }
 
-// xx:xx x年x月x日 星期x
 function anyTime(timeStr) {
   let timeChar = "-";
   let re;
   if(timeStr == "今天") {
-    re = new Date();
+    re = mTime.today;
+  }
+  if(timeStr == "昨天") {
+    re = mTime.yesterday;
   }
   if(!re && -1 < timeStr.indexOf("月")) {
     try {
@@ -327,7 +355,7 @@ function anyTime(timeStr) {
         today += 6;
       }
       let jetLag = today - thatDay;
-      re = new Date(new Date(Date.now() - (jetLag*24*60*60*1000)).toDateString());
+      re = new Date(new Date(Date.now() - (jetLag*mTime.oneday)).toDateString());
     } catch (err) {
       re = null;
     }
@@ -336,7 +364,7 @@ function anyTime(timeStr) {
     re = new Date (new Date().toDateString()+" "+timeStr);
   }
   if(re == null) {
-    console.log('%c 时间类型转换失败！','color:red;font-size:200%');
+    console.log('%c 时间类型转换失败！' + timeStr,'color:red;font-size:200%');
     re = timeStr;
   }
   try{
@@ -348,8 +376,6 @@ function anyTime(timeStr) {
 
 function getUser() {
   user.id = localStorage.getItem("last-wid").replace(/\"/g,"");
-  customerWaitCommit = JSON.parse(localStorage.getItem("customerWaitCommit"));
-  customers = JSON.parse(localStorage.getItem("customers"));
   user.req = false;
   $.get(
     urlDomain + "/whatsapp/user/" + user.id,
@@ -358,7 +384,7 @@ function getUser() {
       user.req = true;
       log(data)
       if(data == "" || data.id == "-1"){
-        console.log("用户不存在");
+        console.log("the user does not exist");
         alert("后台没有当前用户数据，检测为新用户");
         user.updateTime = Date.now();
         user.status = true;
@@ -370,92 +396,69 @@ function getUser() {
           user.status = false;
           console.log('%c ' + err,'color:red;font-size:140%');
           console.error(err)
-          user.updateTime = new Date(Date.now() - 24*60*60*1000);
+          user.updateTime = new Date(Date.now() - mTime.oneday);
           alert("出现异常了！请联系管理员！");
         }
       }
       user.updateTime = new Date(user.updateTime.toLocaleDateString())
-      indexDB.getDataByKey("已提交客户数据", user.id, function (data) {
+
+      indexDB.getDataByKey("user_data", user.id, function (data) {
         if(data) {
           user.totalNumber = user.totalNumber || data.totalNumber;
           user.todayNumber = user.todayNumber || data.todayNumber;
           user.updateTime = user.updateTime || new Date();
-          console.log("时间1", data.updateTime, user.updateTime)
+          console.log("time 1", data.updateTime, user.updateTime)
           user.updateTime = data.updateTime < user.updateTime? data.updateTime : user.updateTime;
-          console.log("最终选择", user.updateTime)
+          console.log("final choice", user.updateTime)
         } else {
           user.updateTime = user.updateTime.getTime();
           user.totalNumber = 0;
           user.todayNumber = 0;
           console.log(user);
-          indexDB.addData("已提交客户数据", [user]);
+          indexDB.addData("user_data", [user]);
         }
-        upUi();
+        upUi("时间将从  "+new Date(user.updateTime).toLocaleString()+"  开始计算");
       })
-      console.log("时间将从  "+new Date(user.updateTime).toLocaleString()+"  开始计算")
     }
   ).fail(
     function(data) {
       user.req = true;
       user.status = true;
-      console.log("连接失败！",data);
-      alert("连接失败！将会导致无法记录！请检查后台地址是否正确！");
-      user.updateTime = new Date(new Date(Date.now()- 24*60*60*1000).toLocaleDateString())
+      console.log("Connection failed!", data);
+      user.updateTime = new Date(new Date(Date.now()- mTime.oneday).toLocaleDateString())
 
-      indexDB.getDataByKey("已提交客户数据", user.id, function (data) {
+      indexDB.getDataByKey("user_data", user.id, function (data) {
         if(data) {
           user.totalNumber = user.totalNumber || data.totalNumber;
           user.todayNumber = user.todayNumber || data.todayNumber;
           user.updateTime = user.updateTime || new Date();
-          console.log("时间2", data.updateTime, user.updateTime)
+          console.log("time 2", data.updateTime, user.updateTime)
           user.updateTime = data.updateTime < user.updateTime? data.updateTime : user.updateTime;
         } else {
           user.updateTime = user.updateTime.getTime();
           user.totalNumber = 0;
           user.todayNumber = 0;
           console.log(user);
-          indexDB.addData("已提交客户数据", [user]);
+          indexDB.addData("user_data", [user]);
         }
-        upUi();
+        upUi("本地保存，时间将从  "+new Date(user.updateTime).toLocaleString()+"  开始计算");
       })
-      console.log("本地保存，时间将从  "+new Date(user.updateTime).toLocaleString()+"  开始计算");
     }
   )
 }
 
 function commitCustomer() {
-  for(let c in customerWaitCommit) {
-    try{
-      customers[c] = customerWaitCommit[c];
-      delete customerWaitCommit[c];
-      // 插入另外一个
-      indexDB.addData("已提交客户数据", [customers[c]]);
-      // 删除数据库中的对象
-      indexDB.deleteDataByKey("未提交客户数据", customers[c].id);
-      if(user.updateTime <= c.last_time) {
-        let customer = {
-          customerId: customers[c].customer_id,
-          userId: user.id,
-          lastTimeSource: last_time_source
-        }
-        $.post(
-          urlDomain + "/whatsapp/customer/add",
-          customer,
-          function(data) {
-            if(200 == data.code) {
-            } else {
-              console.log('%c 上传客户信息失败！' + customers[c].customer_id,'color:red');
-              console.log(data);
-            }
-          }
-        ).fail(
-          function(data) {
-            console.log('%c 上传客户信息失败！' + customers[c].customer_id,'color:red');
-          }
-        )
+  $.post(
+    urlDomain + "/whatsapp/customer/add",
+    customerWaitCommit,
+    function(data) {
+      if(200 == data.code) {
+      } else {
+        console.log('%c failed to upload customer information!' + customers[c].customer_id,'color:red');
+        console.log(data);
       }
-    } catch (err) {}
-  }
+    }
+  )
 }
 
 function upUi(msg) {
@@ -475,14 +478,19 @@ function upUi(msg) {
     f.parentNode.insertBefore(ec,f)
   }
   try{
-    ec.innerHTML = "当前用户：" + user.id;
-    ec.innerHTML += "<br>检测时间：" + user.updateTime.toLocaleString();
+    ec.innerHTML = "<button onclick='let r=document.createElement(\"div\");r.className=\"ManuallyRefresh\";document.body.appendChild(r);' style='color:#9CDCFE'>手动刷新</button>";
+    ec.innerHTML += "<br>请勿狂换客户，避免造成记录异常";
+    ec.innerHTML += "<br>当前用户：" + user.id;
+    ec.innerHTML += "<br>检测时间：" + new Date(user.updateTime).toLocaleString();
     if(!user.totalNumber) user.totalNumber = 0;
     if(!user.todayNumber) user.todayNumber = 0;
-    ec.innerHTML += "<br>今日新客户：" + user.todayNumber;
+    ec.innerHTML += "<br>今日客户：" + user.todayNumber;
     ec.innerHTML += "<br>累计客户：" + user.totalNumber;
   } catch (err) {}
   if(msg) {
-    ec.innerHTML += "<br>" + msg;
+    let newDiv = document.createElement("div");
+    newDiv.innerHTML = msg;
+    ec.appendChild(newDiv);
+    setTimeout(() => newDiv.remove(), 3000);
   }
 }

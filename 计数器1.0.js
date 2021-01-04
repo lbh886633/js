@@ -8,20 +8,17 @@
 // @description 2021/1/1 下午8:17:31
 // @require https://code.jquery.com/jquery-2.1.4.min.js
 // ==/UserScript==
-
+/*
+    将更新关闭
+    在添加失败后就直接失败，不让他做更新
+*/
 var user = {req: true};
 var number = 0;
 var lastCustomerTime;
 var lastCustomerId;
 var customerWaitCommit={};
 var customers={};
-var urlDomain = "http://utopia.utopia.utopia";
-var mTime = {
-  today: new Date(new Date().toDateString()),
-  oneday: 24*60*60*1000
-}
-mTime.yesterday = mTime.today - mTime.oneday;
-
+var urlDomain = "nnn";
 var indexDB = {
     db: null,
     dbName: "",
@@ -183,19 +180,20 @@ var indexDB = {
 }
 indexDB.init("counter", [
     {
-        name: "客户数据",
+        name: "未提交客户数据",
         keyPath: "id",
         index: [
             {name: "客户id", key: "customer_id", property: {unique: true}},
             {name: "上一次聊天时间", key: "last_time", property: {unique: false}},
-            {name: "用户id", key: "user_id"}
+            {name: "更新时间", key: "update_time", property: {unique: false}},
+            {name: "用户id", key: "user_id", property: {unique: false}}
         ]
     },
     {
         name: "用户数据",
         keyPath: "id",
         index: [
-            {name: "用户id", key: "user_id"}
+            {name: "用户id", key: "user_id", property: {unique: true}},
         ]
     }
 ]);
@@ -203,22 +201,15 @@ var ec;
 var mainInte = setInterval(() => {
   try{
     if(1 < document.querySelector("#app").children[0].children.length) {
+
       var userInte = setInterval(()=>{
         let startDetection = false;
         if(user.status){
-          try{
           calcNumber(function(){
-            console.log("客户总数：",customerWaitCommit.length)
+            console.log(customerWaitCommit.length+" ← 未提交客户，已提交客户 → "+customers.length)
             startDetection = true;
           })
           var detectionCustomerInte = setInterval(()=>{
-            let mr = document.querySelectorAll(".ManuallyRefresh");
-            if(0 < mr.length) {
-              console.log("手动刷新数据");
-              upUi("手动刷新");
-              calcNumber();
-              mr.forEach(e=>e.remove());
-            }
             if(startDetection){
               let msgArr = document.querySelector('[aria-label="消息列表。在消息中点击向右箭头即可打开消息上下文菜单。"]').children;
               let customerId = msgArr[msgArr.length-1].getAttribute("data-id");
@@ -226,14 +217,11 @@ var mainInte = setInterval(() => {
                 getCustomer(customerId);
               }
               if(30 < number++) {
-                try{
-                  //TODO 一段时间提交一次数据
-                  commitCustomer();
-                } catch (e) {}
+                commitCustomer();
+
               }
             }
           },1000);
-        } catch(e){console.log(e)}
           clearInterval(userInte);
         } else if(user.req){
           getUser();
@@ -249,44 +237,48 @@ var mainInte = setInterval(() => {
 
 function calcNumber(fun) {
   upUi("刷新数据")
-  indexDB.getAll("客户数据", 
-    function (data) {
-      // 拿到全部客户数据
-      customerWaitCommit = data;
-      // 计算
+  // 拿到所有客户数据，从中拿到用户id是当前用户的
+  indexDB.getAll("未提交客户数据", function (data) {
+    customerWaitCommit = data;
+
+    indexDB.getAll("已提交客户数据", function (data) {
+      customers = data;
+      let totalCustomer = customers.concat(customerWaitCommit);
+      let todayTime = new Date(new Date().toDateString());
       let t = {
-        yesterday: new Date(),
         totalNumber: user.totalNumber,
         todayNumber: user.todayNumber,
         total: 0,
         today: 0,
         tempArr: []
       }
-      customerWaitCommit.forEach(e => {
-        // 确认是当前用户的客户
-        if(user.id == e.user_id) {
-          // 进行计算
-          t.total++;
-            // 客户更新时间需要在今天，客户最早消息时间需要在昨天00:00之后
-          if(mTime.today <= e.update_time && mTime.yesterday <= e.last_time) {
-            t.today++;
+      totalCustomer.forEach(e=>{
+        if(e.customer_id && t.tempArr.indexOf(e.customer_id) < 0) {
+          t.tempArr.push(e.customer_id);
+          // 是客户，用户没有customer_id属性
+          if(user.id == e.user_id) {
+            // 确认是当前用户的客户
+            t.total++;
+            if(todayTime <= e.last_time) {
+              t.today++;
+            }
           }
         }
-      });
-
-      user.totalNumber = user.totalNumber - t.totalNumber + t.total;
-      user.todayNumber = user.todayNumber - t.todayNumber + t.today;
-      indexDB.updateDataByKey("用户数据", user.id, user);
+      })
+      user.totalNumber = user.totalNumber-t.totalNumber+t.total;
+      user.todayNumber = user.todayNumber-t.todayNumber+t.today;
+      indexDB.updateDataByKey("已提交客户数据", user.id, user);
       upUi("数据已刷新");
       if(typeof fun == "function") {
         fun()
       }
-    }
-  );
+    });
+  });
 }
+
 function saveData() {
-  customers.forEach(c=>indexDB.addData("用户数据", [c]));
-  customerWaitCommit.forEach(c=>indexDB.addData("客户数据", [c]));
+  customers.forEach(c=>indexDB.addData("已提交客户数据", [c]));
+  customerWaitCommit.forEach(c=>indexDB.addData("未提交客户数据", [c]));
 }
 
 function getCustomer(customerId) {
@@ -294,7 +286,7 @@ function getCustomer(customerId) {
     let customerTimeSource = document.querySelector('[aria-label="消息列表。在消息中点击向右箭头即可打开消息上下文菜单。"]').children[0].children[0].children[0].innerText;
     let customerTime =anyTime(customerTimeSource);
     if(user.updateTime <= customerTime) {
-      console.log("当前客户：", customerId.substring(0, customerId.indexOf("@")).substring(customerId.indexOf("_")+1));
+      console.log("当前客户id信息：", customerId);
       if(!customers[customerId] && !customerWaitCommit[customerId]){
         customerWaitCommit[customerId] = {
           id: customerId,
@@ -302,29 +294,22 @@ function getCustomer(customerId) {
           user_id: user.id,
           last_time: customerTime,
           last_time_source: customerTimeSource,
-          update_time: new Date()
         };
-        // 先尝试拿到客户数据，如果没有再进行记录
-        indexDB.getDataByKey("客户数据", customerId, function (customer) {
-          if(!customer) {
-            // 数据库中未保存当前客户才进行保存
-            indexDB.addData("客户数据", [customerWaitCommit[customerId]]);
-            console.log("%c 保存结束" + customerId,'color:#E81224');
-            if(!user.totalNumber) user.totalNumber = 0;
-            user.totalNumber++;
-            if(!user.todayNumber) user.todayNumber = 0;
-            user.todayNumber++;
-            indexDB.updateDataByKey("用户数据", user.id, user);
-            upUi("新客户:" + customerId.substring(0, customerId.indexOf("@")).substring(customerId.indexOf("_")+1));
-            lastCustomerTime = customerTime;
-            lastCustomerId = customerId;
-          }
-        });
+        indexDB.addData("未提交客户数据", [customerWaitCommit[customerId]]);
+        console.log("%c 保存结束" + customerId,'color:#E81224');
+        
+        if(!user.totalNumber) user.totalNumber = 0;
+        user.totalNumber++;
+        if(!user.todayNumber) user.todayNumber = 0;
+        user.todayNumber++;
+        indexDB.updateDataByKey("已提交客户数据", user.id, user);
+        upUi("新客户:" + customerId.substring(0, customerId.indexOf("@")).substring(customerId.indexOf("_")+1));
+        lastCustomerTime = customerTime;
+        lastCustomerId = customerId;
       }
+    } else {
+      console.log('%c 判定为不是一个新增的客户：' + customerId,'color:#0074E8');
     }
-    // else {
-    //   console.log('%c 判定为不是一个新增的客户：' + customerId,'color:#0074E8');
-    // }
   }
 }
 
@@ -333,10 +318,7 @@ function anyTime(timeStr) {
   let timeChar = "-";
   let re;
   if(timeStr == "今天") {
-    re = mTime.today;
-  }
-  if(timeStr == "昨天") {
-    re = mTime.yesterday;
+    re = new Date();
   }
   if(!re && -1 < timeStr.indexOf("月")) {
     try {
@@ -369,7 +351,7 @@ function anyTime(timeStr) {
         today += 6;
       }
       let jetLag = today - thatDay;
-      re = new Date(new Date(Date.now() - (jetLag*mTime.oneday)).toDateString());
+      re = new Date(new Date(Date.now() - (jetLag*24*60*60*1000)).toDateString());
     } catch (err) {
       re = null;
     }
@@ -378,7 +360,7 @@ function anyTime(timeStr) {
     re = new Date (new Date().toDateString()+" "+timeStr);
   }
   if(re == null) {
-    console.log('%c 时间类型转换失败！' + timeStr,'color:red;font-size:200%');
+    console.log('%c 时间类型转换失败！','color:red;font-size:200%');
     re = timeStr;
   }
   try{
@@ -389,15 +371,14 @@ function anyTime(timeStr) {
 }
 
 function getUser() {
-  // 拿到用户id
   user.id = localStorage.getItem("last-wid").replace(/\"/g,"");
+  customerWaitCommit = JSON.parse(localStorage.getItem("customerWaitCommit"));
+  customers = JSON.parse(localStorage.getItem("customers"));
   user.req = false;
-  // 尝试从网络获取
   $.get(
     urlDomain + "/whatsapp/user/" + user.id,
     {},
     function(data) {
-      // 请求正常
       user.req = true;
       log(data)
       if(data == "" || data.id == "-1"){
@@ -413,14 +394,12 @@ function getUser() {
           user.status = false;
           console.log('%c ' + err,'color:red;font-size:140%');
           console.error(err)
-          user.updateTime = new Date(Date.now() - mTime.oneday);
+          user.updateTime = new Date(Date.now() - 24*60*60*1000);
           alert("出现异常了！请联系管理员！");
         }
       }
       user.updateTime = new Date(user.updateTime.toLocaleDateString())
-
-      // 从数据库拿数据
-      indexDB.getDataByKey("用户数据", user.id, function (data) {
+      indexDB.getDataByKey("已提交客户数据", user.id, function (data) {
         if(data) {
           user.totalNumber = user.totalNumber || data.totalNumber;
           user.todayNumber = user.todayNumber || data.todayNumber;
@@ -433,21 +412,19 @@ function getUser() {
           user.totalNumber = 0;
           user.todayNumber = 0;
           console.log(user);
-          indexDB.addData("用户数据", [user]);
+          indexDB.addData("已提交客户数据", [user]);
         }
         upUi("时间将从  "+new Date(user.updateTime).toLocaleString()+"  开始计算");
       })
     }
   ).fail(
-    // 请求失败
     function(data) {
       user.req = true;
       user.status = true;
       console.log("连接失败！",data);
-      user.updateTime = new Date(new Date(Date.now()- mTime.oneday).toLocaleDateString())
+      user.updateTime = new Date(new Date(Date.now()- 24*60*60*1000).toLocaleDateString())
 
-      // 从数据库拿数据
-      indexDB.getDataByKey("用户数据", user.id, function (data) {
+      indexDB.getDataByKey("已提交客户数据", user.id, function (data) {
         if(data) {
           user.totalNumber = user.totalNumber || data.totalNumber;
           user.todayNumber = user.todayNumber || data.todayNumber;
@@ -459,7 +436,7 @@ function getUser() {
           user.totalNumber = 0;
           user.todayNumber = 0;
           console.log(user);
-          indexDB.addData("用户数据", [user]);
+          indexDB.addData("已提交客户数据", [user]);
         }
         upUi("本地保存，时间将从  "+new Date(user.updateTime).toLocaleString()+"  开始计算");
       })
@@ -468,23 +445,38 @@ function getUser() {
 }
 
 function commitCustomer() {
-  //TODO 先更新数据
-  // 提交当前数据到服务器
-  $.post(
-    urlDomain + "/whatsapp/customer/add",
-    customerWaitCommit,
-    function(data) {
-      if(200 == data.code) {
-      } else {
-        console.log('%c 上传客户信息失败！' + customers[c].customer_id,'color:red');
-        console.log(data);
+  for(let c in customerWaitCommit) {
+    try{
+      customers[c] = customerWaitCommit[c];
+      delete customerWaitCommit[c];
+      // 插入另外一个
+      indexDB.addData("已提交客户数据", [customers[c]]);
+      // 删除数据库中的对象
+      indexDB.deleteDataByKey("未提交客户数据", customers[c].id);
+      if(user.updateTime <= c.last_time) {
+        let customer = {
+          customerId: customers[c].customer_id,
+          userId: user.id,
+          lastTimeSource: last_time_source
+        }
+        $.post(
+          urlDomain + "/whatsapp/customer/add",
+          customer,
+          function(data) {
+            if(200 == data.code) {
+            } else {
+              console.log('%c 上传客户信息失败！' + customers[c].customer_id,'color:red');
+              console.log(data);
+            }
+          }
+        ).fail(
+          function(data) {
+            console.log('%c 上传客户信息失败！' + customers[c].customer_id,'color:red');
+          }
+        )
       }
-    }
-  ).fail(
-    function(data) {
-      // console.log('%c 上传客户信息失败！' + customers[c].customer_id,'color:red');
-    }
-  )
+    } catch (err) {}
+  }
 }
 
 function upUi(msg) {
@@ -504,8 +496,7 @@ function upUi(msg) {
     f.parentNode.insertBefore(ec,f)
   }
   try{
-    ec.innerHTML = "<button onclick='let r=document.createElement(\"div\");r.className=\"ManuallyRefresh\";document.body.appendChild(r);' style='color:#9CDCFE'>手动刷新</button>";
-    ec.innerHTML += "<br>当前用户：" + user.id;
+    ec.innerHTML = "当前用户：" + user.id;
     ec.innerHTML += "<br>检测时间：" + new Date(user.updateTime).toLocaleString();
     if(!user.totalNumber) user.totalNumber = 0;
     if(!user.todayNumber) user.todayNumber = 0;
@@ -513,10 +504,8 @@ function upUi(msg) {
     ec.innerHTML += "<br>累计客户：" + user.totalNumber;
   } catch (err) {}
   if(msg) {
-    let newDiv = document.createElement("div");
-    newDiv.innerHTML = msg;
-    ec.appendChild(newDiv);
-    setTimeout(() => newDiv.remove(), 3000);
+    let originalHTML = ec.innerHTML;
+    ec.innerHTML += "<br>" + msg;
+    setTimeout(() => ec.innerHTML = originalHTML, 3000);
   }
 }
-

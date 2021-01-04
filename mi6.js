@@ -1645,7 +1645,7 @@ function mi6关注操作(num) {
                         toastLog("号被封了！");
                         return false;
                     }
-                    let re = 关注操作(计数);
+                    let re = mi6关注操作(计数);
                     log("到底后换链接并且关注完成");
                     return re;
                 }
@@ -1659,7 +1659,7 @@ function mi6关注操作(num) {
             if(!tempSave.inFansListError) tempSave.inFansListError = 0;
             if(tempSave.inFansListError < 5){
                 log("重取链接进入", tempSave.inFansListError);
-                关注操作(计数);
+                mi6关注操作(计数);
                 log("重取链接后关注操作完成")
             }
             else {
@@ -2298,6 +2298,9 @@ function getFansList(fansNameList, fansList, all) {
 
         // 处理当前列表
         for (let f in FollowerList) {
+            if(e.className() != "android.widget.RelativeLayout") {
+                continue;
+            }
             f = FollowerList[f];
             try{
                 // 拿到粉丝名字 211
@@ -2364,29 +2367,6 @@ function getFansList(fansNameList, fansList, all) {
                 }
             } catch (err) {
                 console.error("异常信息：", err)
-                console.log("再次尝试返回粉丝列表")
-                // 返回粉丝列表
-                for (var i = 0; i < 5; i++) {
-                    sleep(1000)
-                    if(text("Me").findOne(2000)) {
-                        console.log("似乎返回到了首页")
-                        返回首页();
-                        lh_find(text("Followers").boundsInside(400, 700, 700, 800), "粉丝", 0);
-                        等待加载();
-                        sleep(1000);
-                    }
-                    let fansList  = className("androidx.recyclerview.widget.RecyclerView").packageName(pack).filter(function(uo){
-                        if(uo.bounds().right>device.width*0.5) 
-                            return true;
-                        return false;
-                    }).findOne(2000)
-
-                    if (FollowerList.length-3 < fansList.children().length
-                        || FollowerList.length == fansList.children().length
-                    ) break
-                    else back()
-                }
-
             }
         }
 
@@ -5851,9 +5831,10 @@ function nextAccount() {
         try{
             log("第" + i + "次切换账号");
             if(id("title").findOne(1000).click()) {
+                sleep(100)
                 accountList = className("android.view.ViewGroup").find()
                 let i = 0
-                for (; i < accountList; i++) {
+                for (; i < accountList.length; i++) {
                     if(3 <= accountList[i].children().length) {
                         break;
                     }
@@ -5871,7 +5852,11 @@ function nextAccount() {
             log(err);
         }
     }
+    log("账号切换结束")
 }
 function 驱动回复软件() {
     toastLog("暂未编写")
+    // 启动软件
+    // 向文本输入框输入数据
+    // 点击启动按钮
 }
