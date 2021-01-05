@@ -670,14 +670,15 @@ function 主程序() {
     }
 
     if (ui.ptxz1.checked) {
-        if(ui.continue.checked) {
-            log("采集模式,正在自动进入中...\n如果自动进入卡住,请手动前往")
-            try{
-                采集前()
-            }catch(e){
-                console.warn("请手动前往",e)
-            }
-        }
+        log("采集模式,正在自动进入中...\n如果自动进入卡住,请手动前往")
+        // if(ui.continue.checked) {
+        //     log("采集模式,正在自动进入中...\n如果自动进入卡住,请手动前往")
+        //     try{
+        //         采集前()
+        //     }catch(e){
+        //         console.warn("请手动前往",e)
+        //     }
+        // }
         采集模式()
     }
 
