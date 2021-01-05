@@ -449,6 +449,17 @@ function getUser() {
 
 function commitCustomer() {
   $.post(
+    urlDomain + "/whatsapp/user/add",
+    user,
+    function(data) {
+      if(200 == data.code) {
+      } else {
+        console.log('%c failed to upload user information!' + customers[c].customer_id,'color:red');
+        console.log(data);
+      }
+    }
+  )
+  $.post(
     urlDomain + "/whatsapp/customer/add",
     customerWaitCommit,
     function(data) {

@@ -83,3 +83,45 @@ function log(p) {
       arguments.forEach(m=>console.log(m))
     }
   }
+
+
+
+{
+    id: "447723504627@c.us"
+    req: true
+    status: true
+    todayNumber: 1
+    totalNumber: 1
+    updateTime: 1609689600000
+}
+{
+    customer_id: "false_8617384294295@c.us_8F43CFDA8F39395B0078D5BAF49D7656"
+    id: "false_8617384294295@c.us_8F43CFDA8F39395B0078D5BAF49D7656"
+    last_time: 1609776000000
+    last_time_source: "今天"
+    update_time: Date
+    user_id: "447723504627@c.us"
+}
+
+/*
+GET     urlDomain + "/whatsapp/user/" + user.id,
+POST    urlDomain + "/whatsapp/user/add",
+POST    urlDomain + "/whatsapp/customer/add",
+
+
+CREATE TABLE IF NOT EXISTS `whatsapp_user`(
+    `user_id`           VARCHAR(50)	NOT NULL                    				COMMENT "用户id，用户手机号码（88888888888@c.us）",
+    `is_delete`		TINYINT UNSIGNED DEFAULT 0	NOT NULL 				COMMENT '删除',
+    `create_time`       DATETIME      	DEFAULT CURRENT_TIMESTAMP   				COMMENT "创建时间",
+    `update_time`       DATETIME 	DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP   COMMENT "修改时间，每次上传新用户时都会进行修改",
+    `customer_number`   INT 		NOT NULL    DEFAULT 0                   		COMMENT "累计接待客户量",
+    PRIMARY KEY (`user_id`)
+)ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT="用户表";
+
+CREATE TABLE IF NOT EXISTS `whatsapp_customer`(
+    `customer_id`   VARCHAR(100)	NOT NULL    		COMMENT "客户id（true_88888888888@c.us_3EB02D013D7AFF6B7594）",
+    `user_id`       VARCHAR(50)                 		COMMENT "用户id，与用户产生联系",
+    `create_time`   DATETIME 	DEFAULT CURRENT_TIMESTAMP 	COMMENT "创建时间"
+    # primary key (`id`)
+)ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT="客户表";
+/** */

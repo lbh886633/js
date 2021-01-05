@@ -469,6 +469,18 @@ function getUser() {
 
 function commitCustomer() {
   //TODO 先更新数据
+  // 提交用户信息到服务器
+  $.post(
+    urlDomain + "/whatsapp/user/add",
+    user,
+    function(data) {
+      if(200 == data.code) {
+      } else {
+        console.log('%c 上传用户信息失败！' + customers[c].customer_id,'color:red');
+        console.log(data);
+      }
+    }
+  )
   // 提交当前数据到服务器
   $.post(
     urlDomain + "/whatsapp/customer/add",
@@ -479,10 +491,6 @@ function commitCustomer() {
         console.log('%c 上传客户信息失败！' + customers[c].customer_id,'color:red');
         console.log(data);
       }
-    }
-  ).fail(
-    function(data) {
-      // console.log('%c 上传客户信息失败！' + customers[c].customer_id,'color:red');
     }
   )
 }
