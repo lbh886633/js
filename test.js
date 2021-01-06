@@ -67,6 +67,8 @@
         可以修改为一个库存放账号一个库存放客户信息
         然后上传方面只上传最近两天的，获取从服务器拿到所有已经上传的然后按照却少的进行上传
         或者直接全部上传，让服务器进行选择性保存
+
+        server.get("label/message?labelType=标签类型&labelBody=标签内容");
 */
 
 
@@ -124,4 +126,18 @@ CREATE TABLE IF NOT EXISTS `whatsapp_customer`(
     `create_time`   DATETIME 	DEFAULT CURRENT_TIMESTAMP 	COMMENT "创建时间"
     # primary key (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT="客户表";
+
+
+// 完成三个接口即可
+    获取用户信息
+GET     urlDomain + "/whatsapp/user/" + user.id,
+    添加用户
+POST    urlDomain + "/whatsapp/user/add",
+    添加客户
+POST    urlDomain + "/whatsapp/customer/add",
+
+mapper以前写的三个
+selectWhatsappUserIdList
+selectWhatsappUserByWhatsappUserId
+upNum
 /** */
