@@ -1,12 +1,12 @@
 "ui";
 // https://lbh886633.github.io/js/script.js
-var uti = "可用"
+var uti = ""
 var tempSave = {
     firstEnvi: 0,
     privacy: 30,
     NUMBER: 0,
     自动打码: false,
-    version: "22" + " -- " + uti,
+    version: "23" + " -- " + uti,
     downloadUrl: "http://192.168.137.1:8081/tiktokjs/",
     // 直接发送的消息
     getSayMessage: "Hi",
@@ -280,7 +280,7 @@ ui.layout(
                                 </linear>
                                 <linear padding="5 0 0 0" >
                                     <text textColor="black" text="新密码: " />
-                                    <input lines="1" id="szmm" w="auto" text="lbh886633" />
+                                    <input lines="1" id="szmm" w="auto" text="pd123456" />
                                 </linear>
                             </vertical>
                             <vertical id="updatemodel">

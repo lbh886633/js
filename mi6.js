@@ -52,14 +52,18 @@ var server = {
      * 请求json数据并反序列化对象进行返回，失败时不返回数据undefined
      * @param {String} uri URI地址
      */
-    get: function (uri) {
+    get: function (uri, noParse) {
         try {
             console.info(this.serverUrl + uri);
             let re = http.get(this.serverUrl + uri);
             if (re.statusCode != 200) {
                 throw "请求失败，状态码：" + re.statusCode;
             }
-            return JSON.parse(re.body.string());
+            if(noParse) {
+                return re.body.string();
+            }else {
+                return JSON.parse(re.body.string());
+            }
         } catch (err) {
             log("请求失败", err);
         }
