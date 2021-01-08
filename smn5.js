@@ -120,7 +120,7 @@ var accounts = {
 };
 var errorEnvi = [];
 var appName = "TikTok";
-var pack = "com.zhiliaoapp.musically" || app.getPackageName(appName);
+var pack = "com.ss.android.ugc.trill" || "com.zhiliaoapp.musically" || app.getPackageName(appName);
 var color = "#fb2f2d";
 var survive = true;
 var Exit = exit;
