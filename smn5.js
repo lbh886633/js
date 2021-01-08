@@ -120,7 +120,7 @@ var accounts = {
 };
 var errorEnvi = [];
 var appName = "TikTok";
-var pack = app.getPackageName(appName);
+var pack = "com.zhiliaoapp.musically" || app.getPackageName(appName);
 var color = "#fb2f2d";
 var survive = true;
 var Exit = exit;
@@ -1117,7 +1117,8 @@ function 打开抖音() {
                 // log提示语句
                 console.verbose("等待" + appName + "启动中..." + i);
             } else {
-                app.launchApp(appName);
+                // app.launchApp(appName);
+                app.launch(pack);
             }
         }
         console.verbose("进行最后一次个人信息页面检测")
@@ -4263,7 +4264,8 @@ function 注册7模式() {
     while (1) {
         if(清除数据()){
             // 打开TikTok
-            app.launchApp(appName)
+            // app.launchApp(appName);
+            app.launch(pack);
             for (let j = 0; j < 5; j++) {
                 // 检测登录文字
                 let action = textContains("Sign up").findOne(2000)
@@ -4273,7 +4275,8 @@ function 注册7模式() {
                 }
                 // 10秒内没有打开TikTok则重新打开
                 if(!packageName(pack).findOnce(10000)){
-                    app.launchApp(appName)
+                    // app.launchApp(appName);
+                    app.launch(pack);
                 }
             }
             // 注册
@@ -5326,7 +5329,10 @@ function clickAction(getActionFun, s, ds,pack) {
  * @param {*} tag 自己递归计算次数使用
  */
 function runTikTok(run,tag) {
-    if(!run) app.launchApp(appName);
+    if(!run) {
+        // app.launchApp(appName);
+        app.launch(pack);
+    }
     let tagI = 0;
     let limit = 50;
     let countTagI = tag||tagI;

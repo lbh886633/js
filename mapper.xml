@@ -1,0 +1,80 @@
+    <insert id="insertTiktokTaskFansList" parameterType="List">
+        insert into tiktok_task_fans (username, id, is_exceptoion, is_invalid, url, name, focus, fans, likes, label, create_time, update_time, account_username, say_hello, device, reserved_a, reserved_b, send_msg)
+        <foreach collection="list" item="item" separator=",">
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <choose>
+                <when test="item.username != null">#{item.username},</when>
+                <otherwise>'',</otherwise>
+            </choose>
+            <choose>
+                <when test="item.id != null">#{item.id},</when>
+                <otherwise>'',</otherwise>
+            </choose>
+            <choose>
+                <when test="item.isExceptoion != null">#{item.isExceptoion},</when>
+                <otherwise>'',</otherwise>
+            </choose>
+            <choose>
+                <when test="item.isInvalid != null">#{item.isInvalid},</when>
+                <otherwise>'',</otherwise>
+            </choose>
+            <choose>
+                <when test="item.url != null">#{item.url},</when>
+                <otherwise>'',</otherwise>
+            </choose>
+            <choose>
+                <when test="item.name != null">#{item.name},</when>
+                <otherwise>'',</otherwise>
+            </choose>
+            <choose>
+                <when test="item.focus != null">#{item.focus},</when>
+                <otherwise>'',</otherwise>
+            </choose>
+            <choose>
+                <when test="item.fans != null">#{item.fans},</when>
+                <otherwise>'',</otherwise>
+            </choose>
+            <choose>
+                <when test="item.likes != null">#{item.likes},</when>
+                <otherwise>'',</otherwise>
+            </choose>
+            <choose>
+                <when test="item.label != null">#{item.label},</when>
+                <otherwise>'',</otherwise>
+            </choose>
+            <choose>
+                <when test="item.createTime != null">#{item.createTime},</when>
+                <otherwise>'',</otherwise>
+            </choose>
+            <choose>
+                <when test="item.updateTime != null">#{item.updateTime},</when>
+                <otherwise>'',</otherwise>
+            </choose>
+            <choose>
+                <when test="item.accountUsername != null">#{item.accountUsername},</when>
+                <otherwise>'',</otherwise>
+            </choose>
+            <choose>
+                <when test="item.sayHello != null">#{item.sayHello},</when>
+                <otherwise>'',</otherwise>
+            </choose>
+            <choose>
+                <when test="item.device != null">#{item.device},</when>
+                <otherwise>'',</otherwise>
+            </choose>
+            <choose>
+                <when test="item.reservedA != null">#{item.reservedA},</when>
+                <otherwise>'',</otherwise>
+            </choose>
+            <choose>
+                <when test="item.reservedB != null">#{item.reservedB},</when>
+                <otherwise>'',</otherwise>
+            </choose>
+            <choose>
+                <when test="item.sendMsg != null">#{sendMsg},</when>
+                <otherwise>'',</otherwise>
+            </choose>
+        </trim>
+        </foreach>
+    </insert>
+

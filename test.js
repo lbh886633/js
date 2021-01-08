@@ -1,5 +1,37 @@
 
 
+// 任务发送指定消息
+/*
+    数据库：
+        从粉丝列表拉取粉丝到新表中，所以属性几乎是粉丝自己的所有属性
+        指定粉丝表
+        taskfans
+        多的属性： 
+            send_msg text no null comment '要发送的消息'
+        记录表：
+            用于记录那些粉丝在什么时间被拿去发送了什么消息，标记作用
+            create table "tiktok_fans_log"(
+                `id`    int  auto prk       comment '编号，没用，自增',
+                `fans`  text        comment '粉丝信息，json文本格式',
+                `send_msg`  text    comment '发送的消息',
+                `result`    text    comment '结果，json文本格式',
+
+            )
+    增加导入接口，批量将粉丝导出到任务粉丝，并且添加发送消息，最好可以加上字符，使其不会重复。
+    大致思路：
+            1. 粉丝界面选择粉丝，点击按钮提交到后台
+            2. 后台拿到的应该是id，将所有粉丝信息查出来
+            3. 为每一个粉丝添加回复消息字段
+            4. 批量添加到任务粉丝中
+            
+*/
+
+
+
+
+
+
+
 // 计数器
 /*
 关键词：当存在关键词的时候回复预先制定好的信息
@@ -88,22 +120,6 @@ function log(p) {
 
 
 
-{
-    id: "447723504627@c.us"
-    req: true
-    status: true
-    todayNumber: 1
-    totalNumber: 1
-    updateTime: 1609689600000
-}
-{
-    customer_id: "false_8617384294295@c.us_8F43CFDA8F39395B0078D5BAF49D7656"
-    id: "false_8617384294295@c.us_8F43CFDA8F39395B0078D5BAF49D7656"
-    last_time: 1609776000000
-    last_time_source: "今天"
-    update_time: Date
-    user_id: "447723504627@c.us"
-}
 
 /*
 GET     urlDomain + "/whatsapp/user/" + user.id,
