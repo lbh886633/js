@@ -1,12 +1,23 @@
 "ui";
 // https://lbh886633.github.io/js/script.js
-var uti = ""
+
+var uti;
+{
+    let logs = [
+        "从第24版本开始使用这种方式",
+        "解决采集粉丝不能滑动的问题",
+        "修改更换头像的架构",
+        "修改上传视频的架构",
+        "添加双app支持"
+    ];
+    uti = logs.pop();
+}
 var tempSave = {
     firstEnvi: 0,
     privacy: 30,
     NUMBER: 0,
     自动打码: false,
-    version: "23" + " -- " + uti,
+    version: "24" + " -- " + uti,
     downloadUrl: "http://192.168.137.1:8081/tiktokjs/",
     // 直接发送的消息
     getSayMessage: "Hi",
@@ -54,7 +65,7 @@ var server = {
      */
     get: function (uri) {
         try {
-            console.info(this.serverUrl + uri);
+            console.info("[↓]" + this.serverUrl + uri);
             let re = http.get(this.serverUrl + uri);
             if (re.statusCode != 200) {
                 throw "请求失败，状态码：" + re.statusCode;
@@ -83,10 +94,10 @@ var server = {
      */
     post: function (uri, o) {
         try {
-            console.verbose(p)
-            return http.post(this.serverUrl + uri, p, {}).body;
+            console.verbose("[↑]" + uri + "\n" + JSON.stringify(o))
+            return http.post(this.serverUrl + uri, o, {}).body;
         } catch (err) {
-            log("POST上传出错", err)
+            log("[↑]POST上传出错", err)
         }
     },
     /**
@@ -96,7 +107,7 @@ var server = {
      */
     sendData: function (url, o) {
         try {
-            console.verbose(url, o);
+            console.verbose("[↑]" + url + "\n" + JSON.stringify(o))
             log(http.post(url, o, {}).body.string());
         } catch (err) {
             log("上传出错", err)
@@ -115,12 +126,12 @@ var server = {
     }
 }
 var accounts = {
-    progress: 1,
+    progress: 0,
     list: []
 };
 var errorEnvi = [];
 var appName = "TikTok";
-var pack = "com.ss.android.ugc.trill" || "com.zhiliaoapp.musically" || app.getPackageName(appName);
+var appPackage = "com.zhiliaoapp.musically" || app.getPackageName(appName);
 var color = "#fb2f2d";
 var survive = true;
 var Exit = exit;
@@ -243,14 +254,18 @@ ui.layout(
                                 <linear padding="5 0 0 0">
                                     <text textColor="black" textSize="20" text="模式设置" />
                                 </linear>
-                                <radiogroup orientation="horizontal">
-                                    <radio id="mi6_test" text="测试" />
+                                <radiogroup orientation="horizontal" gravity="center" >
+                                    <radio id="mi6_null" checked="true" text="空" />
                                     <radio id="mi6_reg" text="注册" />
                                     <radio id="mi6_dat" text="资料" />
                                     <radio id="mi6_vid" text="视频" />
                                     <radio id="mi6_foc" text="关注" />
                                     <radio id="mi6_fan" text="粉丝" />
-                                    <radio id="mi6_rep" checked="true" text="回复" />
+                                    <radio id="mi6_rep"  text="回复" />
+                                </radiogroup>
+                                <radiogroup orientation="horizontal" gravity="center" >
+                                    <radio id="mi6_null" checked="true" text="空" />
+                                    <radio id="mi6_task" text="任务" />
                                 </radiogroup>
                                 
                                 <radiogroup orientation="horizontal" h="0">
@@ -264,6 +279,7 @@ ui.layout(
                                 </radiogroup>
                             </vertical>
                             <linear>
+                                    <checkbox id="switchVersion" text="切换版本" />
                                     <checkbox id="repScript" text="回复脚本" />
                                     <checkbox id="createAccount" text="生成邮箱" />
                                     <checkbox id="daily" text="日常模式" />
@@ -293,7 +309,7 @@ ui.layout(
                                     <text textColor="black" text="~" />
                                     <input lines="1" id="gzsl1" w="auto" text="200" />
                                     <text textColor="black" text="个,每次间隔" />
-                                    <input lines="1" id="gzjg" w="auto" text="800" />
+                                    <input lines="1" id="gzjg" w="auto" text="210" />
                                     <text textColor="black" text="~" />
                                     <input lines="1" id="gzjg1" w="auto" text="1200" />
                                 </linear>
@@ -476,9 +492,6 @@ ui.autoService.on("check", function (checked) {
             action: "android.settings.ACCESSIBILITY_SETTINGS"
         });
     }
-    if (!checked && auto.service != null) {
-        auto.service.disableSelf();
-    }
 });
 
 
@@ -655,11 +668,11 @@ function 主程序() {
     let dec = true;
     threads.start(function () {
         while(dec){
-            action = text("Start now").findOne(30);
-            if(action) action.click();
-            action = text("START NOW").findOne(30);
-            if(action) action.click();
-            action = text("立即开始").findOne(30);
+            action = text("Don't show again").findOne(300);
+            if(action) action.click()
+            action = text("Start now").findOne(30)
+                    || text("START NOW").findOne(30)
+                    || text("立即开始").findOne(30);
             if(action) action.click();
         }
     })
@@ -674,6 +687,11 @@ function 主程序() {
     if(ui.createAccount.checked){
         log("邮箱生成");
         邮箱生成();
+    }
+
+    if(ui.switchVersion.checked){
+        log("切换版本");
+        appPackage = "com.ss.android.ugc.trill";
     }
 
     // 日常模式，关注、采集粉丝、回复消息
@@ -734,6 +752,12 @@ function 主程序() {
                     mi6回复消息()
                 }
             }
+            
+            if (tempSave.daily || ui.mi6_task.checked) {
+                log("任务模式");
+                任务发送指定消息();
+            }
+            
         }
         if (!tempSave.daily && ui.mi6_reg.checked) {
             log("注册模式")
@@ -741,7 +765,7 @@ function 主程序() {
             tempSave.continue = true;
             while (tempSave.continue) {
                 mi6注册模式();
-                if(tempSave.continue){
+                if(tempSave.continue) {
                     // 在执行完之后如果还为true则等待继续
                     let cf = floaty.rawWindow(<frame><button id="but">继续注册</button></frame>)
                     cf.setPosition(400,800)
@@ -1047,11 +1071,11 @@ function 登号模式() {
                 if(text("Sign up").find().length>0) break;
 
                 // 如果在TikTok则点击个人页面
-                if(!text("Me").packageName(pack).findOne(500)) {
+                if(!text("Me").packageName(appPackage).findOne(500)) {
                     console.verbose("没在首页")
                     i--;
                 }else{
-                    text("Me").packageName(pack).findOne(500).parent().click();
+                    text("Me").packageName(appPackage).findOne(500).parent().click();
                 }
                 popupDetection();
             }
@@ -1093,7 +1117,7 @@ function 打开抖音() {
         log("登录/注册模式")
         for (let i = 0; i < 5; i++) {
             // 检测是否打开抖音
-            if (packageName(pack).findOne(2000)){
+            if (packageName(appPackage).findOne(2000)){
                 // 连续检测5次弹窗，如果已经到了主页，出现Me控件则跳出
                 for (let j = 0; j < 5; j++) {
                     // 检测弹窗
@@ -1117,8 +1141,7 @@ function 打开抖音() {
                 // log提示语句
                 console.verbose("等待" + appName + "启动中..." + i);
             } else {
-                // app.launchApp(appName);
-                app.launch(pack);
+                app.launchApp(appName);
             }
         }
         console.verbose("进行最后一次个人信息页面检测")
@@ -1611,7 +1634,7 @@ function mi6关注操作(num) {
         let action = text("Open App").findOne(1000);
         if(action) action.click();
     
-        if(packageName(pack).findOne(10)) break;
+        if(packageName(appPackage).findOne(10)) break;
     }
 
     sleep(random(2000, 3000))
@@ -1720,7 +1743,7 @@ function 返回首页(dayleTime) {
     dayleTime = dayleTime||2000;
     for (var i = 0; i < 10; i++) {
         popupDetection(dayleTime*0.25);
-        if (packageName(pack).visibleToUser().exists()) {
+        if (packageName(appPackage).visibleToUser().exists()) {
             sleep(dayleTime*0.5)
             if (text("Me").visibleToUser().exists()) {
                 break
@@ -1734,7 +1757,7 @@ function 返回首页(dayleTime) {
             }
         } else {
             log("启动tiktok")
-            app.launch(pack)
+            app.launch(appPackage)
             sleep(1000)
         }
     }
@@ -1746,11 +1769,225 @@ function 上传视频() {
     var 话题内容 = ui.htbt.text()
     var at = ui.atyh.text()
     var 上传次数 = Number(ui.scsl.text())
+    let 选择后操作 = [
+        {
+            标题: "编辑框",
+            uo: null,
+            检测: function() {
+                this.uo = classNameEndsWith("EditText").visibleToUser().findOne(2000)
+                return this.uo
+            },
+            执行: function() {
+                let re = this.uo.setText(话题内容);
+                log("设置" + this.标题, re)
+                if (re) {
+                    
+                }
+            }
+        },
+        {
+            标题: "去选封面",
+            uo: null,
+            检测: function() {
+                this.uo = text("Select cover").clickable(true).findOne(2000)
+                return this.uo
+            },
+            执行: function() {
+                let re = this.uo.click();
+                log("点击" + this.标题, re)
+                if (re) {
+                    
+                }
+            }
+        },
+        {
+            标题: "封面",
+            uo: null,
+            检测: function() {
+                this.uo = classNameEndsWith("ImageView").idContains("bg6").find()
+                return this.uo
+            },
+            执行: function() {
+                if (this.uo.length > 5) {
+                    let 坐标 = this.uo[2].bounds()
+                    click(坐标.centerX(), 坐标.centerY())
+                    sleep(random(1500, 2000))
+                }
+            }
+        },
+        {
+            标题: "保存",
+            uo: null,
+            检测: function() {
+                this.uo = text("Save").clickable(true).findOne(2000)
+                return this.uo
+            },
+            执行: function() {
+                let re = this.uo.click();
+                log("点击" + this.标题, re)
+                if (re) {
+                }
+            }
+        },
+        {
+            标题: "发布",
+            uo: null,
+            检测: function() {
+                this.uo = text("Post").visibleToUser().depth(10).findOne(2000)
+                return this.uo
+            },
+            执行: function() {
+                var 儲存到裝置中開啟 = desc("Save to deviceOn").visibleToUser().clickable(true).findOne(2000)
+                if (儲存到裝置中開啟) {
+                    log("儲存到裝置中開啟 " + 儲存到裝置中開啟.click())
+                    sleep(random(1000, 1500))
+                }
+                log("發佈 " + this.uo.parent().parent().click() + "进度 " + (i + 1) + "/" + 上传次数)
+                lh_find(text("Post Now"),"Post Now", 0);
+                while (true) {
+                    var 上传中 = textContains("%").visibleToUser().findOne(4000)
+                    if (上传中) {
+                        log("上传中 " + 上传中.text())
+                    } else {
+                        log("上传完成....")
+                        break
+                    }
+                }
+                return "跳出循环执行"
+            }
+        }
+    ]
+    let 选择操作 = [
+        {
+            标题: "拍摄",
+            uo: null,
+            检测: function() {
+                this.uo = classNameEndsWith("FrameLayout").clickable(true).depth(8).drawingOrder(3).findOne(2000)
+                return this.uo
+            },
+            执行: function() {
+                let re = this.uo.click();
+                log("点击" + this.标题, re)
+                if (re) {
+                    log("权限检查(最长20秒)");
+                    for (let i = 0; i < 5; i++) {
+                        if(text("Upload").visibleToUser().findOne(3000)){
+                            break;
+                        }
+                        lh_find(text("允许") ,"",0,300)
+                        lh_find(text("ALLOW"),"",0,300)
+                        lh_find(text("Allow"),"",0,300)
+                    }
+                }
+            }
+        },
+        {
+            标题: "上传",
+            uo: null,
+            检测: function() {
+                this.uo = text("Upload").visibleToUser().findOne(1000)
+                return this.uo
+            },
+            执行: function() {
+                let re = this.uo.parent().parent().click();
+                log("点击" + this.标题, re)
+                if (re) {
+                    
+                }
+            }
+        },
+        {
+            标题: "全部All",
+            uo: null,
+            检测: function() {
+                this.uo = text("All").visibleToUser().findOne(2000)
+                return this.uo
+            },
+            执行: function() {
+                let re = this.uo.parent().click();
+                log("点击" + this.标题, re)
+                if (re) {
+                    
+                }
+            }
+        },
+        {
+            标题: "视频",
+            uo: null,
+            检测: function() {
+                this.uo = text("视频").visibleToUser().findOne(2000)
+                return this.uo
+            },
+            执行: function() {
+                let re = this.uo.parent().click();
+                log("点击" + this.标题, re)
+                if (re) {
+                    
+                }
+            }
+        },
+        {
+            标题: "影片",
+            uo: null,
+            检测: function() {
+                this.uo = text("Videos").visibleToUser().findOne(2000)
+                return this.uo
+            },
+            执行: function() {
+                let re = this.uo.parent().click();
+                log("点击" + this.标题, re)
+                if (re) {
+                    
+                }
+            }
+        },
+        {
+            标题: "选择",
+            uo: null,
+            检测: function() {
+                this.uo = classNameEndsWith("FrameLayout").clickable(true).visibleToUser().findOne(2000)
+                return this.uo
+            },
+            执行: function() {
+                let re = this.uo.click();
+                log("点击" + this.标题, re)
+                if (re) {
+                    sleep(2000);
+                    let sel = text("Select").findOne(5000);
+                    if(sel) sel.parent().click();
+                    for (let next = 0; next < 5; next++) {
+                        下一步 = null;
+                        下一步 = text("Next").visibleToUser().clickable(true).findOne(5000);
+                        if(下一步) {
+                            log("下一步 " + 下一步.click());
+                            sleep(3000);
+                            next--;
+                        } else {
+                            下一步 = classNameEndsWith("FrameLayout").clickable(true).visibleToUser().findOne(2000);
+                            if(下一步) {
+                                下一步.click();
+                            } else {
+                                back();
+                            }
+                        }
+                        if(text("Post").findOnce()) {
+                            break;
+                        }
+                    }
+                    console.info("选择完毕，进入下一阶段")
+                    return 循环执行(选择后操作);
+                }
+            }
+        },
+    ]
     for (var i = 0; i < 上传次数; i++) {
-        返回首页()
+        返回首页() 
+        log("上传视频")
+        循环执行(选择操作)
         sleep(1000)
-        var 拍摄 = classNameEndsWith("FrameLayout").clickable(true).depth(8).drawingOrder(3).findOne(30000)
-        if (拍摄) {
+        var 拍摄;
+        // 拍摄 = classNameEndsWith("FrameLayout").clickable(true).depth(8).drawingOrder(3).findOne(30000)
+        if (false && 拍摄) {
             移动文件(路径.文件夹.视频列表, 路径.文件夹.视频)
             sleep(random(2000, 3000))
             log("拍摄 " + 拍摄.click())
@@ -1879,7 +2116,7 @@ function 上传视频() {
                         }
                     }
                 } else {
-                    log("没找到视频序号,放弃本次上床")
+                    log("没找到视频序号,放弃本次上传")
                     exit()
                 }
             }
@@ -1919,12 +2156,12 @@ function 修改资料() {
                 var 下一步;
                 for (let nextI = 0; nextI < 30*60; nextI++) {
                     popupDetection();
-                    下一步 = text("Business").packageName(pack).findOne(3000)
+                    下一步 = text("Business").packageName(appPackage).findOne(3000)
                     if(下一步) {
                         log("已进入切换页面");
                         break;
                     }
-                    if(text("Me").packageName(pack).findOne(3000)){
+                    if(text("Me").packageName(appPackage).findOne(3000)){
                         if(confirm("是否已手动切换到专业版？")){
                             break;
                         }
@@ -1941,7 +2178,7 @@ function 修改资料() {
                         log(scrollable(true).scrollForward())
                         sleep(1500)
                     }
-                    var 購物 = textContains("Shopping/").packageName(pack).findOne(1500)
+                    var 購物 = textContains("Shopping/").packageName(appPackage).findOne(1500)
                     if (購物) {
                         var 坐标 = 購物.bounds()
                         click(坐标.centerX(), 坐标.centerY())
@@ -2043,6 +2280,143 @@ function 获取用户名(path) {
 
 function 更换头像() {
     返回首页()
+    循环执行([
+        {
+            标题: "编辑个人档案",
+            uo: null,
+            检测: function() {
+                this.uo = textContains("Edit ").visibleToUser().findOne(2000)
+                return this.uo
+            },
+            执行: function() {
+                log("点击" + this.标题, this.uo.click())
+            }
+        },
+        {
+            标题: "照片",
+            uo: null,
+            检测: function() {
+                this.uo = classNameEndsWith("ImageView").depth(11).visibleToUser().clickable(true).findOne(2000)
+                return this.uo
+            },
+            执行: function() {
+                let re = this.uo.click();
+                log("点击" + this.标题, re)
+                if (re) {
+                    移动文件(路径.文件夹.头像列表, 路径.文件夹.头像, true)
+                }
+            }
+        },
+        {
+            标题: "从图库中选取",
+            uo: null,
+            检测: function() {
+                this.uo = text("Select from Gallery").findOne(2000)
+                return this.uo
+            },
+            执行: function() {
+                let re = this.uo.click();
+                log("点击" + this.标题, re)
+                if (re) {
+                    // 检测系统权限
+                    console.verbose("检测是否需要权限");
+                    for (let i = 0; i < 10; i++) {
+                        // 系统授权
+                        action = text("ALLOW").findOne(100);
+                        if(action) action.click(); 
+                        action = text("Allow").findOne(50);
+                        if(action) action.click(); 
+                        action = text("允许").findOne(50);
+                        if(action) action.click(); 
+                        if(text("All media").findOne(100)) break;
+                    }
+                }
+            }
+        },
+        {
+            标题: "全部",
+            uo: null,
+            检测: function() {
+                this.uo = text("All media").visibleToUser().findOne(2000)
+                return this.uo
+            },
+            执行: function() {
+                let re = this.uo.click();
+                log("点击" + this.标题, re)
+                if (re) {
+                    
+                }
+            }
+        },
+        {
+            标题: "头像",
+            uo: null,
+            检测: function() {
+                this.uo = text("头像").findOne(2000)
+                return this.uo
+            },
+            执行: function() {
+                let re = this.uo.parent().click();
+                log("点击" + this.标题, re)
+                if (re) {
+                    
+                }
+            }
+        },
+        {
+            标题: "第一张",
+            uo: null,
+            检测: function() {
+                this.uo = classNameEndsWith("view.View").visibleToUser().clickable(true).findOne(2000)
+                return this.uo
+            },
+            执行: function() {
+                let re = this.uo.click();
+                log("点击" + this.标题, re)
+                if (re) {
+                    
+                }
+            }
+        },
+        {
+            标题: "确定",
+            uo: null,
+            检测: function() {
+                this.uo = text("Confirm").clickable(true).visibleToUser().findOne(2000)
+                return this.uo
+            },
+            执行: function() {
+                let re = this.uo.click();
+                log("点击" + this.标题, re)
+                if (re) {
+                    
+                }
+            }
+        },
+        {
+            标题: "储存",
+            uo: null,
+            检测: function() {
+                this.uo = text("Save").clickable(true).visibleToUser().findOne(2000)
+                return this.uo
+            },
+            执行: function() {
+                let re = this.uo.click();
+                log("点击" + this.标题, re)
+                if (re) {
+                    log("等待出现上传文字")
+                    while (!text("Uploading...").exists()) sleep(500)
+                    log("等待上传完成")
+                    do{
+                        sleep(500)
+                    } while (text("Uploading...").exists())
+                    return "跳出循环执行"
+                }
+            }
+        }
+    ])
+    log("头像更换结束")
+    return true;
     var 我 = text("Me").findOne(30000)
     if (我) {
         log("Me " + 我.parent().click())
@@ -2156,14 +2530,15 @@ function getFansList(fansNameList, fansList, all) {
 
     log("开始")
     let i=0, tempList = [], tempSave = [], closeTag;
+    sleep(1000)
     while(true){
+        sleep(200)
         等待加载(100, 500);
         // 获取粉丝列表父控件
-        let FollowerParent = className("androidx.recyclerview.widget.RecyclerView").packageName(pack).filter(function(uo){
-                            if(uo.bounds().right>device.width*0.5) 
-                                return true;
-                            return false;
-                        }).findOne(3000)
+        let FollowerParent = depth(9).className("androidx.recyclerview.widget.RecyclerView")
+                            .packageName(appPackage).filter(function(uo){
+                                return uo.bounds().right - uo.bounds().left > device.width*0.5;
+                            }).findOne(3000)
         if(!textContains("FOLLOWERS").findOne(500) || !FollowerParent) {
             log("未获取到粉丝列表！如果脚本卡住，请手动进入粉丝列表")
             sleep(3000);
@@ -2209,32 +2584,34 @@ function getFansList(fansNameList, fansList, all) {
                         //  发送私信
                         // if(ui.getsay.checked){
                             // 随机拿到一条信息
-                            tempSave.getSayMessage = getHelloMessage();
-                            if(isNaN(tempSave.NUMBER)) tempSave.NUMBER = 1;
-                            // let newMsg = Date.now().toString().substring(10) + "> " + (tempSave.getSayMessage||"Hi~");
-                            let newMsg = (tempSave.getSayMessage||"Hi~");
-                            let re = sayHello(fans, newMsg);
-                            if(re){
-                                console.info("消息发送状态", re.status);
-                            } else {
-                                log("发送失败")
-                            }
-                            log(re)
+                            // tempSave.getSayMessage = getHelloMessage();
+                            // if(isNaN(tempSave.NUMBER)) tempSave.NUMBER = 1;
+                            // // let newMsg = Date.now().toString().substring(10) + "> " + (tempSave.getSayMessage||"Hi~");
+                            // let newMsg = (tempSave.getSayMessage||"Hi~");
+                            // let re = sayHello(fans, newMsg);
+                            // if(re){
+                            //     console.info("消息发送状态", re.status);
+                            // } else {
+                            //     log("发送失败")
+                            // }
+                            // console.verbose(re)
                         // }
 
                         // 返回粉丝列表
                         for (var i = 0; i < 5; i++) {
                             sleep(1000)
-                            let fansList  = className("androidx.recyclerview.widget.RecyclerView").packageName(pack).filter(function(uo){
-                                if(uo.bounds().right>device.width*0.5) 
-                                    return true;
-                                return false;
-                            }).findOne(2000)
-
-                            if (FollowerList.length-3 < fansList.children().length
-                                || FollowerList.length == fansList.children().length
-                            ) break
-                            else back()
+                            let fansList = depth(9).className("androidx.recyclerview.widget.RecyclerView")
+                                            .packageName(appPackage).filter(function(uo){
+                                                return uo.bounds().right - uo.bounds().left > device.width*0.5;
+                                            }).findOne(3000)
+                            if(fansList) {
+                                if (FollowerList.length-3 < fansList.children().length
+                                    || FollowerList.length == fansList.children().length
+                                ) { 
+                                    break
+                                }
+                            }
+                            back()
                         }
 
                         // 统计数据
@@ -2258,16 +2635,19 @@ function getFansList(fansNameList, fansList, all) {
                         等待加载();
                         sleep(1000);
                     }
-                    let fansList  = className("androidx.recyclerview.widget.RecyclerView").packageName(pack).filter(function(uo){
-                        if(uo.bounds().right>device.width*0.5) 
-                            return true;
-                        return false;
-                    }).findOne(2000)
 
-                    if (FollowerList.length-3 < fansList.children().length
+                    let fansList  = depth(9).className("androidx.recyclerview.widget.RecyclerView")
+                                    .packageName(appPackage).filter(function(uo){
+                                        return uo.bounds().right - uo.bounds().left > device.width*0.5;
+                                    }).findOne(3000)
+                    if(fansList) {
+                        if (FollowerList.length-3 < fansList.children().length
                         || FollowerList.length == fansList.children().length
-                    ) break
-                    else back()
+                        ) {
+                            break
+                        }
+                    }
+                    back()
                 }
 
             }
@@ -2275,11 +2655,6 @@ function getFansList(fansNameList, fansList, all) {
 
         console.info("保存数量：", score,"当前进展：", getFansNum, "总进展：", countGetFansNum)
         if(score == 0) {
-            // 当相似性超过一半时跳出循环
-            if(similar > tempList.length*0.5 && 5 < closeTag++){
-                console.warn("到底了")
-                break;
-            }
             if(!all) {
                 log("当前粉丝均已保存，停止继续遍历");
                 break;
@@ -2287,20 +2662,37 @@ function getFansList(fansNameList, fansList, all) {
             // 判断本次列表是否和上次相同
             let similar = 0;
             tempList.forEach(e=>{
-                if(tempSave.indexOf(e)>-1)
+                if(tempSave.tempList.indexOf(e)>-1)
                     similar++;
             })
+            log("相似度：" + similar/tempList.length)
+            // 当相似性超过8成时跳出循环
+            if(similar/tempList.length > 0.8 && 5 < closeTag++){
+                console.warn("到底了")
+                break;
+            }
         }
         // 将本次暂存数据保存起来用于下次对比
-        tempSave = tempList;
+        tempSave.tempList = tempList;
         // 清空暂存数据
         tempList = [];
 
         save({},true)
         // 滑到下一页
         let scrollDown = FollowerParent.scrollForward();
+        if(!scrollDown) {
+            // 重新获取
+            FollowerParent = depth(9).className("androidx.recyclerview.widget.RecyclerView")
+                            .packageName(appPackage).filter(function(uo){
+                                return uo.bounds().right - uo.bounds().left > device.width*0.5;
+                            }).findOne(3000)
+            if(FollowerParent) {
+                scrollDown = FollowerParent.scrollForward();
+            } else {
+                console.error("不在列表界面")
+            }
+        }
         log("滑动", scrollDown)
-
     }
     log("遍历结束");
     return fansNameList;
@@ -2881,8 +3273,8 @@ function sayHello(f, msg){
         action = text("OK").findOne(50);
         if(action){
             action.click()
-            sleep(100)
             back()
+            sleep(100)
             break;
         }
 
@@ -2952,23 +3344,25 @@ function sayHello(f, msg){
     // 保存已打招呼的粉丝信息
     server.get("fans/sayhello?username="+f.username);
     /*
-        message: 测试
-        perfix: 123
-        suffix: 124
-        accountUsername: 124
-        fansUsername: 1245
-        device: 125
-        reservedA: 
-        reservedB: 
+        msg: 消息内容
+        prefix: 消息前缀：
+        suffix: 消息后缀：
+        accountUsername: tiktok账号：
+        sender: 发送人：
+        code: 类型代码：
+        fansUsername: 粉丝的账号：
+        status: 0
+        device: 设备
+        reservedA: 保留字段a
+        reservedB: 保留字段b：
     */
     // 保存本次的聊天记录结果
-    server.add("record", {
-        message: re.msg,
-        perfix: re.perfix,
-        suffix: re.suffix,
-        accountUsername: accountInfo.username,
-        fansUsername: f.username,
-    });
+    if(typeof re.status != "number") {
+        re.status = re.status? 0 : 1;
+    }
+    re.accountUsername = accountInfo.username;
+    re.fansUsername = f.username;
+    server.add("record", server.excludeNull(re));
     return re;
 }
 
@@ -3362,6 +3756,9 @@ function mi6ReplyMsg() {
         新消息[i].params = null;
 
         try{
+            if(typeof 新消息[i].status != "number") {
+                新消息[i].status = 新消息[i].status? 0 : 1;
+            }
             console.verbose(新消息[i]);
             server.add("record", server.excludeNull(新消息[i]));
         } catch(e){
@@ -3483,6 +3880,9 @@ function replyMsg() {
             fansUsername: f.username,
         } */
         try{
+            if(typeof 新消息[i].status != "number") {
+                新消息[i].status = 新消息[i].status? 0 : 1;
+            }
             console.verbose(新消息[i]);
             server.add("record", server.excludeNull(新消息[i]));
         } catch(e){
@@ -4071,8 +4471,17 @@ function mi6注册模式() {
             try{
                 for (; i < 3;) {
                     lh_find(id("title"), "顶部账号栏", 0, 500)
-                    if(lh_find(text("Add account"), "添加账号", 0, 500)) {
-                        i++;account
+                    if(lh_find(text("Add account"), "Add account", 0, 500)) {
+                        i++;
+                    } else { 
+                        // 查询是否已经存在了三个账号
+                        getAccountList();
+                        log("账号数量：", accounts.list.length)
+                        if(accounts.list.length == 3) {
+                            log("未找到添加账号按钮且存在三个账号，判定为已经注册完毕")
+                            i = accounts.list.length;
+                            break;
+                        }
                     }
                     action = textContains("existing").findOne(100);
                     if(action) {
@@ -4087,7 +4496,7 @@ function mi6注册模式() {
                 }
             }catch(e){}
             if(i>=3){
-                log("已有三个账号，无需继续注册");
+                log("账号已满，无需继续注册 " + i);
                 tempSave.continue = false;
                 return false;
             }
@@ -4095,7 +4504,16 @@ function mi6注册模式() {
         let tag;
         for (let i = 0; i < 5; i++) {
             lh_find(id("title"), "顶部账号栏", 0, 500)
-            lh_find(text("Add account"), "添加账号", 0, 500)
+            if(!lh_find(text("Add account"), "添加账号", 0, 500)) { 
+                // 查询是否已经存在了三个账号
+                getAccountList();
+                log("账号数量：", accounts.list.length)
+                if(accounts.list.length == 3) {
+                    log("未找到添加账号按钮且存在三个账号，判定为已经注册结束")
+                    tempSave.continue = false;
+                    return false;
+                }
+            }
             lh_find(textContains("existing"), "Add existing account", 0, 100);
             // lh_find(text("Use phone or email"), "Use phone or email", 0)
             if(text("Use phone or email").findOne(1000)){
@@ -4264,8 +4682,7 @@ function 注册7模式() {
     while (1) {
         if(清除数据()){
             // 打开TikTok
-            // app.launchApp(appName);
-            app.launch(pack);
+            app.launchApp(appName)
             for (let j = 0; j < 5; j++) {
                 // 检测登录文字
                 let action = textContains("Sign up").findOne(2000)
@@ -4274,9 +4691,8 @@ function 注册7模式() {
                     break;
                 }
                 // 10秒内没有打开TikTok则重新打开
-                if(!packageName(pack).findOnce(10000)){
-                    // app.launchApp(appName);
-                    app.launch(pack);
+                if(!packageName(appPackage).findOnce(10000)){
+                    app.launchApp(appName)
                 }
             }
             // 注册
@@ -5329,10 +5745,7 @@ function clickAction(getActionFun, s, ds,pack) {
  * @param {*} tag 自己递归计算次数使用
  */
 function runTikTok(run,tag) {
-    if(!run) {
-        // app.launchApp(appName);
-        app.launch(pack);
-    }
+    if(!run) app.launchApp(appName);
     let tagI = 0;
     let limit = 50;
     let countTagI = tag||tagI;
@@ -5407,7 +5820,7 @@ function runTikTok(run,tag) {
     }else log(appName + "启动完成");
     // 账号数据
     // info.enviName = xx("获取当前环境名称", true);
-    info.enviName = "Mi6_" + device.getAndroidId();
+    info.enviName = "SMN5_" + device.getAndroidId();
     accountInfo = info;
     accountInfo.envi = accountInfo.username+"@"+accountInfo.enviName;
     let path = 路径.文件夹.账号 + info.enviName + ".log"
@@ -5651,14 +6064,14 @@ function popupDetection(time) {
             if (action) action.click();
         },
         function (t) {   // CANCEL 取消弹窗，一般是账号不存在
-            action = packageName(pack).text("CANCEL").findOne(t)
+            action = packageName(appPackage).text("CANCEL").findOne(t)
             if (action) {
                 action.click();
                 sleep(500);
             }
         },
         function (t) {   // 通知权限被关闭时，取消选择  Later
-            action = packageName(pack).text("Open").findOne(t)
+            action = packageName(appPackage).text("Open").findOne(t)
             if (action && textContains("Notifications keep").findOne(500))
                 action.click();
         },
@@ -5714,6 +6127,8 @@ function objToUri(obj) {
 }
 
 function nextAccount() {
+    exit()
+    return false;
     返回首页(300)
     for (let i = 0; i < 5; i++) {
         try{
@@ -5770,4 +6185,58 @@ function 驱动回复软件() {
     // 启动软件
     // 向文本输入框输入数据
     // 点击启动按钮
+}
+
+function 任务发送指定消息() {
+    // 获取用户链接
+    let fans;
+    do{
+        fans = null;
+        fans = server.get("taskFans/urlexist?username=" + accountInfo.username);
+        log(fans)
+        if(fans) {
+            // 打开链接
+            app.openUrl(fans.url);
+            var 打开方式 = text("TikTok").visibleToUser().findOne(3000)
+            if (打开方式) {
+                log("选择TikTok", 打开方式.parent().parent().click())
+                sleep(1500)
+            }
+            var 始终 = text("始终").visibleToUser().findOne(3000)
+            if (始终) {
+                log("始终 " + 始终.click())
+            }
+            sleep(1000);
+            let re = sayHello(fans, fans.sendMsg)
+            if(re){
+                // 上传本次的结果
+                server.post("taskFansLog/add/" + fans.username, server.excludeNull({
+                    fans: JSON.stringify(fans),
+                    sendMsg: fans.sendMsg,
+                    result: JSON.stringify(re)
+                }))
+            }
+        } else break;
+    }while(true)
+    log("当前队列处理结束");
+}
+/**
+ * 循环执行数组中的单元，当运行完"执行"函数后返回 "跳出循环执行" 时跳出循环执行
+ * @param {ArrAy} 单元数组中必须保存对象，格式 {标题: String, 检测: Function, 执行: Function}
+ * @param {*} 等待时间 
+ */
+function 循环执行(数组, 等待时间) {
+    let 进度 = 0;
+    let 等待 = 等待时间 || 100;
+    let 下标;
+    while (-1 < 进度) {
+        下标 = 进度%数组.length;
+        if(typeof 数组[下标] == "object") {
+            if(/* false */true && 数组[下标].标题) console.verbose("当前操作步骤：", 数组[下标].标题);
+            if(数组[下标].检测()) 进度 = 数组[下标].执行() != "跳出循环执行" ? 进度 : -2;
+            sleep(等待);
+        }
+
+        进度++;
+    }
 }
