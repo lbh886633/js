@@ -8,8 +8,7 @@ var uti;
         "解决采集粉丝不能滑动的问题",
         "修改更换头像的架构",
         "修改上传视频的架构",
-        "添加双app支持",
-        "完善上传视频功能",
+        "添加双app支持"
     ];
     uti = logs.pop();
 }
@@ -306,9 +305,9 @@ ui.layout(
                                 </linear>
                                 <linear padding="5 0 0 0">
                                     <text textColor="black" text="关注数量: " />
-                                    <input lines="1" id="gzsl" w="auto" text="20" />
+                                    <input lines="1" id="gzsl" w="auto" text="200" />
                                     <text textColor="black" text="~" />
-                                    <input lines="1" id="gzsl1" w="auto" text="20" />
+                                    <input lines="1" id="gzsl1" w="auto" text="200" />
                                     <text textColor="black" text="个,每次间隔" />
                                     <input lines="1" id="gzjg" w="auto" text="210" />
                                     <text textColor="black" text="~" />
@@ -1834,9 +1833,7 @@ function 上传视频() {
             标题: "发布",
             uo: null,
             检测: function() {
-                this.uo = text("Post").visibleToUser().depth(10)
-                        .boundsInside(device.width*0.5, device.height*0.8,device.width,device.height)
-                        .findOne(2000)
+                this.uo = text("Post").visibleToUser().depth(10).findOne(2000)
                 return this.uo
             },
             执行: function() {
@@ -1848,53 +1845,15 @@ function 上传视频() {
                 log("發佈 " + this.uo.parent().parent().click() + "进度 " + (i + 1) + "/" + 上传次数)
                 lh_find(text("Post Now"),"Post Now", 0);
                 while (true) {
-                    var 上传中 = textContains("%")
-                                .boundsInside(0,0,device.width*0.2,device.height*0.2)
-                                .visibleToUser().findOne(1000)
+                    var 上传中 = textContains("%").visibleToUser().findOne(4000)
                     if (上传中) {
                         log("上传中 " + 上传中.text())
-                        sleep(3000)
                     } else {
                         log("上传完成....")
-                        break;
+                        break
                     }
                 }
                 return "跳出循环执行"
-            }
-        },
-        {
-            标题: "进度检测",
-            uo: null,
-            num: 0,
-            检测: function() {
-                this.uo = textContains("%")
-                .boundsInside(0,0,device.width*0.2,device.height*0.2)
-                .visibleToUser().findOne(1000)
-                return this.uo
-            },
-            执行: function() {
-                console.info("正在上传")
-                while(textContains("%")
-                .boundsInside(0,0,device.width*0.2,device.height*0.2)
-                .visibleToUser().findOne(1000)){
-                    sleep(3000)
-                    console.verbose()
-                }
-            }
-        },
-        {
-            标题: "首页检测",
-            uo: null,
-            num: 0,
-            检测: function() {
-                this.uo = text("Me").visibleToUser().findOne(1000)
-                return this.uo
-            },
-            执行: function() {
-                console.error("当前是主页！")
-                if(this.num++ > 3) {
-                    return "跳出循环执行"
-                }
             }
         }
     ]
@@ -2016,9 +1975,7 @@ function 上传视频() {
                         }
                     }
                     console.info("选择完毕，进入下一阶段")
-                    循环执行(选择后操作)
-                    console.info("第二阶段结束")
-                    return "跳出循环执行";
+                    return 循环执行(选择后操作);
                 }
             }
         },
@@ -2026,10 +1983,9 @@ function 上传视频() {
     for (var i = 0; i < 上传次数; i++) {
         返回首页() 
         log("上传视频")
-        移动文件(路径.文件夹.视频列表, 路径.文件夹.视频)
         循环执行(选择操作)
         sleep(1000)
-        let 拍摄;
+        var 拍摄;
         // 拍摄 = classNameEndsWith("FrameLayout").clickable(true).depth(8).drawingOrder(3).findOne(30000)
         if (false && 拍摄) {
             移动文件(路径.文件夹.视频列表, 路径.文件夹.视频)
@@ -4511,7 +4467,7 @@ function mi6注册模式() {
     // 注册
     for (let index = 0; index < 5; index++) {
         返回首页(1000);
-        if(false && !lh_find(text("Sign up").clickable(true), "Sign up", 0)){
+        if(!lh_find(text("Sign up").clickable(true), "Sign up", 0)){
             try{
                 for (; i < 3;) {
                     lh_find(id("title"), "顶部账号栏", 0, 500)
@@ -4545,6 +4501,7 @@ function mi6注册模式() {
                 return false;
             }
         }
+        let tag;
         for (let i = 0; i < 5; i++) {
             lh_find(id("title"), "顶部账号栏", 0, 500)
             if(!lh_find(text("Add account"), "添加账号", 0, 500)) { 
@@ -4558,6 +4515,7 @@ function mi6注册模式() {
                 }
             }
             lh_find(textContains("existing"), "Add existing account", 0, 100);
+            // lh_find(text("Use phone or email"), "Use phone or email", 0)
             if(text("Use phone or email").findOne(1000)){
                 if(text("Use phone or email").findOne(1000).bounds().right < 0){
                     // 如果这个控件没有在当前屏幕上的话就点击一次下方的按钮，在点击后等待1秒
@@ -4578,8 +4536,6 @@ function mi6注册模式() {
                 sleep(1000)
             }
         }
-        
-        // 正式流程
         if (lh_find(text("Use phone or email"), "Use phone or email", 0)) {
             index = 10; // 防止不能跳出
             var 生日 = text("When’s your birthday?").visibleToUser().findOne(2000)
@@ -4668,12 +4624,8 @@ function mi6注册模式() {
                                     
                                     var 需要验证 = textContains("Enter 6-digit code").visibleToUser().findOne(1000)
                                     if (需要验证) {
-                                        wait--;
-                                        log("需要验证邮箱6位验证码，等待输入验证码")
-                                        while (textContains("Enter 6-digit code").visibleToUser().findOne(1000)) {
-                                            sleep(3000)
-                                        }
-                                        log("离开验证码界面")
+                                        stopScript("需要验证邮箱6位验证码")
+                                        return false
                                     }
 
                                     if (lh_find(text("Skip").clickable(true), "skip", 0, 1000)) {
@@ -6175,6 +6127,8 @@ function objToUri(obj) {
 }
 
 function nextAccount() {
+    exit()
+    return false;
     返回首页(300)
     for (let i = 0; i < 5; i++) {
         try{
@@ -6193,11 +6147,7 @@ function nextAccount() {
             let un = accounts.list[accounts.progress % accounts.list.length];
             if(lh_find(text(un),  "切换到账号" + un, 0)
             ) {
-                log("切换中...进度：",accounts.list.length,"  ===  ",accounts.progress);
-                if(accounts.list.length <= accounts.progress) {
-                    console.info("已经完成一轮操作！")
-                    exit()
-                }
+                log("切换中...");
                 sleep(10000);
                 返回首页(300);
                 break;
@@ -6286,7 +6236,7 @@ function 循环执行(数组, 等待时间) {
             if(数组[下标].检测()) 进度 = 数组[下标].执行() != "跳出循环执行" ? 进度 : -2;
             sleep(等待);
         }
- 
+
         进度++;
     }
 }
