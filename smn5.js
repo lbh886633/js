@@ -11,7 +11,8 @@ var uti;
         "添加双app支持",
         "完善上传视频功能",
         "修改 默认包名自动获取，头像优先移动",
-        "获取账号列表时加入范围限制"
+        "获取账号列表时加入范围限制",
+        "切换账号后进行账号比对"
     ];
     uti = logs.pop();
 }
@@ -283,7 +284,8 @@ ui.layout(
                                 </radiogroup>
                             </vertical>
                             <linear>
-                                    <checkbox id="switchVersion" text="切换ss版本" />
+                                    <checkbox id="switchVersion" text="ss版本" />
+                                    <checkbox id="switchVersionzl" text="zl版本" />
                                     <checkbox id="repScript" text="回复脚本" />
                                     <checkbox id="createAccount" text="生成邮箱" />
                                     <checkbox id="daily" text="日常模式" />
@@ -691,6 +693,11 @@ function 主程序() {
     if(ui.createAccount.checked){
         log("邮箱生成");
         邮箱生成();
+    }
+    
+    if(ui.switchVersionzl.checked){
+        log("切换zl版本");
+        appPackage = "com.zhiliaoapp.musically";
     }
 
     if(ui.switchVersion.checked){
@@ -1145,7 +1152,8 @@ function 打开抖音() {
                 // log提示语句
                 console.verbose("等待" + appName + "启动中..." + i);
             } else {
-                app.launchApp(appName);
+                // app.launchApp(appName);
+                app.launch(appPackage)
             }
         }
         console.verbose("进行最后一次个人信息页面检测")
@@ -1378,7 +1386,6 @@ function 随机滑动() {
     swipe(x, y, x1, y1, random(1000, 1200))
 
 }
-
 
 function lh_find(obj, msg, dj, time) {
     sleep(random(100, 150))
@@ -4735,7 +4742,8 @@ function 注册7模式() {
     while (1) {
         if(清除数据()){
             // 打开TikTok
-            app.launchApp(appName)
+            // app.launchApp(appName)
+            app.launch(appPackage)
             for (let j = 0; j < 5; j++) {
                 // 检测登录文字
                 let action = textContains("Sign up").findOne(2000)
@@ -4745,7 +4753,8 @@ function 注册7模式() {
                 }
                 // 10秒内没有打开TikTok则重新打开
                 if(!packageName(appPackage).findOnce(10000)){
-                    app.launchApp(appName)
+                    // app.launchApp(appName)
+                    app.launch(appPackage)
                 }
             }
             // 注册
@@ -5798,7 +5807,8 @@ function clickAction(getActionFun, s, ds,pack) {
  * @param {*} tag 自己递归计算次数使用
  */
 function runTikTok(run,tag) {
-    if(!run) app.launchApp(appName);
+    // if(!run) app.launchApp(appName);
+    app.launch(appPackage)
     let tagI = 0;
     let limit = 50;
     let countTagI = tag||tagI;
@@ -6181,6 +6191,8 @@ function objToUri(obj) {
 
 function nextAccount() {
     返回首页(300)
+    // 进度提高
+    accounts.progress++;
     for (let i = 0; i < 5; i++) {
         try{
             while (accounts.list.length < 1) {
@@ -6193,8 +6205,6 @@ function nextAccount() {
                 }
                 getAccountList();
             }
-            // 进度提高
-            accounts.progress++;
             log("第" + i + "次切换账号");
             let action = id("title").findOne(1000);
             if(action) {
@@ -6202,15 +6212,32 @@ function nextAccount() {
             }
             log(accounts.list, accounts.progress)
             let un = accounts.list[accounts.progress % accounts.list.length];
-            if(lh_find(text(un),  "切换到账号" + un, 0)
-            ) {
+            if(lh_find(text(un),  "切换账号到" + un, 0)) {
                 log("切换中...进度：",accounts.list.length,"  ===  ",accounts.progress);
                 if(accounts.list.length <= accounts.progress) {
                     console.info("已经完成一轮操作！")
                     exit()
                 }
                 sleep(10000);
-                返回首页(300);
+                let lastAccount = accountInfo;
+                // 加入账号信息检测
+                for (let I = 0; I < 3; I++) {
+                    返回首页(300);
+                    // 点击个人信息，没有点击的情况下不会去尝试获取信息
+                    if(text("Me").findOne(2000).parent().click()) {
+                        // 获取到个人信息s
+                        info = getFansInfo("个人信息", true);
+                        console.info("当前账号信息")
+                        log(info)
+                        console.info("之前账号信息")
+                        log(lastAccount)
+                        if(lastAccount.username != info.username) {
+                            break;
+                        }
+                    } else {
+                        sleep(5000)
+                    }
+                }
                 break;
             }
         }catch(err){
