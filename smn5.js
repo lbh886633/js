@@ -6185,6 +6185,12 @@ function nextAccount() {
         try{
             while (accounts.list.length < 1) {
                 log("账号列表为空！正在重新获取");
+                返回首页();
+                var 我 = text("Me").findOne(1000)
+                if (我) {
+                    log("Me " + 我.parent().click())
+                    sleep(random(1000, 1500))
+                }
                 getAccountList();
             }
             // 进度提高
