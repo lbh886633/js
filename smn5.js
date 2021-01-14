@@ -796,6 +796,7 @@ function 主程序() {
         let j=0;
         // 赞存上一个账号信息
         let lastAccount = accountInfo;
+        let nowAccount;
         for(; j < 5; j++) {
             nextAccount()
             // 加入账号信息检测
@@ -804,10 +805,10 @@ function 主程序() {
                 // 点击个人信息，没有点击的情况下不会去尝试获取信息
                 if(text("Me").findOne(2000).parent().click()) {
                     // 获取到个人信息s
-                    info = getFansInfo("个人信息", true);
+                    nowAccount = getFansInfo("个人信息", true);
                     console.info("当前账号", lastAccount.username)
-                    console.info("切换之前", info.username)
-                    if(lastAccount.username != info.username) {
+                    console.info("切换之前", nowAccount.username)
+                    if(lastAccount.username != nowAccount.username) {
                         break;
                     }
                 } else {
@@ -815,7 +816,8 @@ function 主程序() {
                 }
             }
         }
-        if(5 <= j) {
+        if(lastAccount.username == nowAccount.username) {
+            log(lastAccount.username, nowAccount.username)
             toastLog("账号切换失败！");
             return false;
         }
