@@ -11,6 +11,7 @@ var uti;
         "添加双app支持",
         "完善上传视频功能",
         "修改 默认包名自动获取，头像优先移动",
+        "获取账号列表时加入范围限制"
     ];
     uti = logs.pop();
 }
@@ -6223,10 +6224,20 @@ function getAccountList() {
             }
             // 开局拿到所有账号
             className("android.view.ViewGroup").find().forEach(e => {
-                let text = e.find(className("TextView"));
-                if(1 < text.length && text[0].text() != "Switch account") {
-                    let o = {};
-                    accounts.list.push(text[0].text());
+                // let text = e.find(className("TextView"));
+                // if(1 < text.length && text[0].text() != "Switch account") {
+                //     accounts.list.push(text[0].text());
+                // }
+                let r = e.bounds();
+                // 占满x坐标 y坐标200
+                if(r.right - r.left == device.width
+                    && r.bottom - r.top < device.height*0.13
+                    && r.bottom - r.top > device.height*0.07
+                ) {
+                    let text = e.find(className("TextView"));
+                    if(1 < text.length && text[0].text() != "Switch account") {
+                        accounts.list.push(text[0].text());
+                    }
                 }
             });
             // 跳出
