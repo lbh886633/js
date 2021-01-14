@@ -12,7 +12,8 @@ var uti;
         "完善上传视频功能",
         "修改 默认包名自动获取，头像优先移动",
         "获取账号列表时加入范围限制",
-        "切换账号后进行账号比对"
+        "切换账号后进行账号比对",
+        "优化账号比对"
     ];
     uti = logs.pop();
 }
@@ -792,8 +793,33 @@ function 主程序() {
             }
         }
         toastLog("当前账号操作结束 " + (++whileNumber));
-        nextAccount()
-        返回首页()
+        let j=0;
+        // 赞存上一个账号信息
+        let lastAccount = accountInfo;
+        for(; j < 5; j++) {
+            nextAccount()
+            // 加入账号信息检测
+            for (let I = 0; I < 3; I++) {
+                返回首页(300);
+                // 点击个人信息，没有点击的情况下不会去尝试获取信息
+                if(text("Me").findOne(2000).parent().click()) {
+                    // 获取到个人信息s
+                    info = getFansInfo("个人信息", true);
+                    console.info("当前账号", lastAccount.username)
+                    console.info("切换之前", info.username)
+                    if(lastAccount.username != info.username) {
+                        break;
+                    }
+                } else {
+                    sleep(5000)
+                }
+            }
+        }
+        if(5 <= j) {
+            toastLog("账号切换失败！");
+            return fasle;
+        }
+        // 返回首页()
         log("账号进度", accounts.progress)
     }
 }
@@ -6219,25 +6245,6 @@ function nextAccount() {
                     exit()
                 }
                 sleep(10000);
-                let lastAccount = accountInfo;
-                // 加入账号信息检测
-                for (let I = 0; I < 3; I++) {
-                    返回首页(300);
-                    // 点击个人信息，没有点击的情况下不会去尝试获取信息
-                    if(text("Me").findOne(2000).parent().click()) {
-                        // 获取到个人信息s
-                        info = getFansInfo("个人信息", true);
-                        console.info("当前账号信息")
-                        log(info)
-                        console.info("之前账号信息")
-                        log(lastAccount)
-                        if(lastAccount.username != info.username) {
-                            break;
-                        }
-                    } else {
-                        sleep(5000)
-                    }
-                }
                 break;
             }
         }catch(err){
