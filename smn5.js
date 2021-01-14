@@ -132,7 +132,8 @@ var accounts = {
 };
 var errorEnvi = [];
 var appName = "TikTok";
-var appPackage = "com.zhiliaoapp.musically" || app.getPackageName(appName);
+// var appPackage = "com.zhiliaoapp.musically" || app.getPackageName(appName);
+var appPackage = app.getPackageName(appName);
 var color = "#fb2f2d";
 var survive = true;
 var Exit = exit;
@@ -280,7 +281,7 @@ ui.layout(
                                 </radiogroup>
                             </vertical>
                             <linear>
-                                    <checkbox id="switchVersion" text="切换版本" />
+                                    <checkbox id="switchVersion" text="切换ss版本" />
                                     <checkbox id="repScript" text="回复脚本" />
                                     <checkbox id="createAccount" text="生成邮箱" />
                                     <checkbox id="daily" text="日常模式" />
@@ -4546,7 +4547,8 @@ function mi6注册模式() {
             }
         }
         for (let i = 0; i < 5; i++) {
-            lh_find(id("title"), "顶部账号栏", 0, 500)
+            lh_find(text("Sign up").clickable(true), "Sign up", 0, 300)
+            lh_find(id("title"), "顶部账号栏", 0, 200)
             if(!lh_find(text("Add account"), "添加账号", 0, 500)) { 
                 // 查询是否已经存在了三个账号
                 getAccountList();
