@@ -817,7 +817,7 @@ function 主程序() {
         }
         if(5 <= j) {
             toastLog("账号切换失败！");
-            return fasle;
+            return false;
         }
         // 返回首页()
         log("账号进度", accounts.progress)
