@@ -312,9 +312,9 @@ ui.layout(
                                 </linear>
                                 <linear padding="5 0 0 0">
                                     <text textColor="black" text="关注数量: " />
-                                    <input lines="1" id="gzsl" w="auto" text="20" />
+                                    <input lines="1" id="gzsl" w="auto" text="200" />
                                     <text textColor="black" text="~" />
-                                    <input lines="1" id="gzsl1" w="auto" text="20" />
+                                    <input lines="1" id="gzsl1" w="auto" text="200" />
                                     <text textColor="black" text="个,每次间隔" />
                                     <input lines="1" id="gzjg" w="auto" text="210" />
                                     <text textColor="black" text="~" />
@@ -814,6 +814,10 @@ function 主程序() {
                 } else {
                     sleep(5000)
                 }
+            }
+            if(lastAccount.username != nowAccount.username) {
+                log("账号切换完成")
+                break;
             }
         }
         if(lastAccount.username == nowAccount.username) {
@@ -1657,7 +1661,7 @@ function mi6关注操作(num) {
     计数 = num || 0;
 
     let 新链接 = 取链接()
-    app.openUrl(新链接)
+    openUrlAndSleep3s(新链接)
     sleep(1000)
     for (let index = 0; index < 10; index++) {
         var 打开方式 = textContains("TikTok").visibleToUser().findOne(2000)
@@ -3141,7 +3145,7 @@ function 发送消息() {
         fans = 拿一个有链接的粉丝信息();
         if(fans) {
             // 打开链接
-            app.openUrl(fans.url);
+            openUrlAndSleep3s(fans.url);
 
             var 打开方式 = text("TikTok").visibleToUser().findOne(3000)
             if (打开方式) {
@@ -6273,12 +6277,16 @@ function getAccountList() {
                 let r = e.bounds();
                 // 占满x坐标 y坐标200
                 if(r.right - r.left == device.width
-                    && r.bottom - r.top < device.height*0.13
-                    && r.bottom - r.top > device.height*0.07
+                    && 
+                    ( (r.bottom - r.top < device.height*0.13
+                        && r.bottom - r.top > device.height*0.07)
+                    || (r.bottom - r.top < 220
+                        && r.bottom - r.top > 180)
+                    )
                 ) {
                     let text = e.find(className("TextView"));
-                    if(1 < text.length && text[0].text() != "Switch account") {
-                        accounts.list.push(text[0].text());
+                    if(text.length == 2) {
+                        accounts.list.push(text.pop().text());
                     }
                 }
             });
@@ -6303,7 +6311,7 @@ function 任务发送指定消息() {
         log(fans)
         if(fans) {
             // 打开链接
-            app.openUrl(fans.url);
+            openUrlAndSleep3s(fans.url);
             var 打开方式 = text("TikTok").visibleToUser().findOne(3000)
             if (打开方式) {
                 log("选择TikTok", 打开方式.parent().parent().click())
@@ -6346,4 +6354,42 @@ function 循环执行(数组, 等待时间) {
  
         进度++;
     }
+}
+function openUrlAndSleep3s(url,s) {
+    let ch = url.substring(url.indexOf("//")+2, url.indexOf(".com"));
+    let mapKey;
+    var map = {
+        "app-va.tiktokv.com": "",
+        "m.tiktok": "t.tiktok",
+        "vm.tiktok": "vt.tiktok",
+        "app-va.tiktok": "www.tiktokv",
+        "www.tiktok": "www.tiktok"
+    }
+    if(!map[ch]) {
+        // re 为key
+        for (let k in map) {
+            if(map[k] == ch) {
+                mapKey = k;
+                break;
+            }
+        }
+    } else {
+        mapKey = ch;
+    }
+    if(appPackage.indexOf("zhiliaoapp") > -1) {
+        if(mapKey != ch) {
+            // 当前url不合适当前版本，进行切换
+            url = url.replace(ch,mapKey)
+        }
+    } else {
+       if(mapKey == ch) {
+            url = url.replace(ch,map[mapKey])
+       }
+    }
+    app.startActivity({ 
+        action: "android.intent.action.VIEW", 
+        data: url, 
+        packageName: appPackage, 
+    });
+    sleep(s||3000);
 }
