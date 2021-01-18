@@ -285,8 +285,8 @@ ui.layout(
                                 </radiogroup>
                             </vertical>
                             <linear>
-                                    <checkbox id="switchVersion" text="ss版本" />
-                                    <checkbox id="switchVersionzl" text="zl版本" />
+                                    <checkbox id="switchVersion" text="长版本号" />
+                                    <checkbox id="switchVersionzl" text="短版本号" />
                                     <checkbox id="repScript" text="回复脚本" />
                                     <checkbox id="createAccount" text="生成邮箱" />
                                     <checkbox id="daily" text="日常模式" />
@@ -2592,8 +2592,10 @@ function 采集粉丝信息() {
     // text("Followers").boundsInside(520, 670, 920, 730).find().length
     // clickAction(function () { return text("Followers").boundsContains(523, 679, 916, 720).findOne(200).parent() }, 500, 600)
     // 谷歌手机的分辨率
-    // clickAction(function () { return text("Followers").boundsInside(520, 670, 920, 730).findOne(200).parent() }, 500, 600)
-    lh_find(text("Followers").boundsInside(400, 700, 700, 800), "粉丝", 0)
+    // clickAction(function () { return text("Followers").boundsInside(400, 700, 700, 800).findOne(200).parent() }, 500, 600)
+    lh_find(text("Followers").boundsInside(device.width*0.3, 0, device.width*0.7, device.height), "粉丝", 0)
+// 三星
+    // lh_find(text("Followers").boundsInside(520, 710, 920, 760), "粉丝", 0)
     // 4. 采集粉丝信息
     fansNameList = server.get("fans/list/username?accountUsername="+accountInfo.username);
     log("已采集过的粉丝数量：", fansNameList.length)
@@ -2754,7 +2756,8 @@ function getFansList(fansNameList, fansList, all) {
             })
             log("相似度：" + similar/tempList.length)
             // 当相似性超过8成时跳出循环
-            if(similar/tempList.length > 0.8 && 5 < closeTag++){
+            if( isNaN(similar/tempList.length)
+                || similar/tempList.length > 0.8 && 5 < closeTag++){
                 console.warn("到底了")
                 break;
             }
@@ -3335,7 +3338,7 @@ function getHelloMessage() {
  * 需要一个消息
  * @param {Object} f fans对象
  * @param {String} msg 消息
- * @returns {Object} 不在粉丝信息页面返回fasle 返回值 {status:状态, sender:发送者名字, msg:消息, perfix:前缀, suffix:后缀, code:编码(子控件数量集)}
+ * @returns {Object} 不在粉丝信息页面返回false 返回值 {status:状态, sender:发送者名字, msg:消息, perfix:前缀, suffix:后缀, code:编码(子控件数量集)}
  */
 function sayHello(f, msg){
     f = f || {};
@@ -4758,7 +4761,7 @@ function mi6注册模式() {
                     }
 
                     log("验证码已过")
-                    // 失败返回fasle，在true的时候会跳出注册模式
+                    // 失败返回false，在true的时候会跳出注册模式
                     tempSave.continue = 过验证码后();
                     log("注册结果：", tempSave.continue?"成功":"失败");
                 }
