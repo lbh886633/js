@@ -1754,7 +1754,15 @@ function mi6关注操作(num) {
 }
 
 function 取链接() {
-    let r = server.get("url/low").url;
+    let r;
+    while (typeof r == "undefined") {
+        try {
+            log("正在获取链接")
+            r = server.get("url/low").url;
+        }catch(e){
+            console.verbose(e);
+        }
+    }
     if(!r){
         throw "获取链接失败！";
     }
