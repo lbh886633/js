@@ -13,7 +13,8 @@ var uti;
         "修改 默认包名自动获取，头像优先移动",
         "获取账号列表时加入范围限制",
         "切换账号后进行账号比对",
-        "优化账号比对"
+        "优化账号比对",
+        "优化权限检查",
     ];
     uti = logs.pop();
 }
@@ -31,7 +32,6 @@ var tempSave = {
 var server = {
     serverUrl: "http://3617233570.picp.vip/tiktokjs/",
     add: function (uri, o) {
-        return false;
         this.sendData(this.serverUrl + uri + "/add", o);
     },
     edit: function (uri, o) {
@@ -226,15 +226,18 @@ exit = function () {
 threads.start(function () {
     let i = 0;
     while(survive){
-        if(i==0) {
-            popupDetection();
-        } else {
-            action = text("Okay").findOne(30);
-            if(action) action.click();
-            
-            if(30 < i) i = 0;
+        popupDetection();
+        {
+            // if(i==0) {
+            //     popupDetection();
+            // } else {
+            //     action = text("Okay").findOne(30);
+            //     if(action) action.click();
+                
+            //     if(30 < i) i = 0;
+            // }
         }
-        sleep(100);
+        sleep(2000);
     }
 })
 
@@ -1449,7 +1452,7 @@ function lh_find(obj, msg, dj, time) {
         if (msg) {
             console.log("没找到 " + msg)
         } else {
-            console.log("没找到 ")
+            // console.log("没找到 ")
         }
     }
 }
@@ -1953,15 +1956,32 @@ function 上传视频() {
                 let re = this.uo.click();
                 log("点击" + this.标题, re)
                 if (re) {
-                    log("权限检查(最长20秒)");
-                    for (let i = 0; i < 5; i++) {
-                        if(text("Upload").visibleToUser().findOne(3000)){
-                            break;
-                        }
-                        lh_find(text("允许") ,"",0,300)
-                        lh_find(text("ALLOW"),"",0,300)
-                        lh_find(text("Allow"),"",0,300)
+                    {
+                        // log("权限检查(最长20秒)");
+                        // for (let i = 0; i < 5; i++) {
+                        //     if(text("Upload").visibleToUser().findOne(3000)){
+                        //         break;
+                        //     }
+                        //     lh_find(text("允许") ,"",0,300)
+                        //     lh_find(text("ALLOW"),"",0,300)
+                        //     lh_find(text("Allow"),"",0,300)
+                        // }
                     }
+                }
+            }
+        },
+        {
+            标题: "权限检查",
+            uo: null,
+            检测: function() {
+                this.uo = text("ALLOW").findOne(100) || text("Allow").findOne(50) || text("允许").findOne(50);
+                return this.uo
+            },
+            执行: function() {
+                let re = this.uo.click();
+                log("点击" + this.标题, re)
+                if (re) {
+                    
                 }
             }
         },
@@ -2406,18 +2426,35 @@ function 更换头像() {
                 let re = this.uo.click();
                 log("点击" + this.标题, re)
                 if (re) {
-                    // 检测系统权限
-                    console.verbose("检测是否需要权限");
-                    for (let i = 0; i < 10; i++) {
-                        // 系统授权
-                        action = text("ALLOW").findOne(100);
-                        if(action) action.click(); 
-                        action = text("Allow").findOne(50);
-                        if(action) action.click(); 
-                        action = text("允许").findOne(50);
-                        if(action) action.click(); 
-                        if(text("All media").findOne(100)) break;
+                    {
+                        // // 检测系统权限
+                        // console.verbose("检测是否需要权限");
+                        // for (let i = 0; i < 10; i++) {
+                        //     // 系统授权
+                        //     action = text("ALLOW").findOne(100);
+                        //     if(action) action.click(); 
+                        //     action = text("Allow").findOne(50);
+                        //     if(action) action.click(); 
+                        //     action = text("允许").findOne(50);
+                        //     if(action) action.click(); 
+                        //     if(text("All media").findOne(100)) break;
+                        // }
                     }
+                }
+            }
+        },
+        {
+            标题: "权限检查",
+            uo: null,
+            检测: function() {
+                this.uo = text("ALLOW").findOne(100) || text("Allow").findOne(50) || text("允许").findOne(50);
+                return this.uo
+            },
+            执行: function() {
+                let re = this.uo.click();
+                log("点击" + this.标题, re)
+                if (re) {
+                    
                 }
             }
         },
@@ -6159,8 +6196,7 @@ function popupDetection(time) {
             if (action) action.click();
             action = text("Allow").findOne(t*0.4);
             if (action) action.click();
-            action = text("允许").findOne(t*0.4);
-            if (action) action.click();
+            lh_find(text("允许"),null,0,t*0.4)
         },
         function (t) {   // CANCEL 取消弹窗，一般是账号不存在
             action = packageName(appPackage).text("CANCEL").findOne(t)
