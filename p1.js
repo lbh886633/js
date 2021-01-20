@@ -6327,8 +6327,6 @@ function getAccountList() {
                 //     accounts.list.push(text[0].text());
                 // }
                 let r = e.bounds();
-                log("r.right - r.left  ", r.right - r.left)
-                log("r.bottom - r.top  ", r.bottom - r.top)
                 // 占满x坐标 y坐标200
                 if(r.right - r.left == device.width
                     && 
@@ -6339,8 +6337,7 @@ function getAccountList() {
                     )
                 ) {
                     let text = e.find(className("TextView"));
-                    log("text.length  ",text.length)
-                    if(text.length == 2) {
+                    if(1 < text.length) {
                         accounts.list.push(text.pop().text());
                     }
                 }
