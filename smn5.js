@@ -2647,6 +2647,7 @@ function 采集粉丝信息() {
     fansNameList = server.get("fans/list/username?accountUsername="+accountInfo.username);
     log("已采集过的粉丝数量：", fansNameList.length)
     getFansList(fansNameList, fansList, "all")
+    返回首页()
 }
 
 /**
