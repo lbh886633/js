@@ -2797,10 +2797,12 @@ function getFansList(fansNameList, fansList, all) {
             }
             // 判断本次列表是否和上次相同
             let similar = 0;
-            tempList.forEach(e=>{
-                if(tempSave.tempList.indexOf(e)>-1)
-                    similar++;
-            })
+            if(tempSave.tempList) {
+                tempList.forEach(e=>{
+                    if(tempSave.tempList.indexOf(e)>-1)
+                        similar++;
+                })
+            }
             log("相似度：" + similar/tempList.length)
             // 当相似性超过8成时跳出循环
             if( isNaN(similar/tempList.length)
