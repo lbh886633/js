@@ -6338,7 +6338,7 @@ function getAccountList() {
                 ) {
                     let text = e.find(className("TextView"));
                     if(1 < text.length) {
-                        accounts.list.push(text.pop().text());
+                        accounts.list.push(text[1].text());
                     }
                 }
             });
