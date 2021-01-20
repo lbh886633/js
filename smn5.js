@@ -6342,6 +6342,13 @@ function getAccountList() {
                     }
                 }
             });
+            // 获取到的账号列表小于8个时提示是否重新获取
+            if(accounts.list.length < 8) {
+                if(confirm("是否重新获取？当前获取到的账号列表如下：",accounts.list.join("\n"))){
+                    // 跳过本次，重新获取
+                    continue;
+                }
+            }
             // 跳出
             break;
         }catch(e){}
