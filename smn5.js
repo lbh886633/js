@@ -2805,13 +2805,12 @@ function getFansList(fansNameList, fansList, all) {
                     similar++;
             })
         }
-            log("相似度：" + similar/tempList.length)
-            // 当相似性超过8成时跳出循环
-            if( isNaN(similar/tempList.length)
-                || similar/tempList.length > 0.8 && 5 < closeTag++){
-                console.warn("到底了")
-                break;
-            }
+        log("相似度：" + similar/tempList.length, "   标记：",closeTag)
+        // 当相似性超过8成时跳出循环
+        if(!isNaN(similar/tempList.length) && similar/tempList.length > 0.8 && 5 < closeTag++){
+            console.warn("到底了")
+            break;
+        }
         }
         // 将本次暂存数据保存起来用于下次对比
         tempSave.tempList = tempList;
