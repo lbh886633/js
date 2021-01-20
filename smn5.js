@@ -2751,7 +2751,7 @@ function getFansList(fansNameList, fansList, all) {
 
                         //  发送私信
                         if(ui.getsay.checked){
-                            随机拿到一条信息
+                            // 随机拿到一条信息
                             tempSave.getSayMessage = getHelloMessage();
                             if(isNaN(tempSave.NUMBER)) tempSave.NUMBER = 1;
                             // let newMsg = Date.now().toString().substring(10) + "> " + (tempSave.getSayMessage||"Hi~");
