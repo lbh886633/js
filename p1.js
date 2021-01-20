@@ -2640,6 +2640,10 @@ function 采集粉丝信息() {
     getFansNum = 0
     // 2. 点击 我 ，确保在个人信息页面
     clickAction(text("Me"), 50)
+    if(accountInfo.fansNumber < 1) {
+        console.warn("粉丝数量为0")
+        return false;
+    }
     // 3. 点击粉丝
     // text("Followers").boundsInside(520, 670, 920, 730).find().length
     // clickAction(function () { return text("Followers").boundsContains(523, 679, 916, 720).findOne(200).parent() }, 500, 600)
@@ -2651,7 +2655,24 @@ function 采集粉丝信息() {
     // 4. 采集粉丝信息
     fansNameList = server.get("fans/list/username?accountUsername="+accountInfo.username);
     log("已采集过的粉丝数量：", fansNameList.length)
-    getFansList(fansNameList, fansList, "all")
+    // 扫描全部
+    let allTag=true;
+    // 粉丝列表小于等于服务器保存的记录则给用户提示，是否继续采集粉丝
+    if(fansNameList.length <= accountInfo.fansNumber) {
+        if(autoConfirm(5000,fasle, "粉丝似乎已经全部采集，是否继续采集？",
+            "当前粉丝数："+fansNameList.length+"\n已保存的粉丝数："+accountInfo.fansNumber)) {
+            allTag = false;
+        } else {
+            // 跳出本次扫描
+            return false;
+        }
+    } else {
+        if(20 < accountInfo.fansNumber) {
+            // 服务器记录大于20则进行局部扫描
+            allTag = false;
+        }
+    }
+    getFansList(fansNameList, fansList, allTag)
     返回首页()
 }
 
@@ -2691,6 +2712,10 @@ function getFansList(fansNameList, fansList, all) {
         let FollowerList = FollowerParent.children();
         // 分数
         let score = 0;
+        if(FollowerList.length < 1) {
+            log("无粉丝")
+            break;
+        }
 
         // 处理当前列表
         for (let fi = 0; fi < FollowerList.length; fi++) {
@@ -6456,4 +6481,29 @@ function openUrlAndSleep3s(url,s) {
         packageName: appPackage, 
     });
     sleep(s||3000);
+}
+function autoConfirm(num, choose, title, content, callback) {
+    threads.start(function(){
+        let arr=[];
+        if(choose) arr= ["确定","OK"];
+        else arr = ["取消","CANCEL"];
+        try{
+            sleep(num||3000)
+        }catch(e){
+            console.error(e)
+            sleep(3000)
+        }
+        let action;
+        for (let i = 0; i < 5; i++) {
+            arr.forEach((t)=>{
+                action = text(t).findOne(500)
+                if(action && action.click()) {
+                    log("点击成功");
+                    return;
+                }
+            })
+        }
+        toastLog("点击失败！");
+    })
+    return confirm(title, content, callback);
 }
