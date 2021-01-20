@@ -2645,23 +2645,14 @@ function 采集粉丝信息() {
         console.warn("粉丝数量为0")
         return false;
     }
-    // 3. 点击粉丝
-    // text("Followers").boundsInside(520, 670, 920, 730).find().length
-    // clickAction(function () { return text("Followers").boundsContains(523, 679, 916, 720).findOne(200).parent() }, 500, 600)
-    // 谷歌手机的分辨率
-    // clickAction(function () { return text("Followers").boundsInside(400, 700, 700, 800).findOne(200).parent() }, 500, 600)
-    lh_find(text("Followers").boundsInside(device.width*0.3, 0, device.width*0.7, device.height), "粉丝", 0)
-    // 三星
-    // lh_find(text("Followers").boundsInside(520, 710, 920, 760), "粉丝", 0)
-    // 4. 采集粉丝信息
     fansNameList = server.get("fans/list/username?accountUsername="+accountInfo.username);
     log("已采集过的粉丝数量：", fansNameList.length)
     // 扫描全部
     let allTag=true;
     // 粉丝列表小于等于服务器保存的记录则给用户提示，是否继续采集粉丝
-    if(fansNameList.length <= accountInfo.fansNumber) {
+    if(accountInfo.fansNumber <= fansNameList.length) {
         if(autoConfirm(5000,false, "粉丝似乎已经全部采集，是否继续采集？",
-            "当前粉丝数："+fansNameList.length+"\n已保存的粉丝数："+accountInfo.fansNumber)) {
+            "当前粉丝数："+fansNameList.length+"\n已保存的粉丝数：" + accountInfo.fansNumber)) {
             allTag = false;
         } else {
             // 跳出本次扫描
@@ -2673,6 +2664,15 @@ function 采集粉丝信息() {
             allTag = false;
         }
     }
+    // 3. 点击粉丝
+    // text("Followers").boundsInside(520, 670, 920, 730).find().length
+    // clickAction(function () { return text("Followers").boundsContains(523, 679, 916, 720).findOne(200).parent() }, 500, 600)
+    // 谷歌手机的分辨率
+    // clickAction(function () { return text("Followers").boundsInside(400, 700, 700, 800).findOne(200).parent() }, 500, 600)
+    // 三星
+    // lh_find(text("Followers").boundsInside(520, 710, 920, 760), "粉丝", 0)
+    lh_find(text("Followers").boundsInside(device.width*0.3, 0, device.width*0.7, device.height), "粉丝", 0);
+    // 4. 采集粉丝信息
     getFansList(fansNameList, fansList, allTag)
     返回首页()
 }
