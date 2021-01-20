@@ -2,6 +2,7 @@
 // https://lbh886633.github.io/js/script.js
 
 var uti;
+var fasle = false;
 {
     let logs = [
         "从第24版本开始使用这种方式",
@@ -2659,7 +2660,7 @@ function 采集粉丝信息() {
     let allTag=true;
     // 粉丝列表小于等于服务器保存的记录则给用户提示，是否继续采集粉丝
     if(fansNameList.length <= accountInfo.fansNumber) {
-        if(autoConfirm(5000,fasle, "粉丝似乎已经全部采集，是否继续采集？",
+        if(autoConfirm(5000,false, "粉丝似乎已经全部采集，是否继续采集？",
             "当前粉丝数："+fansNameList.length+"\n已保存的粉丝数："+accountInfo.fansNumber)) {
             allTag = false;
         } else {
