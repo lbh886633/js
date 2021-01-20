@@ -6327,8 +6327,17 @@ function getAccountList() {
                 //     accounts.list.push(text[0].text());
                 // }
                 let r = e.bounds();
+                log("r.right - r.left  ", r.right - r.left)
+                log("r.bottom - r.top  ", r.bottom - r.top)
                 // 占满x坐标 y坐标200
-                if(r.right - r.left == device.width
+                if(
+                    r.right - r.left == device.width
+                    // (
+                    // // 最长和屏幕宽度一样
+                    //     r.right - r.left <= device.width
+                    //     // 最短要有屏幕的8成
+                    //     &&  r.right - r.left > device.width * 0.8
+                    // )
                     && 
                     ( (r.bottom - r.top < device.height*0.13
                         && r.bottom - r.top > device.height*0.07)
@@ -6337,6 +6346,7 @@ function getAccountList() {
                     )
                 ) {
                     let text = e.find(className("TextView"));
+                    log("text.length  ",text.length)
                     if(text.length == 2) {
                         accounts.list.push(text.pop().text());
                     }
@@ -6346,6 +6356,7 @@ function getAccountList() {
             if(accounts.list.length < 8) {
                 if(confirm("是否重新获取？当前获取到的账号列表如下：",accounts.list.join("\n"))){
                     // 跳过本次，重新获取
+                    accounts.list=[];
                     continue;
                 }
             }
