@@ -808,20 +808,24 @@ function 主程序() {
             // 加入账号信息检测
             for (let I = 0; I < 3; I++) {
                 返回首页(300);
-                // 点击个人信息，没有点击的情况下不会去尝试获取信息
-                if(text("Me").findOne(2000).parent().click()) {
-                    // 获取到个人信息s
-                    nowAccount = getFansInfo("个人信息", true);
-                    console.info("当前账号", lastAccount.username)
-                    console.info("切换之前", nowAccount.username)
-                    if(lastAccount.username != nowAccount.username) {
-                        break;
+                try{
+                    // 点击个人信息，没有点击的情况下不会去尝试获取信息
+                    if(text("Me").findOne(2000).parent().click()) {
+                        // 获取到个人信息s
+                        nowAccount = getFansInfo("个人信息", true);
+                        console.info("切换之前", lastAccount.username)
+                        console.info("当前账号", nowAccount.username)
+                        if(lastAccount.username != nowAccount.username) {
+                            break;
+                        }
+                    } else {
+                        sleep(5000)
                     }
-                } else {
-                    sleep(5000)
+                }catch(e){
+                    console.log(e)
                 }
             }
-            if(lastAccount.username != nowAccount.username) {
+            if(lastAccount.username != [nowAccount.username||""]) {
                 log("账号切换完成")
                 break;
             }
