@@ -363,7 +363,7 @@ ui.layout(
                                     <checkbox id="replymsg" text="回复消息" />
                                     <checkbox id="sayhellobyurl" text="链接问候" />
                                     <checkbox id="sayhellobysearch" text="搜索问候" />
-                                    <checkbox id="getsay" text="采集发送" />
+                                    <checkbox id="getsay" checked="true" text="采集发送" />
                                 </linear>
                                 <linear padding="10 1 ">
                                     <img bg="#C3916A" w="*" h="1"/>
