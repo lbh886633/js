@@ -2667,7 +2667,7 @@ function getFansList(fansNameList, fansList, all) {
     }catch(e){fansList=[]}
 
     log("开始")
-    let i=0, tempList = [], tempSave = [], closeTag;
+    let i=0, tempList = [], tempSave = [], closeTag = 0;
     sleep(1000)
     while(true){
         sleep(200)
