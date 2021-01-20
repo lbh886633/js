@@ -356,7 +356,8 @@ ui.layout(
                                     <checkbox id="ghtx" text="更换头像" />
                                     <checkbox id="scsp" text="上传视频" />
                                 </linear>
-                                <linear h="{{tempSave.privacy||0}}">
+                                {/* <linear h="{{tempSave.privacy||0}}"> */}
+                                <linear h="30">
                                     <checkbox id="replymsg" text="回复消息" />
                                     <checkbox id="sayhellobyurl" text="链接问候" />
                                     <checkbox id="sayhellobysearch" text="搜索问候" />
@@ -2717,20 +2718,20 @@ function getFansList(fansNameList, fansList, all) {
                         let fans = getFansInfo(username);
 
                         //  发送私信
-                        // if(ui.getsay.checked){
-                            // 随机拿到一条信息
-                            // tempSave.getSayMessage = getHelloMessage();
-                            // if(isNaN(tempSave.NUMBER)) tempSave.NUMBER = 1;
-                            // // let newMsg = Date.now().toString().substring(10) + "> " + (tempSave.getSayMessage||"Hi~");
-                            // let newMsg = (tempSave.getSayMessage||"Hi~");
-                            // let re = sayHello(fans, newMsg);
-                            // if(re){
-                            //     console.info("消息发送状态", re.status);
-                            // } else {
-                            //     log("发送失败")
-                            // }
-                            // console.verbose(re)
-                        // }
+                        if(ui.getsay.checked){
+                            随机拿到一条信息
+                            tempSave.getSayMessage = getHelloMessage();
+                            if(isNaN(tempSave.NUMBER)) tempSave.NUMBER = 1;
+                            // let newMsg = Date.now().toString().substring(10) + "> " + (tempSave.getSayMessage||"Hi~");
+                            let newMsg = (tempSave.getSayMessage||"Hi~");
+                            let re = sayHello(fans, newMsg);
+                            if(re){
+                                console.info("消息发送状态", re.status);
+                            } else {
+                                log("发送失败")
+                            }
+                            console.verbose(re)
+                        }
 
                         // 返回粉丝列表
                         for (var i = 0; i < 5; i++) {
