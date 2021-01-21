@@ -2693,7 +2693,7 @@ function getFansList(fansNameList, fansList, all) {
     }catch(e){fansList=[]}
 
     log("开始")
-    let i=0, tempList = [], tempSave = [], closeTag = 0;
+    let i=0, tempList = [], tempSave = [], closeTag = 0, zeroFans=0;
     sleep(1000)
     while(true){
         sleep(200)
@@ -2715,8 +2715,10 @@ function getFansList(fansNameList, fansList, all) {
         // 分数
         let score = 0;
         if(FollowerList.length < 1) {
-            log("无粉丝")
-            break;
+            if(2 < zeroFans++){
+                log("无粉丝")
+                break;
+            }
         }
 
         // 处理当前列表
