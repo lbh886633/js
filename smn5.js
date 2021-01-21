@@ -2704,7 +2704,7 @@ function getFansList(fansNameList, fansList, all) {
                             .filter(function(uo){
                                 return uo.bounds().right - uo.bounds().left > device.width*0.5;
                             }).findOne(3000)
-        if((!textContains("FOLLOWERS").findOne(500) || !textContains("粉絲").findOne(500)) || !FollowerParent) {
+        if(!(textContains("FOLLOWERS").findOne(500) || textContains("粉絲").findOne(500)) || !FollowerParent) {
             log("未获取到粉丝列表！如果脚本卡住，请手动进入粉丝列表")
             sleep(3000);
             continue;
