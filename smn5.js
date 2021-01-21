@@ -4265,7 +4265,10 @@ function 消息处理(fans,newMsgList){
         for (let tag in tempSave.RequiredLabels) {   // 拿到当前标签内容 包括 label（标签） words（关键字） info（信息）
             tag = tempSave.RequiredLabels[tag].label;
             // label: '{"label": "国家","words": "usa", "info": ["where are you from?"]}'
-            tag = JSON.parse(tag);
+            log(tag)
+            try{
+                tag = JSON.parse(tag);
+            }catch(e){log(e)}
             // 如果当前单词存在于标签中，则进行保存，将其转换成小写
             if(-1 < tag.words.toLowerCase().indexOf(w)){
                 // 判断是否存在当前标签，没有就创建
