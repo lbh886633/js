@@ -3180,8 +3180,8 @@ function mi6回复消息() {
     log("新消息总数量：", newMsgCount)
     // 根据条件选择是否进入私信界面
     if(newMsgCount>0) {
-        // 进行下一步，可选没有新消息就直接开始下一个
-        lh_find(className("android.widget.ImageView").clickable(true), "点击私信", 0)
+        // 进行下一步，可选没有新消息就直接开始下一个，明天再改成计算的
+        if(lh_find(className("android.widget.ImageView").boundsInside(970,90,1050,160).clickable(false), "点击私信", 0)) {
         // 2.5. 获取列表，可以用于滚动
         actionRecycler = className("androidx.recyclerview.widget.RecyclerView")
                 .boundsInside(0, 200, device.width, device.height)
@@ -3216,6 +3216,9 @@ function mi6回复消息() {
             console.warn("可能还剩余", newMsgCount, "条消息未被处理");
         }
     } else {
+        log("点击失败")
+    }
+} else {
         log("没有新消息")
     }
     log("回复消息结束")
@@ -4402,6 +4405,142 @@ function 获取一条消息(path) {
  * @param {Number} num 第几个,从0开始,默认 0
  */
 function 搜索进入(str,tab,num){
+    let result;
+    let 操作 = [
+        {
+            标题: "返回首页",
+            uo: null,
+            检测: function() {
+                this.uo = !text("Me").visibleToUser().exists();
+                return this.uo
+            },
+            执行: function() {
+                返回首页();
+            }
+        },
+        {
+            标题: "切换到搜索页",
+            uo: null,
+            检测: function() {
+                this.uo = text("Discover").findOne(1000)
+                return this.uo
+            },
+            执行: function() {
+                let re = this.uo.parent().click();
+                log("点击" + this.标题, re)
+                if (re) {
+                    
+                }
+            }
+        },
+        {
+            标题: "点击搜索框",
+            uo: null,
+            检测: function() {
+                this.uo = text("Search").findOne(1000)
+                return this.uo
+            },
+            执行: function() {
+                let re = click(this.uo.bounds().right-5, this.uo.bounds().centerY());
+                log("点击" + this.标题, re)
+                if (re) {
+                    log("设置文字")
+                    this.uo.setText(str||"test")
+                }
+            }
+        },
+        {
+            标题: "点击搜索",
+            uo: null,
+            检测: function() {
+                this.uo = text("Search").findOne(1000)
+                return this.uo
+            },
+            执行: function() {
+                let r = this.uo.bounds();
+                let re = click(r.centerX(), r.centerY());
+                log("点击" + this.标题, re)
+                if (re) {
+                    
+                }
+            }
+        },
+        {
+            标题: "点击用户/其它",
+            uo: null,
+            检测: function() {
+                this.uo = text(tab||"USERS").findOne(1000)
+                return this.uo
+            },
+            执行: function() {
+                let handleRe;
+
+                循环执行([
+                    {
+                        标题: "点击标题",
+                        uo: null,
+                        检测: function() {
+                            this.uo = text(tab||"USERS").findOne(1000)
+                            return this.uo
+                        },
+                        执行: function() {
+                            let re = this.uo.parent().click();
+                            log("点击" + this.标题, re)
+                            if (re) {
+                                等待加载();
+                            }
+                        }
+                    },
+                    {
+                        uo: null,
+                        检测: function() {
+                            this.uo = text(tab||"USERS").findOne(1000).parent().selected()
+                            return this.uo
+                        },
+                        执行: function() {
+                            let re = this.uo;
+                            log("点击第一个");
+                            let i = 0;
+                            for (; i < 5; i++) {
+                                let a = className("androidx.recyclerview.widget.RecyclerView").boundsContains(100,400,100,100).findOne(2000)
+                                if(a) {
+                                    try{
+                                        a.children()[num||0].click()
+                                        break;
+                                    } catch (err) {
+                                        log("点击指定第"+num+"条数据失败");
+                                        try{
+                                            a.children()[0].click()
+                                            break;
+                                        } catch (errr){
+                                            console.error("点击第一条数据失败",errr);
+                                        }
+                                    }
+                                }
+                            }
+                            handleRe = true;
+                            result = i < 5;
+                            return "跳出循环执行";
+                        }
+                    },
+                ])
+                if(handleRe) return "跳出循环执行";
+                log("进入失败，回退")
+            }
+        },
+    ]
+    循环执行(操作)
+    return result;
+}
+
+/**
+ * 在主页使用
+ * 通过搜索str进入tab列表点击第num条数据
+ * @param {String} str 选择的分类,默认 "test"
+ * @param {String} tab 选择的分类,默认 "USERS"
+ * @param {Number} num 第几个,从0开始,默认 0
+ */
+function 搜索进入1(str,tab,num){
     // 1. 进入搜索页面
     let action = text("Discover").findOne(1000)
     log(action)
@@ -6403,18 +6542,26 @@ function 任务发送指定消息() {
         fans = server.get("taskFans/urlexist?username=" + accountInfo.username);
         log(fans)
         if(fans) {
-            // 打开链接
-            openUrlAndSleep3s(fans.url);
-            var 打开方式 = text("TikTok").visibleToUser().findOne(3000)
-            if (打开方式) {
-                log("选择TikTok", 打开方式.parent().parent().click())
-                sleep(1500)
-            }
-            var 始终 = text("始终").visibleToUser().findOne(3000)
-            if (始终) {
-                log("始终 " + 始终.click())
+            if(5 < fans.url.length){
+                log("通过链接发消息")
+                // 打开链接
+                openUrlAndSleep3s(fans.url);
+                var 打开方式 = text("TikTok").visibleToUser().findOne(1000)
+                if (打开方式) {
+                    log("选择TikTok", 打开方式.parent().parent().click())
+                    sleep(1500)
+                }
+                var 始终 = text("始终").visibleToUser().findOne(1000)
+                if (始终) {
+                    log("始终 " + 始终.click())
+                }
+            } else {
+                log("通过搜索名字发消息")
+                // 通过搜索进入
+                搜索进入(fans.username, "USERS", 0);
             }
             sleep(1000);
+            // 发送一条消息
             let re = sayHello(fans, fans.sendMsg)
             if(re){
                 // 上传本次的结果
