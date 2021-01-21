@@ -2700,7 +2700,8 @@ function getFansList(fansNameList, fansList, all) {
         等待加载(100, 500);
         // 获取粉丝列表父控件
         let FollowerParent = depth(9).className("androidx.recyclerview.widget.RecyclerView")
-                            .packageName(appPackage).filter(function(uo){
+                            // .packageName(appPackage)
+                            .filter(function(uo){
                                 return uo.bounds().right - uo.bounds().left > device.width*0.5;
                             }).findOne(3000)
         if(!textContains("FOLLOWERS").findOne(500) || !FollowerParent) {

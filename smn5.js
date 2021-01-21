@@ -2700,13 +2700,10 @@ function getFansList(fansNameList, fansList, all) {
         等待加载(100, 500);
         // 获取粉丝列表父控件
         let FollowerParent = depth(9).className("androidx.recyclerview.widget.RecyclerView")
-                            .packageName(appPackage).filter(function(uo){
+                            // .packageName(appPackage)
+                            .filter(function(uo){
                                 return uo.bounds().right - uo.bounds().left > device.width*0.5;
                             }).findOne(3000)
-log("不使用包名查找：",depth(9).className("androidx.recyclerview.widget.RecyclerView")
-.filter(function(uo){
-    return uo.bounds().right - uo.bounds().left > device.width*0.5;
-}).findOne(3000))
         if(!textContains("FOLLOWERS").findOne(500) || !FollowerParent) {
             log("未获取到粉丝列表！如果脚本卡住，请手动进入粉丝列表")
             sleep(3000);
@@ -4299,6 +4296,8 @@ function 消息处理(fans,newMsgList){
         }
         // 如果有标签消息则进行标签消息回复，没有则不进行回复
         if(0 < msg.length) {
+            console.warn("标签消息内容(采用连接方式)：")
+            log(msg)
             return msg.join("\n");
         }
     }
