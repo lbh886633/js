@@ -6231,6 +6231,8 @@ function 新环境(s) {
 }
 
 function 清除数据() {
+    log("取消清除数据")
+    return false;
     log("清除数据");
     let settingPackage = "com.android.settings";
     log("打开应用详情界面");

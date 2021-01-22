@@ -768,6 +768,8 @@ function 主程序() {
                     log("回复")
                     返回首页()
                     tempSave.RequiredLabels = readRequiredLabelsFile();
+                    log(tempSave.RequiredLabels)
+                    exit()
                     mi6回复消息()
                 }
             }
@@ -4266,9 +4268,9 @@ function 消息处理(fans,newMsgList){
             tag = tempSave.RequiredLabels[tag].label;
             // label: '{"label": "国家","words": "usa", "info": ["where are you from?"]}'
             log(tag)
-            try{
-                tag = JSON.parse(tag);
-            }catch(e){log(e)}
+            // try{
+                // tag = JSON.parse(tag);
+            // }catch(e){log(e)}
             // 如果当前单词存在于标签中，则进行保存，将其转换成小写
             if(-1 < tag.words.toLowerCase().indexOf(w)){
                 // 判断是否存在当前标签，没有就创建
@@ -4311,7 +4313,8 @@ function 消息处理(fans,newMsgList){
     }
 
     fans.label = JSON.stringify(fansLabel);
-    for (let r in tempSave.RequiredLabels) {
+    // for (let r in tempSave.RequiredLabels) {
+    for (let i = 0; i < tempSave.RequiredLabels.length; i++) {
         /*
             [ { searchValue: null,
             createBy: null,
@@ -4327,7 +4330,8 @@ function 消息处理(fans,newMsgList){
             reservedB: '' } ]
         */
         // 拿到标签体 label 是字符串 需要序列化
-        r = JSON.parse(tempSave.RequiredLabels[r].label);
+        // r = JSON.parse(tempSave.RequiredLabels[r].label);
+        r = tempSave.RequiredLabels[i];
         // 由于粉丝的标签是字符串，所以继续使用标签暂存对象来进行判断
         if(!fansLabel[r.label]){
             // let reMsg = Date.now().toString().substring(10) +"> "+ r.info[random(0,r.info.length-1)];
@@ -4350,10 +4354,13 @@ function 消息处理(fans,newMsgList){
 function readRequiredLabelsFile(path){
     // 没有 tempSave.LabelsData 数组或者长度为0，都将从服务器获取数据
     if(!tempSave.LabelsData || tempSave.LabelsData.length < 1) {
-        try{
-            tempSave.LabelsData = server.get("label/list").rows;
-        } catch(err){
-            tempSave.LabelsData = [];
+        // 从服务器拿到标签集合
+        let ls = server.get("label/list").rows;
+        tempSave.LabelsData = [];
+        // 将每一个标签转成对象储存
+        for (let i = 0; i < ls.length; i++) {
+            console.verbose(ls[i].label)
+            tempSave.LabelsData.push(JSON.parse(ls[i].label));
         }
     }
     return tempSave.LabelsData;
@@ -6236,6 +6243,8 @@ function 新环境(s) {
 }
 
 function 清除数据() {
+    log("取消清除数据")
+    return false;
     log("清除数据");
     let settingPackage = "com.android.settings";
     log("打开应用详情界面");
