@@ -17,6 +17,7 @@ var fasle = false;
         "优化账号比对",
         "优化权限检查",
         "优化采集粉丝",
+        "修改标签模式",
     ];
     uti = logs.pop();
 }
@@ -74,7 +75,7 @@ var server = {
     get: function (uri) {
         try {
             console.info("[↓]" + this.serverUrl + uri);
-            let re = http.get(this.serverUrl + uri);
+            let re = http.get(this.serverUrl + uri, {'Connection': 'close'});
             if (re.statusCode != 200) {
                 throw "请求失败，状态码：" + re.statusCode;
             }
@@ -103,7 +104,7 @@ var server = {
     post: function (uri, o) {
         try {
             console.verbose("[↑]" + uri + "\n" + JSON.stringify(o))
-            return http.post(this.serverUrl + uri, o, {}).body;
+            return http.post(this.serverUrl + uri, o, {'Connection': 'close'}).body;
         } catch (err) {
             log("[↑]POST上传出错", err)
         }
@@ -116,7 +117,7 @@ var server = {
     sendData: function (url, o) {
         try {
             console.verbose("[↑]" + url + "\n" + JSON.stringify(o))
-            log(http.post(url, o, {}).body.string());
+            log(http.post(url, o, {'Connection': 'close'}).body.string());
         } catch (err) {
             log("上传出错", err)
         }
@@ -719,89 +720,100 @@ function 主程序() {
     let whileNumber = 0;
 
     while(true) {
-        if(runTikTok()) {
-            log("账号正常，还原成功")
-            // 开启一个新线程来保存账号
-            threads.start(function () {
-                let saveAcc = {
-                    username: accountInfo.username,
-                    isExceptoion: 0,
-                    isInvalid: 0,
-                    url: accountInfo.url,
-                    name: accountInfo.name,
-                    device: accountInfo.enviName,
-                    focus: server.numberToString(accountInfo.focusNumber),
-                    fans: server.numberToString(accountInfo.fansNumber),
-                    likes: server.numberToString(accountInfo.likeNumber),
+        try{
+            if(runTikTok()) {
+                log("账号正常，还原成功")
+                // 开启一个新线程来保存账号
+                threads.start(function () {
+                    let saveAcc = {
+                        username: accountInfo.username,
+                        isExceptoion: 0,
+                        isInvalid: 0,
+                        url: accountInfo.url,
+                        name: accountInfo.name,
+                        device: accountInfo.enviName,
+                        focus: server.numberToString(accountInfo.focusNumber),
+                        fans: server.numberToString(accountInfo.fansNumber),
+                        likes: server.numberToString(accountInfo.likeNumber),
+                    }
+                    server.add("account", saveAcc);
+                })
+
+
+                if (!tempSave.daily && ui.mi6_dat.checked) {
+                    log("修改资料")
+                    修改资料()
+                    更换头像()
                 }
-                server.add("account", saveAcc);
-            })
 
-
-            if (!tempSave.daily && ui.mi6_dat.checked) {
-                log("修改资料")
-                修改资料()
-                更换头像()
-            }
-
-            if (!tempSave.daily && ui.mi6_vid.checked) {
-                log("上传视频")
-                上传视频();
-            }
-
-            if (tempSave.daily || ui.mi6_foc.checked) {
-                log("关注模式")
-                限制 = random(Number(ui.gzsl.text()), Number(ui.gzsl1.text()))
-                mi6关注操作()
-            }
-
-            if (tempSave.daily || ui.mi6_fan.checked) {
-                log("打招呼")
-                采集粉丝信息()
-            }
-
-            if (tempSave.daily || ui.mi6_rep.checked) {
-                if(ui.repScript.checked){
-                    // 驱动脚本去进行回复
-                    驱动回复软件()
-                } else {
-                    log("回复")
-                    返回首页()
-                    tempSave.RequiredLabels = readRequiredLabelsFile();
-                    log(tempSave.RequiredLabels)
-                    exit()
-                    mi6回复消息()
+                if (!tempSave.daily && ui.mi6_vid.checked) {
+                    log("上传视频")
+                    上传视频();
                 }
+
+                if (tempSave.daily || ui.mi6_foc.checked) {
+                    log("关注模式")
+                    限制 = random(Number(ui.gzsl.text()), Number(ui.gzsl1.text()))
+                    mi6关注操作()
+                }
+
+                if (tempSave.daily || ui.mi6_fan.checked) {
+                    log("打招呼")
+                    采集粉丝信息()
+                }
+
+                if (tempSave.daily || ui.mi6_rep.checked) {
+                    if(ui.repScript.checked){
+                        // 驱动脚本去进行回复
+                        驱动回复软件()
+                    } else {
+                        log("回复")
+                        返回首页()
+                        // tempSave.RequiredLabels = readRequiredLabelsFile();
+                        // 获取标签
+                        tempSave.RequiredLabels = getLabelList();
+                        mi6回复消息()
+                    }
+                }
+                
+                if (tempSave.daily || ui.mi6_task.checked) {
+                    log("任务模式");
+                    任务发送指定消息();
+                }
+                
             }
-            
-            if (tempSave.daily || ui.mi6_task.checked) {
-                log("任务模式");
-                任务发送指定消息();
-            }
-            
-        }
-        if (!tempSave.daily && ui.mi6_reg.checked) {
-            log("注册模式")
-            tempSave.login = true;
-            tempSave.continue = true;
-            while (tempSave.continue) {
-                mi6注册模式();
-                if(tempSave.continue) {
-                    // 在执行完之后如果还为true则等待继续
-                    let cf = floaty.rawWindow(<frame><button id="but">继续注册</button></frame>)
-                    cf.setPosition(400,800)
-                    cf.but.click(()=>{
-                        toast("继续")
-                        cf.close();
-                        cf = null;
-                    })
-                    while(cf){
-                        sleep(1000);
+            if (!tempSave.daily && ui.mi6_reg.checked) {
+                log("注册模式")
+                tempSave.login = true;
+                tempSave.continue = true;
+                while (tempSave.continue) {
+                    mi6注册模式();
+                    if(tempSave.continue) {
+                        // 在执行完之后如果还为true则等待继续
+                        let cf = floaty.rawWindow(<frame><button id="but">继续注册</button></frame>)
+                        cf.setPosition(400,800)
+                        cf.but.click(()=>{
+                            toast("继续")
+                            cf.close();
+                            cf = null;
+                        })
+                        while(cf){
+                            sleep(1000);
+                        }
                     }
                 }
             }
+        }catch(err){
+            log(err)
+            console.error(err.stack);
+            if(autoConfirm(10000, true,
+                "程序运行出现异常！是否重新运行？", "异常堆栈信息：" + err.stack)
+            ) {
+                continue;
+            }
         }
         toastLog("当前账号操作结束 " + (++whileNumber));
+
         let j=0;
         // 赞存上一个账号信息
         let lastAccount = accountInfo;
@@ -3597,6 +3609,7 @@ function sendMsg(msg){
         for (let m in msgList) {
             m = msgList[m];
             if(msg == m.msg){
+                detectionMsgStatus(msg);
                 return m;
             }
         }
@@ -3613,6 +3626,20 @@ function sendMsg(msg){
     }
 }
 
+function detectionMsgStatus(msg) {
+    try{
+        if(0 < msg.suffix.indexOf("Feeback")){
+            if(autoConfirm(5000, false, "手动处理？")){
+                let pauseJS = true;
+                let f = floaty.rawWindow(<frame><button id="runJS">继续运行</button></frame>)
+                f.runJS.click(()=>{pauseJS=false})
+                while(pauseJS) sleep(1000);
+            }
+        }
+    }catch(e){
+        console.verbose("消息状态检测时发生异常：", e);
+    }
+}
 // 在聊天界面发送消息
 function sendMsgBackup(msg){
     
@@ -4229,7 +4256,8 @@ function addFans(obj,arr) {
 
 /**
  * 处理消息
- * 依赖外部变量 RequiredLabels 格式：[{ label:"标签名"（标签）, words: "关键词,关键词,..."（关键字） info: ["询问语句1","询问语句2"]（信息）}]
+ * 依赖外部变量 RequiredLabels 格式：[{ labelName:"标签名"（标签）, words: "关键词,关键词,..."（关键字） 
+ *                          ask: ["询问语句1","询问语句2"]（信息） reply: ["触发时回复","触发时回复2"]（信息）}]
  * @param {UIObject} fans  保存的粉丝的信息
  * @param {Array} newMsgList 新的聊天记录
  */
@@ -4252,90 +4280,78 @@ function 消息处理(fans,newMsgList){
     }
 
     console.verbose("单词组：", words)
-    let fansLabel;
+    // 拿到粉丝当前标签内容,粉丝标签信息 {"标签1": ["触发词1", "触发词2"],"标签2": ["触发词1", "触发词2"],"标签3": ["触发词1", "触发词2"]}
+    let fansLabel = {};
     try{
-        fansLabel = JSON.parse(fans.label);
-    } catch(e){}
-    if(!fansLabel){
-        fansLabel = {};
+        fansLabel = server.get("fanslabel/getlabel/"+fans.username).label;
+    }catch(err) {
+        log(err)
+        log("获取粉丝标签失败！");
     }
-    // 添加标签 的标记
-    let addLabel = [];
+    // 触发词优先回复
+    let nowMsg=[];
     // 使用单词去匹配词库并保存
     for (let w in words) {
         w = words[w].toLowerCase();   // 拿到当前单词，并将当前单词转成小写
         for (let tag in tempSave.RequiredLabels) {   // 拿到当前标签内容 包括 label（标签） words（关键字） info（信息）
-            tag = tempSave.RequiredLabels[tag].label;
-            // label: '{"label": "国家","words": "usa", "info": ["where are you from?"]}'
+            tag = tempSave.RequiredLabels[tag];
+            // {labelName: "国家", words: "usa"(已经处理为小写), ask: ["where are you from?"], reply: ["where are you from?"]}
             log(tag)
-            // try{
-                // tag = JSON.parse(tag);
-            // }catch(e){log(e)}
-            // 如果当前单词存在于标签中，则进行保存，将其转换成小写
-            if(-1 < tag.words.toLowerCase().indexOf(w)){
+            // 如果当前单词存在于标签中，则进行保存，将其转换成小写，这里的indexOf是在字符串中找
+            if(-1 < tag.words.indexOf(w)){
                 // 判断是否存在当前标签，没有就创建
-                if(!fansLabel[tag.label]) {
-                    fansLabel[tag.label]=[];
+                if(!fansLabel[tag.labelName]) {
+                    fansLabel[tag.labelName]=[];
                 }
-                // 判断是否已经存在当前标签,如果没有则进行保存
-                if(fansLabel[tag.label].indexOf(w) < 0) {
-                    fansLabel[tag.label].push(w);
-                    addLabel.push([tag.label, w]);
+                // 判断是否已经存在当前标签,如果没有则进行保存，这里的indexOf是在数组中找
+                if(fansLabel[tag.labelName].indexOf(w) < 0) {
+                    fansLabel[tag.labelName].push(w);
+                    /* 进行粉丝标签保存
+                    {
+                        username: 用户账号
+                        labelName: 标签名字：
+                        labelBody: 触发内容：
+                    }
+                     */
+                    server.add("fanslabel", {
+                        username: fans.username,
+                        labelName: tag.labelName,
+                        labelBody: w
+                    })
+                    if(0 < tag.reply.length) {
+                        // 存在触发词则保存触发词
+                        nowMsg.push(tag.reply[random(0, tag.reply.length-1)]);
+                    }
                 }
             }
         }
     }
 
-    log("最新标签内容")
+    log("最新用户标签数据")
     log(fansLabel)
-    if(1 < addLabel.length) {
-        // 对新增的标签进行是否预回复处理
-        let msg = [];
-        for (let i = 0; i < addLabel.length; i++) {
-            // 标签类型  
-            let labelType = addLabel[i][0];
-            // 标签内容
-            let labelBody = addLabel[i][0];
-            // 进行处理 record/doubleusername?fansUsername="
-            let message = server.get("label/message?labelType=" + labelType + "&labelBody=" + labelBody);
-            log(message);
-            // 如果消息体为空则不进行添加
-            if(message != "") {
-                msg.push(message);
-            }
-        }
-        // 如果有标签消息则进行标签消息回复，没有则不进行回复
-        if(0 < msg.length) {
-            console.warn("标签消息内容(采用连接方式)：")
-            log(msg)
-            return msg.join("\n");
-        }
+    // 如果有标签消息则进行标签消息回复，没有则不进行回复
+    if(0 < nowMsg.length) {
+        console.warn("标签消息内容：")
+        log(msg)
+        return msg.join("\n");
     }
 
-    fans.label = JSON.stringify(fansLabel);
+    // 查找剩余标签内容，执行相应的询问（顺序）
+
+
     // for (let r in tempSave.RequiredLabels) {
     for (let i = 0; i < tempSave.RequiredLabels.length; i++) {
         /*
-            [ { searchValue: null,
-            createBy: null,
-            createTime: null,
-            updateBy: null,
-            updateTime: null,
-            remark: null,
-            params: {},
-            num: 1,
-            isDelete: 0,
-            label: '{ label: "国家", words: "usa", info: ["where are you from?"] }',
-            reservedA: '',
-            reservedB: '' } ]
+            [
+                { label: "国家", words: "usa", ask: ["where are you from?"], reply: ["where are you from?"] }
+                { label: "国家1", words: "usa", ask: ["where are you from?"], reply: ["where are you from?"]  }
+            ]
         */
-        // 拿到标签体 label 是字符串 需要序列化
-        // r = JSON.parse(tempSave.RequiredLabels[r].label);
         r = tempSave.RequiredLabels[i];
         // 由于粉丝的标签是字符串，所以继续使用标签暂存对象来进行判断
-        if(!fansLabel[r.label]){
+        if(!fansLabel[r.labelName]){
             // let reMsg = Date.now().toString().substring(10) +"> "+ r.info[random(0,r.info.length-1)];
-            let reMsg = r.info[random(0,r.info.length-1)];
+            let reMsg = r.ask[random(0, r.ask.length-1)];
             console.info("新消息：", reMsg);
             return reMsg;
         }
@@ -4400,7 +4416,29 @@ function readRequiredLabelsFile(path){
     }
     return data
 }
-
+/**
+ * 从后台拿到所有的标签
+ */
+function getLabelList(){
+    // {"total":2,"rows":[
+    //    {"labelName":"国家","words":"咿呀咿呀一","ask":"1,2","reply":"1,2"},
+    //    {"labelName":"国家1","words":null,"ask":"3","reply":"3"}
+    // ],"code":0,"msg":null}
+    // 没有 tempSave.LabelsData 数组或者长度为0，都将从服务器获取数据
+    if(!tempSave.LabelsData || tempSave.LabelsData.length < 1) {
+        // 从服务器拿到标签集合 /tiktokjs/labelinfo/labellist
+        tempSave.LabelsData = server.get("labelinfo/labellist").rows;
+        for (let i = 0; i < tempSave.LabelsData.length; i++) {
+            if(tempSave.LabelsData[i].words == null) tempSave.LabelsData[i].words ="";
+            // 将大写转成小写
+            tempSave.LabelsData[i].words = tempSave.LabelsData[i].words.toLowerCase();
+            // 切割消息
+            if(tempSave.LabelsData[i].ask) tempSave.LabelsData[i].ask = tempSave.LabelsData[i].ask.split(",");
+            if(tempSave.LabelsData[i].reply) tempSave.LabelsData[i].reply = tempSave.LabelsData[i].reply.split(",");
+        }
+    }
+    return tempSave.LabelsData;
+}
 /**
  * 从文件中随机获取到一条消息
  */
