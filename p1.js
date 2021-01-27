@@ -6802,6 +6802,9 @@ function signIn() {
                     do{
                         sleep(1000)
                         let vgs = className("android.view.ViewGroup").find();
+                        if(vgs.length <= accountList.length) {
+                            if(!confirm("当前所有账号已全部执行完毕,是否重新执行?")) exit();
+                        }
                         for (let i = 0; i < vgs.length; i++) {
                             let e = vgs[i];
                             let r = e.bounds();
