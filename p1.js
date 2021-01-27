@@ -6738,6 +6738,8 @@ function autoConfirm(num, choose, title, content, callback) {
 }
 
 function switchAccount() {
+    返回首页();
+    log("点击 '我' ", text("Me").findOne(1000).parent().click())
     if(1 < getAccountList().list.length) {
         signUp()
     }
