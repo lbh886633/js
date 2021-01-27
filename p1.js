@@ -6802,9 +6802,10 @@ function signIn() {
                     do{
                         sleep(1000)
                         let vgs = className("android.view.ViewGroup").find();
-                        if(vgs.length <= accountList.length) {
-                            if(!confirm("当前所有账号已全部执行完毕,是否重新执行?")) exit();
-                        }
+                        // 当存在超过当前列表的账号时会出现误报执行完毕
+                        // if(vgs.length <= accountList.length) {
+                        //     
+                        // }
                         for (let i = 0; i < vgs.length; i++) {
                             let e = vgs[i];
                             let r = e.bounds();
@@ -6837,7 +6838,16 @@ function signIn() {
                     }while (!account && listUO.scrollForward())
                     if(account.click()) log("账号切换到：", accountName)
                     else log("账号切换失败")
-                }catch(e){}
+                }catch(e){
+                    log(e)
+                    if(!confirm("似乎当前所有账号已全部执行完毕,是否结束执行?", "已经执行"+accountList.length+"个账号。\n"+e)) {
+                        exit();
+                    }
+                    if(autoConfirm("是否清空当前账号列表？","已执行账号列表：\n"+accountList.join("\n"))){
+                        accountList = [];
+                    }
+                    
+                }
                 等待加载()
             }
         },
