@@ -716,6 +716,11 @@ function 主程序() {
     let whileNumber = 0;
 
     while(true) {
+        if(ui.switchaccount.checked){
+            // 账号列表可以从本地文件读取
+            if(!accountList) accountList = [];
+            switchAccount()
+        }
         try{
             if(runTikTok()) {
                 log("账号正常，还原成功")
@@ -814,11 +819,7 @@ function 主程序() {
         }
         toastLog("当前账号操作结束 " + (++whileNumber));
 
-        if(ui.switchaccount.checked){
-            // 账号列表可以从本地文件读取
-            if(!accountList) accountList = [];
-            switchAccount()
-        } else {
+        if(!ui.switchaccount.checked) {
             let j=0;
             // 暂存上一个账号信息
             let lastAccount = accountInfo;
