@@ -8,6 +8,7 @@ var fasle = false;
         "未更改关于标签的实现",
         "修改标签模式",
         "更改回复消息的具体实现",
+        "增加一种切换账号模式,登录账号",
     ];
     uti = logs.pop();
 }
@@ -124,6 +125,7 @@ var server = {
         return uri;
     }
 }
+var accountList = [];
 var accounts = {
     progress: 0,
     list: []
@@ -365,6 +367,9 @@ ui.layout(
                                     <checkbox id="first_start" text="从头开始" />
                                     <checkbox id="continue" checked="true" text="现在继续" />
                                     <checkbox id="nofor" checked="true" text="关闭循环" />
+                                </linear>
+                                <linear>
+                                    <checkbox id="switchaccount" checked="true" text="登录账号" />
                                 </linear>
                             </vertical>
                             <vertical id="getmodel">
@@ -809,44 +814,51 @@ function 主程序() {
         }
         toastLog("当前账号操作结束 " + (++whileNumber));
 
-        let j=0;
-        // 赞存上一个账号信息
-        let lastAccount = accountInfo;
-        let nowAccount;
-        for(; j < 5; j++) {
-            nextAccount()
-            // 加入账号信息检测
-            for (let I = 0; I < 3; I++) {
-                返回首页(300);
-                try{
-                    // 点击个人信息，没有点击的情况下不会去尝试获取信息
-                    if(text("Me").findOne(2000).parent().click()) {
-                        // 获取到个人信息s
-                        nowAccount = getFansInfo("个人信息", true);
-                        console.info("切换之前", lastAccount.username)
-                        console.info("当前账号", nowAccount.username)
-                        if(lastAccount.username != nowAccount.username) {
-                            break;
+        if(ui.switchaccount.checked){
+            // 账号列表可以从本地文件读取
+            if(accountList) accountList = [];
+            switchAccount()
+        } else {
+            let j=0;
+            // 暂存上一个账号信息
+            let lastAccount = accountInfo;
+            let nowAccount;
+            for(; j < 5; j++) {
+                nextAccount()
+                // 加入账号信息检测
+                for (let I = 0; I < 3; I++) {
+                    返回首页(300);
+                    try{
+                        // 点击个人信息，没有点击的情况下不会去尝试获取信息
+                        if(text("Me").findOne(2000).parent().click()) {
+                            // 获取到个人信息s
+                            nowAccount = getFansInfo("个人信息", true);
+                            console.info("切换之前", lastAccount.username)
+                            console.info("当前账号", nowAccount.username)
+                            if(lastAccount.username != nowAccount.username) {
+                                break;
+                            }
+                        } else {
+                            sleep(5000)
                         }
-                    } else {
-                        sleep(5000)
+                    }catch(e){
+                        console.log(e)
                     }
-                }catch(e){
-                    console.log(e)
+                }
+                if(lastAccount.username != [nowAccount.username||""]) {
+                    log("账号切换完成")
+                    break;
                 }
             }
-            if(lastAccount.username != [nowAccount.username||""]) {
-                log("账号切换完成")
-                break;
+            if(lastAccount.username == nowAccount.username) {
+                log(lastAccount.username, nowAccount.username)
+                toastLog("账号切换失败！");
+                return false;
             }
+            // 返回首页()
+            log("账号进度", accounts.progress)
         }
-        if(lastAccount.username == nowAccount.username) {
-            log(lastAccount.username, nowAccount.username)
-            toastLog("账号切换失败！");
-            return false;
-        }
-        // 返回首页()
-        log("账号进度", accounts.progress)
+
     }
 }
 
@@ -6726,18 +6738,26 @@ function autoConfirm(num, choose, title, content, callback) {
 
 function switchAccount() {
     返回首页();
+    log("--- 1 检测账号")
     if(1 < getAccountList().list.length) {
-        返回首页();
+        log("--- 2 退出登录")
         signUp()
     }
-    返回首页();
+    log("--- 3 登录")
+    sleep(100)
+    // 需要传入当前已经使用的账号列表
     signIn()
 }
 
-
+// 需要全局参数 accountList
+// let accountList = ["15zhanghao","3zhanghao","17zhanghao","16zhanghao","14zhanghao","13zhanghao","12zhanghao","5zhanghao"]; // 本次脚本执行时已使用的所有账号列表
 function signIn() {
-    // 从文件中读取当前已经登录的账号
-    let accounts = files.read("/sdcard/xxxx/已用账号.txt").split("\n");
+    返回首页();
+    log("点击 '我' ", text("Me").findOne(1000).parent().click())
+    // 账号控件
+    let accountName;
+    // 账号名
+    let account;
     let 操作 = [
         {
             标题: "标题",
@@ -6777,51 +6797,107 @@ function signIn() {
                 return this.uo
             },
             执行: function() {
-                let arr = [];
-                // 获取账号列表,选择下一个账号
-                className("android.view.ViewGroup").find().forEach(e => {
-                    let r = e.bounds();
-                    // 占满x坐标 y坐标200
-                    if((r.right - r.left == 912 
-                        || (r.right - r.left < device.width*0.9
-                            && r.right - r.left > device.width*0.8)
-                        )&& 
-                        ( (r.bottom - r.top < device.height*0.1
-                            && r.bottom - r.top > device.height*0.07)
-                        || (r.bottom - r.top < 190
-                            && r.bottom - r.top > 160)
-                        )
-                    ) {
-                        let text = e.find(className("TextView"));
-                        log(text.length)
-                        if(0 < text.length) {
-                            text[0].text();
-                             arr.push(text[0]);
+                try{
+                    let listUO = className("androidx.recyclerview.widget.RecyclerView").findOne(1000);
+                    // 回到头顶
+                    while(listUO.scrollBackward()){sleep(200)}
+                    // 遍历当前的账号列表
+                    do{
+                        sleep(1000)
+                        let vgs = className("android.view.ViewGroup").find();
+                        for (let i = 0; i < vgs.length; i++) {
+                            let e = vgs[i];
+                            let r = e.bounds();
+                            // 占满x坐标 y坐标200
+                            if((r.right - r.left == 912 
+                                || (r.right - r.left < device.width*0.9
+                                    && r.right - r.left > device.width*0.8)
+                                )&& 
+                                ( (r.bottom - r.top < device.height*0.1
+                                    && r.bottom - r.top > device.height*0.07)
+                                || (r.bottom - r.top < 190
+                                    && r.bottom - r.top > 160)
+                                )
+                            ) {
+                                let text = e.find(className("TextView"));
+                                if(text && 0 < text.length) {
+                                    accountName = text[0].text();
+                                    console.verbose(accountName)
+                                    // 判断当前账号是否已经被使用过，如果没有被使用过则将其当作要被使用的账号
+                                    if(accountList.indexOf(accountName) < 0) {
+                                        accountList.push(accountName);
+                                        account = e;
+                                        // 跳出当前的foreach循环
+                                        break;
+                                    }
+                                }
+                            }
                         }
-                    }
-                });
-                //账号列表获取成功之后对比文件中保存的记录，缺少哪个就跑哪一个，跑完了就清空文件
-                // 从头到尾遍历
-                arr.forEach(n=>{
-                    try{
-                        if(accounts.indexOf(n.text()) < 0 && n.parent().click()){
-                            log("账号切换")
-                            accounts.push(n.text());
-                            files.write("/sdcard/xxxx/已用账号.txt", accounts.join("\n"));
-                            sleep(3000)
-                        }
-                    }catch(errpr){console.log(error)}
-                })
+                        // 如果已经获取到账号则跳出循环
+                    }while (!account && listUO.scrollForward())
+                    if(account.click()) log("账号切换到：", accountName)
+                    else log("账号切换失败")
+                }catch(e){}
+                等待加载()
             }
         },
         {
-            标题: "标题",
+            标题: "输入密码",
+            uo: null,
+            检测: function() {
+                this.uo = text("Forgot password?").findOne(100)
+                return this.uo
+            },
+            执行: function() {
+                // 获取密码输入框,设置密码
+                for (let i = 0; i < 2; i++) {
+                    let ins = className("android.widget.EditText").find();
+                    if(1 < ins.length){
+                        ins.pop().setText(ui.szmm.text())
+                        // 点击下一步
+                        let next = text("Log in").find();
+                        if(1 < next.length) {
+                            if(next.pop().parent().parent().click())
+                                break;
+                        }
+                    }
+                    sleep(1000)
+                }
+            }
+        },
+        {
+            标题: "检测生日",
+            uo: null,
+            检测: function() {
+                this.uo = text("When’s your birthday?").visibleToUser().findOne(200)
+                return this.uo
+            },
+            执行: function() {
+                console.hide()
+                for (var ii = 1; ii < 3; ii++) {
+                    var year = depth(8).drawingOrder((ii + 1)).classNameEndsWith("view.View").findOne(1000)
+                    if (year) {
+                        var point = year.bounds()
+                        for (var i = 0; i < random(3, 4); i++) {
+                            swipe(point.centerX(), point.centerY(), point.centerX(), device.height, 500)
+                            sleep(1000)
+                        }
+                    }
+                }
+                console.show()
+                if (lh_find(text("Next"), "Next", 0)) {
+                }
+            }
+        },
+        {
+            标题: "首页",
             uo: null,
             检测: function() {
                 this.uo = text("Me").boundsInside(device.width*0.8, device.height*0.8, device.width, device.height).findOne(100)
                 return this.uo
             },
             执行: function() {
+                log("账号已切换")
                 return "跳出循环执行"
             }
         },
@@ -6831,7 +6907,7 @@ function signIn() {
 }
 
 function signUp() {
-    
+    返回首页();
     let 操作 = [
         {
             标题: "设置",
@@ -6852,7 +6928,7 @@ function signUp() {
             标题: "退出登录",
             uo: null,
             检测: function() {
-                this.uo = text("Log out").depth(7).findOne(100)
+                this.uo = text("Log out").findOne(100)
                 return this.uo
             },
             执行: function() {
@@ -6892,15 +6968,23 @@ function signUp() {
                                 return this.uo
                             },
                             执行: function() {
+                                log("账号已退出")
                                 return "跳出循环执行";
                             }
                         },
                     ]);
                     return "跳出循环执行";
+                } else {
+                    if(!this.uo.parent().click()){
+                        this.uo.parent().parent().click()
+                    }
+                   /*  // 向下滑动
+                    scrollable(true).find().forEach(e=>{
+                        log("滑动 ", e.scrollForward());
+                    }) */
                 }
             }
         },
-        
     ]
     循环执行(操作)
 }
