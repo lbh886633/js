@@ -6738,12 +6738,9 @@ function autoConfirm(num, choose, title, content, callback) {
 
 function switchAccount() {
     返回首页();
-    log("--- 1 检测账号")
     if(1 < getAccountList().list.length) {
-        log("--- 2 退出登录")
         signUp()
     }
-    log("--- 3 登录")
     sleep(100)
     // 需要传入当前已经使用的账号列表
     signIn()
@@ -6825,7 +6822,10 @@ function signIn() {
                                     console.verbose(accountName)
                                     // 判断当前账号是否已经被使用过，如果没有被使用过则将其当作要被使用的账号
                                     if(accountList.indexOf(accountName) < 0) {
+                                        log("账号列表: ============")
+                                        log(accountList)
                                         accountList.push(accountName);
+                                        log(accountList)
                                         account = e;
                                         // 跳出当前的foreach循环
                                         break;
