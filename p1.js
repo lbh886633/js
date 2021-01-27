@@ -5,19 +5,9 @@ var uti;
 var fasle = false;
 {
     let logs = [
-        "从第24版本开始使用这种方式",
-        "解决采集粉丝不能滑动的问题",
-        "修改更换头像的架构",
-        "修改上传视频的架构",
-        "添加双app支持",
-        "完善上传视频功能",
-        "修改 默认包名自动获取，头像优先移动",
-        "获取账号列表时加入范围限制",
-        "切换账号后进行账号比对",
-        "优化账号比对",
-        "优化权限检查",
-        "优化采集粉丝",
+        "未更改关于标签的实现",
         "修改标签模式",
+        "更改回复消息的具体实现",
     ];
     uti = logs.pop();
 }
@@ -26,7 +16,7 @@ var tempSave = {
     privacy: 30,
     NUMBER: 0,
     自动打码: false,
-    version: "24" + " -- " + uti,
+    version: "25" + " -- " + uti,
     downloadUrl: "http://192.168.137.1:8081/tiktokjs/",
     // 直接发送的消息
     getSayMessage: "Hi",
@@ -175,7 +165,8 @@ var 路径 = {}
     { 任务消息: "任务消息"},
     { 环境: "环境" },
     { 标签: "标签" },
-    { 失败环境: "失败环境" }
+    { 失败环境: "失败环境" },
+    { 已用账号: "已用账号" }
 ], ".txt")
 // 生成文件夹路径对象
 路径.文件夹 = 创建路径(根路径, [
@@ -772,6 +763,10 @@ function 主程序() {
                         // tempSave.RequiredLabels = readRequiredLabelsFile();
                         // 获取标签
                         tempSave.RequiredLabels = getLabelList();
+                        if(!tempSave.RequiredLabels || tempSave.RequiredLabels.length < 1 ){
+                            console.warn("没有获取到标签数据！停止运行")
+                            exit()
+                        }
                         mi6回复消息()
                     }
                 }
@@ -2518,6 +2513,22 @@ function 更换头像() {
             }
         },
         {
+            标题: "头像",
+            uo: null,
+            检测: function() {
+                this.uo = text("ok").findOne(1000)||text("OK").findOne(200)||text("确定").findOne(200)
+                return this.uo
+            },
+            执行: function() {
+                let re = this.uo.click();
+                log("点击" + this.标题, re)
+                if (re) {
+                    // 刷新
+                    media.scanFile(路径.文件夹.头像);
+                }
+            }
+        },
+        {
             标题: "第一张",
             uo: null,
             检测: function() {
@@ -2887,7 +2898,7 @@ function getFansList(fansNameList, fansList, all) {
 }
 
 // 获取信息的函数，需要在用户信息的界面
-function getFansInfo(usernameP,mainTag) {
+function getFansInfo(usernameP,mainTag, saveUri) {
     function getNum(str){
         let uo = text(str).findOne(1000);
         if(uo) {
@@ -3057,7 +3068,7 @@ function getFansInfo(usernameP,mainTag) {
             urlExists: urlExists,
             url: url,
             uri: uri
-        });
+        },false,saveUri);
         } catch (e) {
         console.verbose("采集异常：", e)
     }
@@ -3094,7 +3105,7 @@ function getVideoPlayerNumberInfo() {
  * @param {Object} obj 不保存到文件时，要保存的对象
  * @param {Boolean} savaToFile 保存到文件中
  */
-function save(obj,savaToFile) {
+function save(obj,savaToFile, saveUri) {
     if(savaToFile){
         log("将数据保存到文件")
         // 粉丝做成数组每一行一个粉丝数据，一般不需要读出来，聊天记录放另外一个文件，
@@ -3159,7 +3170,7 @@ function save(obj,savaToFile) {
 
 */
 // 保存到服务器
-    server.add("fans", {
+    server.add(saveUri || "fans", {
         username: obj.username,
         isExceptoion: 0,
         isInvalid: 0,
@@ -3608,7 +3619,7 @@ function sendMsg(msg){
         let msgList = 获取消息();
         for (let m in msgList) {
             m = msgList[m];
-            if(msg == m.msg){
+            if(msg == m.msg) {
                 detectionMsgStatus(msg);
                 return m;
             }
@@ -4130,7 +4141,7 @@ function getFansInfoByFansMsgView() {
         sleep(500)
     }
     // 如果获取失败则创建一个粉丝信息
-    if(!fans) {
+    if(!fans || !fans.username) {
         console.warn("无粉丝对象，创建一个粉丝对象")
         fans = {
             username: username,
@@ -4261,7 +4272,7 @@ function addFans(obj,arr) {
  * @param {UIObject} fans  保存的粉丝的信息
  * @param {Array} newMsgList 新的聊天记录
  */
-function 消息处理(fans,newMsgList){
+function 消息处理(fans,newMsgList) {
 
     if(!fans.label) fans.label = {};
     // 1. 分析新消息单词数组
@@ -6578,6 +6589,7 @@ function getAccountList() {
             break;
         }catch(e){}
     }
+    return accounts;
 }
 function 驱动回复软件() {
     toastLog("暂未编写")
@@ -6636,6 +6648,7 @@ function 循环执行(数组, 等待时间) {
     let 进度 = 0;
     let 等待 = 等待时间 || 100;
     let 下标;
+    if(!数组) throw "操作参数为空！";
     while (-1 < 进度) {
         下标 = 进度%数组.length;
         if(typeof 数组[下标] == "object") {
@@ -6709,4 +6722,185 @@ function autoConfirm(num, choose, title, content, callback) {
         toastLog("点击失败！");
     })
     return confirm(title, content, callback);
+}
+
+function switchAccount() {
+    返回首页();
+    if(1 < getAccountList().list.length) {
+        返回首页();
+        signUp()
+    }
+    返回首页();
+    signIn()
+}
+
+
+function signIn() {
+    // 从文件中读取当前已经登录的账号
+    let accounts = files.read("/sdcard/xxxx/已用账号.txt").split("\n");
+    let 操作 = [
+        {
+            标题: "标题",
+            uo: null,
+            检测: function() {
+                this.uo = id("title").findOne(100)
+                return this.uo
+            },
+            执行: function() {
+                let re = this.uo.click();
+                log("点击" + this.标题, re)
+                if (re) {
+
+                }
+            }
+        },
+        {
+            标题: "添加账号",
+            uo: null,
+            检测: function() {
+                this.uo = text("Add account").findOne(100)
+                return this.uo
+            },
+            执行: function() {
+                let re = this.uo.parent().parent().click();
+                log("点击" + this.标题, re)
+                if (re) {
+
+                }
+            }
+        },
+        {
+            标题: "选择账号",
+            uo: null,
+            检测: function() {
+                this.uo = text("Select account").depth(8).findOne(100);
+                return this.uo
+            },
+            执行: function() {
+                let arr = [];
+                // 获取账号列表,选择下一个账号
+                className("android.view.ViewGroup").find().forEach(e => {
+                    let r = e.bounds();
+                    // 占满x坐标 y坐标200
+                    if((r.right - r.left == 912 
+                        || (r.right - r.left < device.width*0.9
+                            && r.right - r.left > device.width*0.8)
+                        )&& 
+                        ( (r.bottom - r.top < device.height*0.1
+                            && r.bottom - r.top > device.height*0.07)
+                        || (r.bottom - r.top < 190
+                            && r.bottom - r.top > 160)
+                        )
+                    ) {
+                        let text = e.find(className("TextView"));
+                        log(text.length)
+                        if(0 < text.length) {
+                            text[0].text();
+                             arr.push(text[0]);
+                        }
+                    }
+                });
+                //账号列表获取成功之后对比文件中保存的记录，缺少哪个就跑哪一个，跑完了就清空文件
+                // 从头到尾遍历
+                arr.forEach(n=>{
+                    try{
+                        if(accounts.indexOf(n.text()) < 0 && n.parent().click()){
+                            log("账号切换")
+                            accounts.push(n.text());
+                            files.write("/sdcard/xxxx/已用账号.txt", accounts.join("\n"));
+                            sleep(3000)
+                        }
+                    }catch(errpr){console.log(error)}
+                })
+            }
+        },
+        {
+            标题: "标题",
+            uo: null,
+            检测: function() {
+                this.uo = text("Me").boundsInside(device.width*0.8, device.height*0.8, device.width, device.height).findOne(100)
+                return this.uo
+            },
+            执行: function() {
+                return "跳出循环执行"
+            }
+        },
+        
+    ]
+    循环执行(操作)
+}
+
+function signUp() {
+    
+    let 操作 = [
+        {
+            标题: "设置",
+            uo: null,
+            检测: function() {
+                this.uo = classNameEndsWith("RelativeLayout").drawingOrder(7).clickable(true).findOne(2000)
+                return this.uo
+            },
+            执行: function() {
+                let re = this.uo.click();
+                log("点击" + this.标题, re)
+                if (re) {
+
+                }
+            }
+        },
+        {
+            标题: "退出登录",
+            uo: null,
+            检测: function() {
+                this.uo = text("Log out").depth(7).findOne(100)
+                return this.uo
+            },
+            执行: function() {
+                let re = this.uo.click();
+                log("点击" + this.标题, re)
+                if (re) {
+                    循环执行([
+                        {
+                            标题: "保存账号",
+                            uo: null,
+                            检测: function() {
+                                this.uo = text("Save").depth(10).findOne(100)
+                                return this.uo
+                            },
+                            执行: function() {
+                                let re = this.uo.click();
+                                log("点击" + this.标题, re)
+                            }
+                        },
+                        {
+                            标题: "退出登录",
+                            uo: null,
+                            检测: function() {
+                                this.uo = text("Log out").findOne(100) || text("Continue with Google").findOne(100)
+                                return this.uo
+                            },
+                            执行: function() {
+                                let re = this.uo.click();
+                                log("点击" + this.标题, re)
+                            }
+                        },
+                        {
+                            标题: "检测是否已退出",
+                            uo: null,
+                            检测: function() {
+                                this.uo = text("Me").boundsInside(device.width*0.8, device.height*0.8, device.width, device.height).findOne(100)
+                                return this.uo
+                            },
+                            执行: function() {
+                                return "跳出循环执行";
+                            }
+                        },
+                    ]);
+                    return "跳出循环执行";
+                }
+            }
+        },
+        
+    ]
+    循环执行(操作)
 }
