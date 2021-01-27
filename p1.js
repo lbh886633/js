@@ -816,7 +816,7 @@ function 主程序() {
 
         if(ui.switchaccount.checked){
             // 账号列表可以从本地文件读取
-            if(accountList) accountList = [];
+            if(!accountList) accountList = [];
             switchAccount()
         } else {
             let j=0;
@@ -6822,10 +6822,7 @@ function signIn() {
                                     console.verbose(accountName)
                                     // 判断当前账号是否已经被使用过，如果没有被使用过则将其当作要被使用的账号
                                     if(accountList.indexOf(accountName) < 0) {
-                                        log("账号列表: ============")
-                                        log(accountList)
                                         accountList.push(accountName);
-                                        log(accountList)
                                         account = e;
                                         // 跳出当前的foreach循环
                                         break;
