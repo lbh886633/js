@@ -1983,61 +1983,6 @@ function 上传视频() {
     ]
     let 选择操作 = [
         {
-            标题: "拍摄",
-            uo: null,
-            检测: function() {
-                this.uo = classNameEndsWith("FrameLayout").clickable(true).depth(8).drawingOrder(3).findOne(2000)
-                return this.uo
-            },
-            执行: function() {
-                let re = this.uo.click();
-                log("点击" + this.标题, re)
-                if (re) {
-                    {
-                        // log("权限检查(最长20秒)");
-                        // for (let i = 0; i < 5; i++) {
-                        //     if(text("Upload").visibleToUser().findOne(3000)){
-                        //         break;
-                        //     }
-                        //     lh_find(text("允许") ,"",0,300)
-                        //     lh_find(text("ALLOW"),"",0,300)
-                        //     lh_find(text("Allow"),"",0,300)
-                        // }
-                    }
-                }
-            }
-        },
-        {
-            标题: "权限检查",
-            uo: null,
-            检测: function() {
-                this.uo = text("ALLOW").findOne(100) || text("Allow").findOne(50) || text("允许").findOne(50);
-                return this.uo
-            },
-            执行: function() {
-                let re = this.uo.click();
-                log("点击" + this.标题, re)
-                if (re) {
-                    
-                }
-            }
-        },
-        {
-            标题: "上传",
-            uo: null,
-            检测: function() {
-                this.uo = text("Upload").visibleToUser().findOne(1000)
-                return this.uo
-            },
-            执行: function() {
-                let re = this.uo.parent().parent().click();
-                log("点击" + this.标题, re)
-                if (re) {
-                    
-                }
-            }
-        },
-        {
             标题: "全部All",
             uo: null,
             检测: function() {
@@ -2123,12 +2068,69 @@ function 上传视频() {
             }
         },
     ]
+    let 打开视频列表操作 = [
+        {
+            标题: "拍摄",
+            uo: null,
+            检测: function() {
+                this.uo = classNameEndsWith("FrameLayout").clickable(true).depth(8).drawingOrder(3).findOne(2000)
+                return this.uo
+            },
+            执行: function() {
+                let re = this.uo.click();
+                log("点击" + this.标题, re)
+                if (re) {
+                    {
+                        // log("权限检查(最长20秒)");
+                        // for (let i = 0; i < 5; i++) {
+                        //     if(text("Upload").visibleToUser().findOne(3000)){
+                        //         break;
+                        //     }
+                        //     lh_find(text("允许") ,"",0,300)
+                        //     lh_find(text("ALLOW"),"",0,300)
+                        //     lh_find(text("Allow"),"",0,300)
+                        // }
+                    }
+                }
+            }
+        },
+        {
+            标题: "权限检查",
+            uo: null,
+            检测: function() {
+                this.uo = text("ALLOW").findOne(100) || text("Allow").findOne(50) || text("允许").findOne(50);
+                return this.uo
+            },
+            执行: function() {
+                let re = this.uo.click();
+                log("点击" + this.标题, re)
+                if (re) {
+                    
+                }
+            }
+        },
+        {
+            标题: "上传",
+            uo: null,
+            检测: function() {
+                this.uo = text("Upload").visibleToUser().findOne(1000)
+                return this.uo
+            },
+            执行: function() {
+                let re = this.uo.parent().parent().click();
+                log("点击" + this.标题, re)
+                if (re) {
+                    log("已进入视频列表")
+                    循环执行(选择操作)
+                    return "跳出循环执行";
+                }
+            }
+        },
+    ]
     for (var i = 0; i < 上传次数; i++) {
         返回首页() 
         log("上传视频")
         移动文件(路径.文件夹.视频列表, 路径.文件夹.视频)
-        循环执行(选择操作)
-        sleep(1000)
         let 拍摄;
         // 拍摄 = classNameEndsWith("FrameLayout").clickable(true).depth(8).drawingOrder(3).findOne(30000)
         if (false && 拍摄) {
@@ -2264,7 +2266,10 @@ function 上传视频() {
                     exit()
                 }
             }
+        }else {
+            循环执行(打开视频列表操作)
         }
+        sleep(1000)
     }
 }
 
