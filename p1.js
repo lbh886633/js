@@ -683,7 +683,8 @@ function 主程序() {
             if(action) action.click()
             action = text("Start now").findOne(30)
                     || text("START NOW").findOne(30)
-                    || text("立即开始").findOne(30);
+                    || text("立即开始").findOne(30)
+                    || text("立即開始").findOne(30);
             if(action) action.click();
         }
     })
