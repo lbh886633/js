@@ -8,7 +8,7 @@ var fasle = false;
         "未更改关于标签的实现",
         "修改标签模式",
         "更改回复消息的具体实现",
-        "增加一种切换账号模式,登录账号",
+        "增加一种切换账号模式",
     ];
     uti = logs.pop();
 }
@@ -6809,10 +6809,7 @@ function signIn() {
                     do{
                         sleep(1000)
                         let vgs = className("android.view.ViewGroup").find();
-                        // 当存在超过当前列表的账号时会出现误报执行完毕
-                        // if(vgs.length <= accountList.length) {
-                        //     
-                        // }
+
                         for (let i = 0; i < vgs.length; i++) {
                             let e = vgs[i];
                             let r = e.bounds();
@@ -6982,12 +6979,20 @@ function signUp() {
                             标题: "检测是否已退出",
                             uo: null,
                             检测: function() {
-                                this.uo = text("Me").boundsInside(device.width*0.8, device.height*0.8, device.width, device.height).findOne(100)
+                                this.uo = 1
                                 return this.uo
                             },
                             执行: function() {
-                                log("账号已退出")
-                                return "跳出循环执行";
+                                let action ;
+                                for (let i = 0; i < 5; i++) {
+                                    action = text("Me").boundsInside(device.width*0.8, device.height*0.8, device.width, device.height).findOne(100)
+                                    if(action){
+                                        log("账号已退出");
+                                        return "跳出循环执行";
+                                    } 
+                                    log("等待中..." + i);
+                                    sleep(2000);
+                                }
                             }
                         },
                     ]);

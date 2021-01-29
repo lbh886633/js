@@ -7,7 +7,7 @@ var fasle = false;
     let logs = [
         "修改标签模式",
         "更改回复消息的具体实现",
-        "增加一种切换账号模式,登录账号",
+        "增加一种切换账号模式",
     ];
     uti = logs.pop();
 }
@@ -368,7 +368,7 @@ ui.layout(
                                     <checkbox id="nofor" checked="true" text="关闭循环" />
                                 </linear>
                                 <linear>
-                                    <checkbox id="switchaccount"  text="登录账号" />
+                                    <checkbox id="switchaccount" checked="true" text="登录账号" />
                                 </linear>
                             </vertical>
                             <vertical id="getmodel">
@@ -715,6 +715,11 @@ function 主程序() {
     let whileNumber = 0;
 
     while(true) {
+        if(ui.switchaccount.checked){
+            // 账号列表可以从本地文件读取
+            if(!accountList) accountList = [];
+            switchAccount()
+        }
         try{
             if(runTikTok()) {
                 log("账号正常，还原成功")
@@ -813,50 +818,46 @@ function 主程序() {
         }
         toastLog("当前账号操作结束 " + (++whileNumber));
 
-        if(ui.switchaccount.checked){
-            // 账号列表可以从本地文件读取
-            if(!accountList) accountList = [];
-            switchAccount()
-        } else {
-        let j=0;
-        // 暂存上一个账号信息
-        let lastAccount = accountInfo;
-        let nowAccount;
-        for(; j < 5; j++) {
-            nextAccount()
-            // 加入账号信息检测
-            for (let I = 0; I < 3; I++) {
-                返回首页(300);
-                try{
-                    // 点击个人信息，没有点击的情况下不会去尝试获取信息
-                    if(text("Me").findOne(2000).parent().click()) {
-                        // 获取到个人信息s
-                        nowAccount = getFansInfo("个人信息", true);
-                        console.info("切换之前", lastAccount.username)
-                        console.info("当前账号", nowAccount.username)
-                        if(lastAccount.username != nowAccount.username) {
-                            break;
+        if(!ui.switchaccount.checked) {
+            let j=0;
+            // 暂存上一个账号信息
+            let lastAccount = accountInfo;
+            let nowAccount;
+            for(; j < 5; j++) {
+                nextAccount()
+                // 加入账号信息检测
+                for (let I = 0; I < 3; I++) {
+                    返回首页(300);
+                    try{
+                        // 点击个人信息，没有点击的情况下不会去尝试获取信息
+                        if(text("Me").findOne(2000).parent().click()) {
+                            // 获取到个人信息s
+                            nowAccount = getFansInfo("个人信息", true);
+                            console.info("切换之前", lastAccount.username)
+                            console.info("当前账号", nowAccount.username)
+                            if(lastAccount.username != nowAccount.username) {
+                                break;
+                            }
+                        } else {
+                            sleep(5000)
                         }
-                    } else {
-                        sleep(5000)
+                    }catch(e){
+                        console.log(e)
                     }
-                }catch(e){
-                    console.log(e)
+                }
+                if(lastAccount.username != [nowAccount.username||""]) {
+                    log("账号切换完成")
+                    break;
                 }
             }
-            if(lastAccount.username != [nowAccount.username||""]) {
-                log("账号切换完成")
-                break;
+            if(lastAccount.username == nowAccount.username) {
+                log(lastAccount.username, nowAccount.username)
+                toastLog("账号切换失败！");
+                return false;
             }
+            // 返回首页()
+            log("账号进度", accounts.progress)
         }
-        if(lastAccount.username == nowAccount.username) {
-            log(lastAccount.username, nowAccount.username)
-            toastLog("账号切换失败！");
-            return false;
-        }
-        // 返回首页()
-        log("账号进度", accounts.progress)
-    }
 
     }
 }
@@ -6750,6 +6751,7 @@ function autoConfirm(num, choose, title, content, callback) {
 
 function switchAccount() {
     返回首页();
+    log("点击 '我' ", text("Me").findOne(1000).parent().click())
     if(1 < getAccountList().list.length) {
         signUp()
     }
@@ -6814,9 +6816,7 @@ function signIn() {
                     do{
                         sleep(1000)
                         let vgs = className("android.view.ViewGroup").find();
-                        if(vgs.length <= accountList.length) {
-                            if(!confirm("当前所有账号已全部执行完毕,是否重新执行?")) exit();
-                        }
+
                         for (let i = 0; i < vgs.length; i++) {
                             let e = vgs[i];
                             let r = e.bounds();
@@ -6849,7 +6849,16 @@ function signIn() {
                     }while (!account && listUO.scrollForward())
                     if(account.click()) log("账号切换到：", accountName)
                     else log("账号切换失败")
-                }catch(e){}
+                }catch(e){
+                    log(e)
+                    if(!confirm("似乎当前所有账号已全部执行完毕,是否结束执行?", "已经执行"+accountList.length+"个账号。\n"+e)) {
+                        exit();
+                    }
+                    if(autoConfirm("是否清空当前账号列表？","已执行账号列表：\n"+accountList.join("\n"))){
+                        accountList = [];
+                    }
+                    
+                }
                 等待加载()
             }
         },
@@ -6920,6 +6929,7 @@ function signIn() {
 
 function signUp() {
     返回首页();
+    log("点击 '我' ", text("Me").findOne(1000).parent().click())
     let 操作 = [
         {
             标题: "设置",
@@ -6976,12 +6986,20 @@ function signUp() {
                             标题: "检测是否已退出",
                             uo: null,
                             检测: function() {
-                                this.uo = text("Me").boundsInside(device.width*0.8, device.height*0.8, device.width, device.height).findOne(100)
+                                this.uo = 1
                                 return this.uo
                             },
                             执行: function() {
-                                log("账号已退出")
-                                return "跳出循环执行";
+                                let action ;
+                                for (let i = 0; i < 5; i++) {
+                                    action = text("Me").boundsInside(device.width*0.8, device.height*0.8, device.width, device.height).findOne(100)
+                                    if(action){
+                                        log("账号已退出");
+                                        return "跳出循环执行";
+                                    } 
+                                    log("等待中..." + i);
+                                    sleep(2000);
+                                }
                             }
                         },
                     ]);
