@@ -5,10 +5,9 @@ var uti;
 var fasle = false;
 {
     let logs = [
+        "修改标签模式",
         "更改回复消息的具体实现",
         "增加一种切换账号模式",
-        "增加采集用户",
-        "修改标签模式",
     ];
     uti = logs.pop();
 }
@@ -18,6 +17,7 @@ var tempSave = {
     NUMBER: 0,
     自动打码: false,
     version: "25" + " -- " + uti,
+    downloadUrl: "http://192.168.137.1:8081/tiktokjs/",
     // 直接发送的消息
     getSayMessage: "Hi",
 };
@@ -72,10 +72,9 @@ var server = {
             return JSON.parse(re.body.string());
         } catch (err) {
             log("请求失败", err);
-            console.verbose(err.stack);
         }
     },
-    // 排除对象中的null与undefined数据
+    // 排除对象中的null数据
     excludeNull: function (o) {
         let p = {};
         for (let k in o) {
@@ -94,7 +93,7 @@ var server = {
      */
     post: function (uri, o) {
         try {
-            console.verbose("[↑]" + this.serverUrl +  uri + "\n" + JSON.stringify(o))
+            console.verbose("[↑]" + uri + "\n" + JSON.stringify(o))
             return http.post(this.serverUrl + uri, o, {'Connection': 'close'}).body;
         } catch (err) {
             log("[↑]POST上传出错", err)
@@ -261,20 +260,17 @@ ui.layout(
                                     <text textColor="black" textSize="20" text="模式设置" />
                                 </linear>
                                 <radiogroup orientation="horizontal" gravity="center" >
-                                    {/*<radio id="mi6_null" checked="true" text="空" />*/}
-                                    <radio id="mi6_null" text="空" />
+                                    <radio id="mi6_null" checked="true" text="空" />
                                     <radio id="mi6_reg" text="注册" />
                                     <radio id="mi6_dat" text="资料" />
                                     <radio id="mi6_vid" text="视频" />
                                     <radio id="mi6_foc" text="关注" />
                                     <radio id="mi6_fan" text="粉丝" />
-                                    <radio id="mi6_rep"  checked="true" text="回复" />
+                                    <radio id="mi6_rep"  text="回复" />
                                 </radiogroup>
                                 <radiogroup orientation="horizontal" gravity="center" >
                                     <radio id="mi6_null" checked="true" text="空" />
                                     <radio id="mi6_task" text="任务" />
-                                    <radio id="getUserList" text="采集用户" />
-                                    <radio id="focusUser" text="关注用户" />
                                 </radiogroup>
                                 
                                 <radiogroup orientation="horizontal" h="0">
@@ -290,6 +286,7 @@ ui.layout(
                             <linear>
                                     <checkbox id="switchVersion" text="长版本号" />
                                     <checkbox id="switchVersionzl" text="短版本号" />
+                                    <checkbox id="repScript" text="回复脚本" />
                                     <checkbox id="createAccount" text="生成邮箱" />
                                     <checkbox id="daily" text="日常模式" />
                             </linear>
@@ -374,10 +371,6 @@ ui.layout(
                                     <checkbox id="switchaccount" checked="true" text="登录账号" />
                                 </linear>
                             </vertical>
-                            <linear padding="5 0 0 0">
-                                <text textColor="black" text="指定关注数量: " />
-                                <input lines="1" id="focusUserNumber" w="auto" text="200"/>
-                            </linear>
                             <vertical id="getmodel">
                                 <linear padding="5 0 0 0">
                                     <text textColor="black" textSize="20" text="采集设置" />
@@ -717,14 +710,6 @@ function 主程序() {
         appPackage = "com.ss.android.ugc.trill";
     }
 
-
-    if (ui.getUserList.checked) {
-        log("采集用户，三星未适配");
-        采集用户();
-        console.info("采集用户模式结束");
-        exit()
-    }
-    
     // 日常模式，关注、采集粉丝、回复消息
     tempSave.daily = ui.daily.checked;
 
@@ -779,26 +764,26 @@ function 主程序() {
                 }
 
                 if (tempSave.daily || ui.mi6_rep.checked) {
-                    log("回复")
-                    返回首页()
-                    //TODO tempSave.RequiredLabels = readRequiredLabelsFile();
-                    // 获取标签
-                    tempSave.RequiredLabels = getLabelList();
-                    if(!tempSave.RequiredLabels || tempSave.RequiredLabels.length < 1 ){
-                        console.warn("没有获取到标签数据！停止运行")
-                        exit()
+                    if(ui.repScript.checked){
+                        // 驱动脚本去进行回复
+                        驱动回复软件()
+                    } else {
+                        log("回复")
+                        返回首页()
+                        // tempSave.RequiredLabels = readRequiredLabelsFile();
+                        // 获取标签
+                        tempSave.RequiredLabels = getLabelList();
+                        if(!tempSave.RequiredLabels || tempSave.RequiredLabels.length < 1 ){
+                            console.warn("没有获取到标签数据！停止运行")
+                            exit()
+                        }
+                        mi6回复消息()
                     }
-                    mi6回复消息()
                 }
                 
                 if (tempSave.daily || ui.mi6_task.checked) {
                     log("任务模式");
                     任务发送指定消息();
-                }
-                
-                if (ui.focusUser.checked) {
-                    log("指定关注模式");
-                    focusUser(0 <  ui.focusUserNumber ? ui.focusUserNumber || 200 : 200);
                 }
                 
             }
@@ -1710,6 +1695,7 @@ function mi6关注操作(num) {
 
     let 新链接 = 取链接()
     openUrlAndSleep3s(新链接)
+
     sleep(1000)
     for (let index = 0; index < 10; index++) {
         var 打开方式 = textContains("TikTok").visibleToUser().findOne(2000)
@@ -1860,203 +1846,6 @@ function 返回首页(dayleTime) {
             sleep(1000)
         }
     }
-    // 点击 “Me” 
-    lh_find(text("Me"),"个人信息", 0, 3000);
-    // text("Me").findOne(2000).parent().click()
-}
-
-///////////////////////////
-// 关注用户
-function focusUser(max) {
-    log("关注用户")
-    let focusNumber = 0;
-    max = max || 200;
-    let words = ["Follow","Message","Requested"];
-    // 获取链接，持有用户
-    for (let i = 0; i < 3; i++) {
-        while(focusNumber < max) {
-            let user = server.get("focusList/gain");
-            // 没有新用户了
-            if(!user) break;
-            // 用户不是一个对象，用户没有链接，用户链接长度过短
-            if(typeof user != "object" || !user.url || user.url.length < 5 ) {
-                console.verbose("信息不符合", user);
-                if(user.code == 500){
-                    log("没有需要关注的用户了！")
-                    exit();
-                }
-                continue;
-            }
-            log("正在打开用户信息")
-            // 打开链接
-            openUrlAndSleep3s(user.url);
-            // 检测当前界面，如果当前界面不是用户信息页面则等待，
-            let state;
-            do {
-                state = detectionFollowStatus(true);
-                try{
-                    if(!state) continue;
-                    if(state.text()=="Follow"){
-                        // 点击
-                        log("关注：", state.click());
-                        // 点击关注，清空状态
-                        state = null;
-                        sleep(1000)
-                    } else {
-                        user.label = state.text();
-                        // 上传当前状态
-                        threads.start(function () {
-                            log(server.post("focusList/use/"+user.id+"?label="+user.label,{}).json());
-                        })
-                        返回首页(300);
-                        break;
-                    }
-                }catch(e){
-                    console.verbose(e)
-                }
-            } while (!state);
-            focusNumber++;
-            log("进度：" + focusNumber + "/" + max);
-        }
-        sleep(5000*i)
-    }
-    
-    function detectionFollowStatus(wait) {
-        for (let i = 0;wait && i < 5; i++) {
-            等待加载()
-            let follow = className("android.widget.TextView")
-                .clickable(true).drawingOrder(1).filter(function(uo){
-                    return -1 < words.indexOf(uo.text());
-                }).find()
-            if (follow.length == 0) {
-                follow = className("android.widget.Button")
-                .clickable(true).filter(function(uo){
-                    return -1 < words.indexOf(uo.text());
-                }).find()
-            }
-            if (follow.length == 1){
-                return follow[0];
-            } else {
-                console.verbose("文字数量：", follow.length);
-            }
-            sleep(1000)
-        }
-    }
-
-}
-
-function 采集用户() {
-    // 打开tiktok
-    while(true){
-        返回首页()
-        // 这里需要做的是：打开链接，进入粉丝列表，出现异常的时候进行处理
-        let url = server.get("url/label?label=采集粉丝")
-        if(!url) {
-            console.info("获取不到新的链接，可能已经全部获取。")
-            exit();
-        }
-        openUrlAndSleep3s(url.url)
-        let list 
-        do{
-            sleep(1000)
-            // 进入粉丝列表
-            let action = text("Followers").drawingOrder(2).visibleToUser().findOne(2000);
-            if(action) {
-                if(action.parent().click()){
-                    sleep(2000)
-                }
-            }
-            list = className("androidx.recyclerview.widget.RecyclerView")
-                .filter(function(uo){
-                    return device.width*0.8 < uo.bounds().right - uo.bounds().left;
-                }).depth(9).enabled(true).findOne(1000)
-        }while(!list)
-        // 获取用户列表的控件
-        获取用户列表(list);
-    }
-}
-function 获取用户列表(list) {
-    log("进入用户列表...")
-    // 获取列表信息之后获取用户信息
-    // 如果出现异常则返回到列表重新获取列表之后继续执行
-    // 如果没有出现异常则返回列表后向下滑动后执行
-    let saveList = [];
-    let userList = list || className("androidx.recyclerview.widget.RecyclerView")
-                .filter(function(uo){
-                    return device.width*0.8 < uo.bounds().right - uo.bounds().left;
-                })
-                .findOne(1000);
-    /*
-        获取当前页面的用户信息，
-        正常：返回列表之后滑动到下一页
-        异常：设置标记scrol，返回列表，不滑动继续获取用户信息
-        会对用户名字使用数组进行保存操作
-
-        需要在上面再封装一层，功能是打开链接，
-        如果已经在列表则不会进行打开链接的操作，
-        而是直接运行的操作
-     */
-    do {
-        let scrol = true;
-        try{
-            saveList = getFansInfoList(userList,saveList);
-        }catch(err){
-            log("出现异常")
-            log(err)
-            scrol = false;
-        }
-        for (let i = 0; i < 5; i++) {
-            userList = className("androidx.recyclerview.widget.RecyclerView")
-                    .filter(function(uo){
-                        return device.width*0.8 < uo.bounds().right - uo.bounds().left;
-                    }).findOne(1000)
-            if(userList) log("存在")
-            if(userList) break;
-            else back()
-        }
-        sleep(2000)
-        if(scrol){
-            if(!userList.scrollForward()){
-                // 滑动失败
-                log("滑动失败，跳出循环，本次完成计数：", saveList.length)
-                break;
-            }
-        }
-        log("总保存数："+saveList.length)
-        log("============")
-    } while (true);
-}
-
-/**
- * 获取当前页面列表中的粉丝信息
- * userList 列表控件对象 saveList 保存数组列表
- */
-function getFansInfoList(userList,saveList) {
-    saveList = saveList || [];
-    let ul = userList.children();
-    for (let i = 0; i < ul.length; i++) {
-        let userName = ul[i].find(className("TextView"))[0].text()
-        if(saveList.indexOf(userName) < 0){
-            if(ul[i].click()){
-                // 将当前用户保存起来
-                // 获取用户并将其保存到服务器
-                getFansInfo(null,null,"focusList");
-                saveList.push(userName);
-            } else {
-                log("点击失败");
-            }
-        }
-        // 不在列表则进行返回
-        for (let i = 0; i < 5; i++) {
-            userList = className("androidx.recyclerview.widget.RecyclerView")
-                    .id("cku").findOne(1000)
-            if(userList)log("存在")
-            if(userList) break;
-            else back()
-        }
-        sleep(500)
-    }
-    return saveList;
 }
 
 ///////////////////////////
@@ -3421,8 +3210,6 @@ function mi6回复消息() {
     log("测试中...")
     // 1. 进入信息界面
     text("Inbox").findOne(1000).parent().click()
-    sleep(500)
-    等待加载()
     // 2. 进入私信界面 这里获取总共几条新消息
     let newMsgCount = 0;
     let action = text("All activity").findOne(100).parent().parent()
@@ -3438,13 +3225,12 @@ function mi6回复消息() {
     // 根据条件选择是否进入私信界面
     if(newMsgCount>0) {
         // 进行下一步，可选没有新消息就直接开始下一个，明天再改成计算的
-        if(lh_find(className("android.widget.RelativeLayout").clickable(true)
-            .boundsInside(device.width*0.85,0,device.width,device.height*0.1), "点击私信", 0)) {
+        if(lh_find(className("android.widget.ImageView").boundsInside(970,90,1050,160).clickable(false), "点击私信", 0)) {
             // 2.5. 获取列表，可以用于滚动
             actionRecycler = className("androidx.recyclerview.widget.RecyclerView")
                     .boundsInside(0, 200, device.width, device.height)
                     .findOne(1000);
-            //调试不能下滑时 console.info(actionRecycler)
+            //TODO console.info(actionRecycler)
             // 当失败次数等于3的时候就跳出
             for (let i = 0; i < 3;) {
                 // 等待加载列表
@@ -3798,8 +3584,6 @@ function sayHello(f, msg){
     }
     re.accountUsername = accountInfo.username;
     re.fansUsername = f.username;
-    log("保存消息")
-    if(!re.fansUsername) re.fansUsername = fans.username||"-";
     server.add("record", server.excludeNull(re));
     return re;
 }
@@ -3813,31 +3597,33 @@ function sendMsg(msg){
         if(action) {
             log("消息输入框")
             action.setText(msg);
+            break;
         }
-        // 3. 发送消息  发送按钮 950,1700, 1100,1950
-        action = className("android.widget.ImageView")
-            .boundsInside(device.width*0.8, device.height*0.8, device.width,device.height)
-            .clickable(true).find();
-        if(1 < action.length) {
-            // 当按钮数量大于1个时点击最后一个
-            if(action.pop().click()) {
-                log("发送消息");
-                break;
-            } else {
-                log("点击发送按钮失败")
-            }
-        }
-        sleep(1000)
     }
-
+    // 3. 发送消息  发送按钮 950,1700, 1100,1950
+    action = className("android.widget.ImageView").boundsInside(950,1700, 1100,1950).depth(9).clickable(true).findOne(1000);
+    if(action){
+        log("发送消息", action.click());
+    }
+    // 3.1. 发送消息（按钮在中间部分时）  发送按钮 950,1700, 1100,1950
+    action = className("android.widget.ImageView").boundsInside(950,800, 1100,1950).depth(9).clickable(true).findOnce();
+    if(action){
+        // 点击最后一个
+        log("发送消息(中)", action.click());
+    }
     // 银行卡检测 DECLINE LINK
     action = text("DECLINE").findOne(1000)
     if(action){
         console.error("未绑卡")
         action.click();
+    } else {
+        // 防止发送失败
+        action = className("android.widget.ImageView").boundsContains(950,1700, 1100,1950).clickable(true).findOne(1000);
+        if(action){
+            log("再次点击发送消息按钮", action.click());
+        }
     }
-
-    action = text("Resend").clickable(true).findOne(300)  
+    action = text("Resend").clickable(true).findOne(300)                                                                
     if(action) action.click()
 
     sleep(2000);
@@ -3848,9 +3634,6 @@ function sendMsg(msg){
             sleep(100)
         }
     }
-
-    // 检测消息发送异常
-    detectionMsgStatus();
     try{
         sleep(500)
         // 4. 检测是否发送成功
@@ -3858,6 +3641,7 @@ function sendMsg(msg){
         for (let m in msgList) {
             m = msgList[m];
             if(msg == m.msg) {
+                detectionMsgStatus(msg);
                 return m;
             }
         }
@@ -3873,23 +3657,9 @@ function sendMsg(msg){
         }
     }
 }
-// 检测到整句话则提示用户
-function detectionMsgStatus() {
-    log("=====   消息处理    ======")
-    let uo = text("This message violated our Community Guidelines. We restrict certain content and actions to protect our community. If you believe this was a mistake, tap Feedback to let us know.")
-            .findOne(100);
-    if(uo) {
-        if(autoConfirm(5000, false, "手动反馈？")){
-            let pauseJS = true;
-            let f = floaty.rawWindow(<frame><button id="runJS">继续运行</button></frame>)
-            f.runJS.click(()=>{pauseJS=false})
-            while(pauseJS) sleep(1000);
-            log("继续运行");
-        }
-    }
-}
 
-function detectionMsgStatusBackup(msg) {
+function detectionMsgStatus(msg) {
+    //TODO
     log("=====   消息处理    ======")
     log(msg)
     try{
@@ -3957,10 +3727,6 @@ function 获取消息(){
             console.verbose(usStr, "获取失败", err)
         }
     }
-    // 如果存在按钮x则优先点击
-    if(lh_find(id("a0_"),"关闭打招呼提示",0,1000)){
-        sleep(300);
-    }
     let msgList = [];
     let msgListUO;
     for (let i = 0; i < 5; i++) {
@@ -3973,7 +3739,7 @@ function 获取消息(){
         // 自下而上保存信息到数组
         for (let i = msgListUO.length-1; i >= 0; i--) {
             let m = msgListUO[i].children();
-            let status,msg,prefix="",suffix="",code,sender;
+            let status,msg,perfix="",suffix="",code,sender;
 
             // 拿到编码，一般来说，只有几种可能 010 011 110 111 020(对方消息) 
             code = "" + tryRun(m[0], ".children().length") + tryRun(m[1], ".children().length") + tryRun(m[2], ".children().length");
@@ -3981,7 +3747,7 @@ function 获取消息(){
                 try{
                     let actionPerfix = m[0].findOne(className("android.widget.TextView"))
                     if(actionPerfix){
-                        prefix = actionPerfix.text();
+                        perfix = actionPerfix.text();
                     }
                 } catch (err) {}
             }
@@ -4005,22 +3771,15 @@ function 获取消息(){
                     }
                 } catch (err) {}
             }
-
-            msgList.push(
-                server.excludeNull({
-                    msg: msg,
-                    prefix: prefix,
-                    suffix: suffix,
-                    accountUsername: accountInfo.username,
-                    sender: sender,
-                    code: code,
-                    // fansUsername: null, // 放到上传消息的地方去进行赋值
-                    status: status,
-                    device: accountInfo.device,
-                    reservedA: null,
-                    reservedB: null,
-                })
-            )
+            
+            msgList.push({
+                status: status, 
+                sender: sender,
+                msg: msg, 
+                perfix: perfix, 
+                suffix: suffix, 
+                code: code
+            })
         }
     }
     return msgList;
@@ -4100,9 +3859,8 @@ function replySendlist(sendlist) {
             if(newMsgListLength != sendlist.length){
                 break;
             }
-            log("似乎未进入聊天界面");
+            log("暂未进入聊天界面");
         }
-        // 回复消息
         mi6ReplyMsg();
         // 7. 返回上一级
         for (let i = 0; i < 5; i++) {
@@ -4139,25 +3897,12 @@ function mi6ReplyMsg() {
     log("正在获取粉丝数据")
     // 拿顶部的用户名字,数据库中没有信息则进入右上角拿对方账号信息
     let fans;
-
-    {
-        let tempUO = className("android.widget.TextView").clickable(true)
-                    .boundsInside(0,0,device.width*0.9,device.height*0.1)
-                    .findOne(3000);
-        if(tempUO) {
-            let fansName = tempUO.text();
-            fans = server.get("fans/name/" + fansName + "?accountUsername=" + accountInfo.username)
-        }
-    }
-
+    let fansNameUO = className("TextView").boundsInside(0,0,device.width*0.9,device.height*0.2).findOne(3000);
+    if(fansNameUO) fans = server.get("fans/name/" + fansNameUO.text() + "?accountUsername=" + accountInfo.username);
     if(!fans) {
-        // log("通过名字获取对方信息失败！正在尝试通过账号获取")
-        log("尝试通过账号获取或创建")
+        log("通过名字获取对方信息失败！正在尝试通过账号获取")
         fans = getFansInfoByFansMsgView();
     }
-    // 通过粉丝账号找聊天记录
-    fans.messages = server.get("record/doubleusername?fansUsername=" + fans.username
-                +"&accountUsername="+fans.accountUsername) || [];
 
     log("开始获取消息并回复")
     // 5. 获取双方聊天信息（不翻页）
@@ -4172,100 +3917,94 @@ function mi6ReplyMsg() {
     let 新消息列表 = 获取消息();
     
     /*
-    [ 
-        { 
-            status: false,
-            sender: 'prettyboi.malik',
-            msg: '[消息发送失败]prettyboi.malik',
-            perfix: '2020-12-23 18:58',
-            suffix: '',
-            code: '120' 
-        },
-        { 
-            status: false,
-            sender: 'prettyboi.malik',
-            msg: '[消息发送失败]prettyboi.malik',
-            perfix: '2020-12-23 12:29',
-            suffix: '',
-            code: '120' 
-        } 
-    ]
+    [ { status: false,
+    sender: 'prettyboi.malik',
+    msg: '[消息发送失败]prettyboi.malik',
+    perfix: '2020-12-23 18:58',
+    suffix: '',
+    code: '120' },
+  { status: false,
+    sender: 'prettyboi.malik',
+    msg: '[消息发送失败]prettyboi.malik',
+    perfix: '2020-12-23 12:29',
+    suffix: '',
+    code: '120' } ]
      */
     // 对当前的消息做去重处理
     if(总消息.length == 0){
         总消息 = 总消息.concat(新消息列表);
         新消息 = 新消息列表;
     } else {
-        // 将总消息的msg遍历出来
-        let totalMsg = [], index;
-        总消息.forEach(e=>{totalMsg.push(e.msg)})
-        // 遍历当前消息
-        新消息列表.forEach(消=>{
-            // log(消.msg);
-            // 设置保存标记
-            let saveTag = true;
-            let m = 消.msg;
-            // 遍历完全部消息
-            for (let i = 0; i < totalMsg.length; i++) {
-                if(m == totalMsg[i]){
-                    // 消息内容相同时
-                    // 以下条件任意满足其一则设置(saveTag)为false并开始下一个
-                    // true 跳过，false 继续
-                    if(
-                        // 存在code属性时，不和保存的一致
-                        消["code"] == 总消息[i]["code"]
-                        && 消["prefix"] == 总消息[i]["prefix"]
-                        && 消["suffix"] == 总消息[i]["suffix"]
-                    ) {
-                        saveTag = false;
-                        // 开始下一个
-                        return true;
+        for (let 消 in 新消息列表) {
+            log(消)
+            消 = 新消息列表[消];
+            // 是否保存的标记
+            let tag = false;
+
+            for (let 息 in 总消息) {
+                息 = 总消息[息];
+                /// 消息内容相等的时候才进行比对
+                if(消.msg == 息.msg){
+                    log("消息体相同")
+                    let letTag = true;
+                    // 只匹配必要的信息 code perfix suffix msg 
+                    for (let k in 消) {
+                        if(消[k] != 息[k]) {
+                            // 不相等，有一个属性不相等则跳出进行保存
+                            letTag = false;
+                            break;
+                        }
                     }
-                    // if(消["code"] && 消["code"] == 总消息[i]["code"])
+                    if(!letTag) {
+                        // 存在一个消息一样的，全相等的，则直接跳出循环，且设置不保存
+                        tag = false;
+                        break;
+                    }
                 }
+                // 不相等则将保存标记设置成true
+                tag = true;
+                break;
             }
-    
-            if(saveTag) {
+
+            if(tag) {
                 总消息.push(消);
                 新消息.push(消);
             }
-    
-        })
+        }
     }
 
+    log(fans)
     // 6. 进行消息处理，返回false则不回复消息
     let 回消息 = 消息处理(fans,新消息);
     if(回消息){
         // 输入消息并发送
-        log("回复消息")
-        let sm = sendMsg(回消息);
+        let sm = sendMsg(回消息)
         总消息.push(sm);
         新消息.push(sm);
     }
+    // 将当前信息进行保存
+    // 向服务器保存最新的聊天数据  只保存新的数据
+    // 按照时间是倒序的
+    for (let i = 新消息.length; 0 <= i; i--) {
+        // 避免因为空对象导致异常
+        if(!新消息[i]) break;
 
-    threads.start(function(){
-        console.info("即将上传聊天记录数：" + 新消息.length);
-        // 将当前信息进行保存
-        // 向服务器保存最新的聊天数据  只保存新的数据
-        // 按照时间是倒序的，所以倒着向后台传
-        for (let i = 新消息.length-1; 0 <= i; i--) {
-            try{
-                if(typeof 新消息[i].status != "number") {
-                    新消息[i].status = 新消息[i].status? 0 : 1;
-                }
-                if(!新消息[i].fansUsername) 新消息[i].fansUsername = fans.username||"-";
-                server.add("record", server.excludeNull(新消息[i]));
-            } catch(e) {
-                log(e);
-                log("上传新消息失败！");
+        // 避免因为空对象导致失败
+        新消息[i].params = null;
+
+        try{
+            if(typeof 新消息[i].status != "number") {
+                新消息[i].status = 新消息[i].status? 0 : 1;
             }
+            console.verbose(新消息[i]);
+            server.add("record", server.excludeNull(新消息[i]));
+        } catch(e){
+            log(e);
+            log("上传新消息失败！");
         }
-    })
-    // 聊天记录和标签都是重新查的,所以不需要再重新保存粉丝信息
+    }
     // 将粉丝信息进行保存
-    // fans.messages = [];
-    // log("保存当前粉丝信息")
-    // server.add("fans", server.excludeNull(fans));
+    server.add("fans", server.excludeNull(fans));
 }
 
 /**
@@ -4382,7 +4121,6 @@ function replyMsg() {
                 新消息[i].status = 新消息[i].status? 0 : 1;
             }
             console.verbose(新消息[i]);
-            if(!新消息[i].fansUsername) 新消息[i].fansUsername = fans.username||"-";
             server.add("record", server.excludeNull(新消息[i]));
         } catch(e){
             log(e);
@@ -4431,6 +4169,9 @@ function getFansInfoByFansMsgView() {
             name: name,
             accountUsername: accountInfo.username
         }
+    } else {
+        // 通过粉丝数据找聊天记录
+        fans.messages = server.get("record/doubleusername?fansUsername=" + fans.username+"&accountUsername="+fans.accountUsername);
     }
     // 返回上一级，聊天界面
     back();
@@ -4554,10 +4295,8 @@ function addFans(obj,arr) {
  */
 function 消息处理(fans,newMsgList) {
 
-    // log("==== 粉丝信息以及新消息 ====")
-    // console.verbose(fans);
-    // console.verbose(newMsgList);
-
+    log("==== 粉丝信息以及新消息 ====")
+    log(fans)
     // 1. 分析新消息单词数组
     let words = [];
     for (let m in newMsgList) {
@@ -4574,29 +4313,25 @@ function 消息处理(fans,newMsgList) {
         }
     }
 
-    // console.verbose("单词组：", words)
+    console.verbose("单词组：", words)
     // 拿到粉丝当前标签内容,粉丝标签信息 {"标签1": ["触发词1", "触发词2"],"标签2": ["触发词1", "触发词2"],"标签3": ["触发词1", "触发词2"]}
     let fansLabel = {};
     try{
-        if(fans.username) fansLabel = server.get("fansLabel/getlabel/" + fans.username).label;
+        if(fans.username) fansLabel = server.get("fanslabel/getlabel/" + fans.username).label;
     }catch(err) {
         log(err)
         log("获取粉丝标签失败！");
     }
-
-    // log("=== 已存标签 ===")
-    // log(fansLabel)
-
+    log("=== 已存标签 ===")
+    log(fansLabel)
     // 触发词优先回复
     let nowMsg=[];
     // 使用单词去匹配词库并保存
     for (let w in words) {
-        // 拿到当前单词，并将当前单词转成小写
-        w = words[w].toLowerCase();   
-        // 拿到当前标签内容 包括 label（标签） words（关键字） info（信息）
-        for (let tag in tempSave.RequiredLabels) {
+        w = words[w].toLowerCase();   // 拿到当前单词，并将当前单词转成小写
+        for (let tag in tempSave.RequiredLabels) {   // 拿到当前标签内容 包括 label（标签） words（关键字） info（信息）
             tag = tempSave.RequiredLabels[tag];
-            // {labelName: "国家", words: ["usa","en"](已经处理为小写), ask: ["where are you from?"], reply: ["where are you from?"]}
+            // {labelName: "国家", words: "usa"(已经处理为小写), ask: ["where are you from?"], reply: ["where are you from?"]}
             // 如果当前单词存在于标签中，则进行保存，将其转换成小写，这里的indexOf是在字符串中找
             if(-1 < tag.words.indexOf(w)){
                 // 判断是否存在当前标签，没有就创建
@@ -4613,8 +4348,8 @@ function 消息处理(fans,newMsgList) {
                         labelBody: 触发内容：
                     }
                      */
-                    // console.warn("标签保存")
-                    server.add("fansLabel", {
+                    console.warn("标签保存")
+                    server.add("fanslabel", {
                         username: fans.username,
                         labelName: tag.labelName,
                         labelBody: w
@@ -4628,21 +4363,21 @@ function 消息处理(fans,newMsgList) {
         }
     }
 
-    // 要回复的消息
-    let reMsg = "";
-
-    // log("=== 优先回复消息 ===")
-    // log(nowMsg)
-    // log("最新用户标签数据")
-    // log(fansLabel)
-
+    log("=== 优先回复消息 ===")
+    log(nowMsg)
+    //TODO
+    log("最新用户标签数据")
+    log(fansLabel)
     // 如果有标签消息则进行标签消息回复，没有则不进行回复
     if(0 < nowMsg.length) {
-        reMsg = nowMsg.join("\n");
+        console.warn("标签消息内容：")
+        return nowMsg.join("\n");
     }
 
-    if(reMsg!="") reMsg+="\n\n\n";
     // 查找剩余标签内容，执行相应的询问（顺序）
+
+
+    // for (let r in tempSave.RequiredLabels) {
     for (let i = 0; i < tempSave.RequiredLabels.length; i++) {
         /*
             [
@@ -4652,26 +4387,17 @@ function 消息处理(fans,newMsgList) {
         */
         r = tempSave.RequiredLabels[i];
         // 由于粉丝的标签是字符串，所以继续使用标签暂存对象来进行判断
-        if(!fansLabel[r.labelName]) {
+        if(!fansLabel[r.labelName]){
             // let reMsg = Date.now().toString().substring(10) +"> "+ r.info[random(0,r.info.length-1)];
-            let appendMsg = r.ask[random(0, r.ask.length-1)];
-            if(appendMsg){
-                reMsg +=  appendMsg;
-                console.info("新消息：", reMsg);
-                return reMsg;
-            } else {
-                log("以下标签询问消息为空!");
-                log(r);
-            }
+            let reMsg = r.ask[random(0, r.ask.length-1)];
+            console.info("新消息：", reMsg);
+            return reMsg;
         }
     }
-    
-    if(reMsg=="") {
-        console.info("不发送新消息")
-        // 不发送新消息
-        return false;
-    }
-    return reMsg;
+
+    console.info("不发送新消息")
+    // 不发送新消息
+    return false;
 }
 
 /**
@@ -4732,24 +4458,18 @@ function readRequiredLabelsFile(path){
  * 从后台拿到所有的标签
  */
 function getLabelList(){
-    /*
-    [
-        { "labelName": "国家", "words": "jp,cn,usa", "ask": "where are you from?", "reply": "oh" }, 
-        { "labelName": "测试", "words": "123", "ask": null, "reply": null }, 
-        { "labelName": "标签", "words": "asjdgahjs", "ask": "are you ok?,are you ok ?,123", "reply": "hahahah" },
-        { "labelName": "性别", "words": "man,woman", "ask": null, "reply": null }
-    ]
-     */
+    // {"total":2,"rows":[
+    //    {"labelName":"国家","words":"咿呀咿呀一","ask":"1,2","reply":"1,2"},
+    //    {"labelName":"国家1","words":null,"ask":"3","reply":"3"}
+    // ],"code":0,"msg":null}
     // 没有 tempSave.LabelsData 数组或者长度为0，都将从服务器获取数据
     if(!tempSave.LabelsData || tempSave.LabelsData.length < 1) {
-        // 从服务器拿到标签集合 /tiktokjs/labelInfo/labellist
-        tempSave.LabelsData = server.get("labelInfo/labellist");
+        // 从服务器拿到标签集合 /tiktokjs/labelinfo/labellist
+        tempSave.LabelsData = server.get("labelinfo/labellist").rows;
         for (let i = 0; i < tempSave.LabelsData.length; i++) {
             if(tempSave.LabelsData[i].words == null) tempSave.LabelsData[i].words ="";
-            if(tempSave.LabelsData[i].ask == null) tempSave.LabelsData[i].ask ="";
-            if(tempSave.LabelsData[i].reply == null) tempSave.LabelsData[i].reply ="";
-            // 将大写转成小写，并且也切割成单词组
-            tempSave.LabelsData[i].words = tempSave.LabelsData[i].words.toLowerCase().split(",");
+            // 将大写转成小写
+            tempSave.LabelsData[i].words = tempSave.LabelsData[i].words.toLowerCase();
             // 切割消息
             if(tempSave.LabelsData[i].ask) tempSave.LabelsData[i].ask = tempSave.LabelsData[i].ask.split(",");
             if(tempSave.LabelsData[i].reply) tempSave.LabelsData[i].reply = tempSave.LabelsData[i].reply.split(",");
@@ -4954,7 +4674,7 @@ function 搜索进入1(str,tab,num){
     return i<5
 }
 /**
- * 通过搜索的模式
+ * 通过搜索打招呼的模式
  */
 function 通过搜索打招呼() {
     返回首页();
@@ -6243,11 +5963,7 @@ function 等待加载(s,num){
     let i = 0
     sleep(s||2000)
     for (; i < num; i++) {
-        if(!className("android.widget.ProgressBar")
-        .boundsInside(device.width*0.4,device.height*0.4,device.width*0.6,device.height*0.6)
-        .findOnce())
-            if(id("ca_").boundsInside(0,0, device.width,device.height).find().length==0) 
-                break
+        if(id("ca_").boundsInside(0,0, device.width,device.height).find().length==0) break
         if(i%5==0) console.verbose("等待加载中")
         sleep(300)
     }
@@ -6902,7 +6618,12 @@ function getAccountList() {
     }
     return accounts;
 }
-
+function 驱动回复软件() {
+    toastLog("暂未编写")
+    // 启动软件
+    // 向文本输入框输入数据
+    // 点击启动按钮
+}
 
 function 任务发送指定消息() {
     // 获取用户链接
@@ -7002,34 +6723,8 @@ function openUrlAndSleep3s(url,s) {
         data: url, 
         packageName: appPackage, 
     });
-
-
-    // 在打开链接之后等待加载出来用户信息界面
-    let words = ["Follow","Message","Requested"];
-    function dfs(wait) {
-        for (let i = 0;wait && i < 5; i++) {
-            等待加载()
-            let follow = className("android.widget.TextView")
-                .clickable(true).drawingOrder(1).filter(function(uo){
-                    return -1 < words.indexOf(uo.text());
-                }).find()
-            if (follow.length == 0) {
-                follow = className("android.widget.Button")
-                .clickable(true).filter(function(uo){
-                    return -1 < words.indexOf(uo.text());
-                }).find()
-            }
-            if (follow.length == 1){
-                return follow[0];
-            } else {
-                console.verbose("文字数量：", follow.length);
-            }
-            sleep(1000)
-        }
-    // 声明完后调用
-    }(true);
+    sleep(s||3000);
 }
-
 function autoConfirm(num, choose, title, content, callback) {
     threads.start(function(){
         let arr=[];
@@ -7058,6 +6753,7 @@ function autoConfirm(num, choose, title, content, callback) {
 
 function switchAccount() {
     返回首页();
+    log("点击 '我' ", text("Me").findOne(1000).parent().click())
     if(1 < getAccountList().list.length) {
         signUp()
     }
@@ -7070,6 +6766,7 @@ function switchAccount() {
 // let accountList = ["15zhanghao","3zhanghao","17zhanghao","16zhanghao","14zhanghao","13zhanghao","12zhanghao","5zhanghao"]; // 本次脚本执行时已使用的所有账号列表
 function signIn() {
     返回首页();
+    log("点击 '我' ", text("Me").findOne(1000).parent().click())
     // 账号控件
     let accountName;
     // 账号名
@@ -7156,7 +6853,7 @@ function signIn() {
                     else log("账号切换失败")
                 }catch(e){
                     log(e)
-                    if(confirm("似乎当前所有账号已全部执行完毕,是否结束执行？", "已经执行"+accountList.length+"个账号。\n"+e)) {
+                    if(!confirm("似乎当前所有账号已全部执行完毕,是否结束执行?", "已经执行"+accountList.length+"个账号。\n"+e)) {
                         exit();
                     }
                     if(autoConfirm("是否清空当前账号列表？","已执行账号列表：\n"+accountList.join("\n"))){
@@ -7165,11 +6862,6 @@ function signIn() {
                     
                 }
                 等待加载()
-            }
-        },
-        {
-            检测: function () {
-                return 等待加载() && false;
             }
         },
         {
@@ -7239,6 +6931,7 @@ function signIn() {
 
 function signUp() {
     返回首页();
+    log("点击 '我' ", text("Me").findOne(1000).parent().click())
     let 操作 = [
         {
             标题: "设置",
@@ -7307,8 +7000,7 @@ function signUp() {
                                         return "跳出循环执行";
                                     } 
                                     log("等待中..." + i);
-                                    等待加载()
-                                    sleep(1000);
+                                    sleep(2000);
                                 }
                             }
                         },
