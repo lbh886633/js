@@ -1695,6 +1695,35 @@ function mi6关注操作(num) {
 
     let 新链接 = 取链接()
     openUrlAndSleep3s(新链接)
+
+    
+    //TODO 等待加载出来用户界面，最长等待15秒
+    function detectionFollowStatus(wait) {
+        for (let i = 0;wait && i < 15; i++) {
+            let follow = className("android.widget.TextView")
+                .clickable(true).drawingOrder(1).filter(function(uo){
+                    return -1 < words.indexOf(uo.text());
+                }).find()
+            if (follow.length == 0) {
+                follow = className("android.widget.Button")
+                .clickable(true).filter(function(uo){
+                    return -1 < words.indexOf(uo.text());
+                }).find()
+            }
+            if (follow.length == 1){
+                return follow[0];
+            } else {
+                console.verbose("等待中...", follow.length);
+            }
+            sleep(1000)
+        }
+    }
+    let words = ["Follow","Message","Requested"];
+    detectionFollowStatus(true)
+    
+
+
+
     sleep(1000)
     for (let index = 0; index < 10; index++) {
         var 打开方式 = textContains("TikTok").visibleToUser().findOne(2000)
