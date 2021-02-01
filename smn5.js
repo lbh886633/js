@@ -168,6 +168,7 @@ var 路径 = {}
     { 环境: "环境" },
     { 标签: "标签" },
     { 失败环境: "失败环境" },
+    { 账号进度: "账号进度" },
     { 已用账号: "已用账号" }
 ], ".txt")
 // 生成文件夹路径对象
@@ -261,14 +262,13 @@ ui.layout(
                                     <text textColor="black" textSize="20" text="模式设置" />
                                 </linear>
                                 <radiogroup orientation="horizontal" gravity="center" >
-                                    {/*<radio id="mi6_null" checked="true" text="空" />*/}
-                                    <radio id="mi6_null" text="空" />
+                                    <radio id="mi6_null" checked="true" text="空" />
                                     <radio id="mi6_reg" text="注册" />
                                     <radio id="mi6_dat" text="资料" />
                                     <radio id="mi6_vid" text="视频" />
                                     <radio id="mi6_foc" text="关注" />
                                     <radio id="mi6_fan" text="粉丝" />
-                                    <radio id="mi6_rep"  checked="true" text="回复" />
+                                    <radio id="mi6_rep"  text="回复" />
                                 </radiogroup>
                                 <radiogroup orientation="horizontal" gravity="center" >
                                     <radio id="mi6_null" checked="true" text="空" />
@@ -290,6 +290,7 @@ ui.layout(
                             <linear>
                                     <checkbox id="switchVersion" text="长版本号" />
                                     <checkbox id="switchVersionzl" text="短版本号" />
+                                    <checkbox id="readLocalAccountRecord" text="账号进度" />
                                     <checkbox id="createAccount" text="生成邮箱" />
                                     <checkbox id="daily" text="日常模式" />
                             </linear>
@@ -684,7 +685,7 @@ function 主程序() {
     log("当前版本：",tempSave.version)
     let dec = true;
     threads.start(function () {
-        while(dec){
+        while(dec) {
             action = text("Don't show again").findOne(300);
             if(action) action.click()
             action = text("Start now").findOne(30)
@@ -717,6 +718,11 @@ function 主程序() {
         appPackage = "com.ss.android.ugc.trill";
     }
 
+    if(ui.readLocalAccountRecord.checked){
+        log("读取本地账号记录");
+        accountList = files.read(路径.账号进度).split("\n");
+        log("当前已完成的进度：", accountList);
+    }
 
     if (ui.getUserList.checked) {
         log("采集用户，三星未适配");
@@ -7059,10 +7065,13 @@ function autoConfirm(num, choose, title, content, callback) {
 function switchAccount() {
     返回首页();
     if(1 < getAccountList().list.length) {
+        if(accountInfo.username) {
+            log("账号记录")
+            files.append(路径.账号进度, "\n"+accountInfo.username);
+        }
         signUp()
     }
     sleep(100)
-    // 需要传入当前已经使用的账号列表
     signIn()
 }
 
@@ -7156,7 +7165,8 @@ function signIn() {
                     else log("账号切换失败")
                 }catch(e){
                     log(e)
-                    if(confirm("似乎当前所有账号已全部执行完毕,是否结束执行？", "已经执行"+accountList.length+"个账号。\n"+e)) {
+                    files.write(路径.账号进度, "");
+                    if(confirm("似乎当前所有账号已全部执行完毕,是否结束执行？", "本地进度记录已清空！\n已经执行"+accountList.length+"个账号。\n"+e)) {
                         exit();
                     }
                     if(autoConfirm("是否清空当前账号列表？","已执行账号列表：\n"+accountList.join("\n"))){
