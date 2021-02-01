@@ -7033,9 +7033,9 @@ function openUrlAndSleep3s(url,s) {
             }
             sleep(1000)
         }
-        log("已进入用户界面")
     // 声明完后调用
-    }(true);
+    };
+    dfs(true);
     sleep(1000)
 }
 

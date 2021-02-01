@@ -725,7 +725,7 @@ function 主程序() {
     }
 
     if (ui.getUserList.checked) {
-        log("采集用户，三星未适配");
+        log("采集用户");
         采集用户();
         console.info("采集用户模式结束");
         exit()
@@ -3406,19 +3406,20 @@ function save(obj,savaToFile, saveUri) {
 
 */
 // 保存到服务器，采集时会导致账号为null从而导致上传异常
-    server.add(saveUri || "fans", server.excludeNull({
-        username: obj.username,
-        isExceptoion: 0,
-        isInvalid: 0,
-        url: obj.url,
-        name: obj.name,
-        focus: server.numberToString(obj.focusNumber),
-        fans: server.numberToString(obj.fansNumber),
-        likes: server.numberToString(obj.likeNumber),
-        accountUsername: accountInfo.username,
-        device: accountInfo.enviName,
-        reservedB: obj.BI,
-    }));
+let upFans = {
+    username: obj.username,
+    isExceptoion: 0,
+    isInvalid: 0,
+    url: obj.url,
+    name: obj.name,
+    focus: server.numberToString(obj.focusNumber),
+    fans: server.numberToString(obj.fansNumber),
+    likes: server.numberToString(obj.likeNumber),
+    accountUsername: accountInfo.username,
+    device: accountInfo.enviName,
+    reservedB: obj.BI,
+}
+    server.add(saveUri || "fans", server.excludeNull(upFans));
     return obj;
 }
 
@@ -7033,7 +7034,9 @@ function openUrlAndSleep3s(url,s) {
             sleep(1000)
         }
     // 声明完后调用
-    }(true);
+    };
+    dfs(true);
+    sleep(1000)
 }
 
 function autoConfirm(num, choose, title, content, callback) {
