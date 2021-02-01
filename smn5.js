@@ -3405,8 +3405,8 @@ function save(obj,savaToFile, saveUri) {
     }
 
 */
-// 保存到服务器
-    server.add(saveUri || "fans", {
+// 保存到服务器，采集时会导致账号为null从而导致上传异常
+    server.add(saveUri || "fans", server.excludeNull({
         username: obj.username,
         isExceptoion: 0,
         isInvalid: 0,
@@ -3418,7 +3418,7 @@ function save(obj,savaToFile, saveUri) {
         accountUsername: accountInfo.username,
         device: accountInfo.enviName,
         reservedB: obj.BI,
-    });
+    }));
     return obj;
 }
 
