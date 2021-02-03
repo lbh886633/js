@@ -9,6 +9,7 @@ var fasle = false;
         "增加一种切换账号模式",
         "增加采集用户",
         "修改标签模式",
+        "增加消息异常重试",
     ];
     uti = logs.pop();
 }
@@ -275,6 +276,7 @@ ui.layout(
                                     <radio id="mi6_task" text="任务" />
                                     <radio id="getUserList" text="采集用户" />
                                     <radio id="focusUser" text="关注用户" />
+                                    <radio id="detectionException" text="检测异常" />
                                 </radiogroup>
                                 
                                 <radiogroup orientation="horizontal" h="0">
@@ -681,6 +683,7 @@ var newtext = ""
 var 序号 = ""
 var 随机账号 = ""
 
+// TODO
 function 主程序() {
     log("当前版本：",tempSave.version)
     let dec = true;
@@ -795,6 +798,12 @@ function 主程序() {
                         exit()
                     }
                     mi6回复消息()
+                }
+
+                if (ui.detectionException.checked) {
+                    log("消息异常检测重试")
+                    返回首页()
+                    消息异常检测重试()
                 }
                 
                 if (tempSave.daily || ui.mi6_task.checked) {
@@ -1134,6 +1143,7 @@ function 还原模式() {
                     log("回复消息")
                     回复消息()
                 }
+
                 if (ui.sayhellobyurl.checked) {
                     log("通过链接打招呼")
                     发送消息()
@@ -2063,6 +2073,205 @@ function getFansInfoList(userList,saveList) {
         sleep(500)
     }
     return saveList;
+}
+
+function 消息异常检测重试() {
+    var 列表 = [];
+    var t = 100;
+    var 操作 = [ 
+        /*  
+           {
+                标题: "Inbox",
+                uo: null,
+                检测: function () {
+                    this.uo = text("Inbox").findOne(t);
+                    return this.uo;
+                },
+                执行: function () {
+                    let r = clickOn(this.uo);
+                    log("点击" + this.标题, re);
+                    if (re) {
+                    }
+                }
+            } 
+        */
+        
+            step(
+                // 设置标题
+                "消息页", 
+                /* 检测函数，将 text("Inbox").findOne(100) 的结果
+                赋值给 this.uo 然后返回 this.uo 
+                */
+                function(){ return (this.uo = text("Inbox").findOne(t)) }, 
+                // 需要点击所以不需要这个参数
+                null,
+                // 点击成功后执行这里
+                function(){ sleep(500); 等待加载(); }
+            ),
+            step(
+                "点击私信", 
+                function(){return (this.uo = className("android.widget.RelativeLayout").clickable(true)
+                        .boundsInside(device.width*0.85,0,device.width,device.height*0.1).findOne(t))},
+                null,
+                ()=>{}
+                // function(){return "跳出循环执行";}
+            ),
+            step(
+                "私信界面操作", 
+                function(){return (this.uo = text("Direct messages").findOne(t))}, 
+                // 在私信界面的操作，不需要点击
+                function(){
+                    /*
+                        1. 获取当前的所有列表
+                        2. 获取存在感叹号的用户
+                            // 用户列表放外面创建，避免被刷新
+                        3. 排除已经操作过的，如果全部操作过则翻页，翻页失败则结束
+                        4. 进入一个用户，将其保存
+                     */
+                    // 用户列表 
+                    while(true) {
+                        try{
+                            // 1. 获取当前的所有列表
+                            let recycler = className("androidx.recyclerview.widget.RecyclerView")
+                                                .boundsInside(0, 0, device.width, device.height)
+                                                .findOne(1000);
+                            let tag;
+                            // 进入带有感叹号的选项，并将用户名保存
+                            for (let uo of recycler.children()) {
+                                // 2. 获取存在感叹号的用户
+                                if(0 < uo.find(className("ImageView")).length) {
+                                    // 获取用户名
+                                    let dmt = uo.findOne(depth(10).className("TextView"));
+                                    if(dmt) {
+                                        let name = dmt.text();
+                                        // 3. 排除已经操作过的。进行校验保存
+                                        if(name && 列表.indexOf(name) < 0) {
+                                            // 进入，直接点击uo会产生混乱的bug
+                                            // 4. 进入一个用户，将其保存
+                                            if(clickOn(text(name))) {
+                                                // 进入成功，进行保存，设置标记，跳出遍历
+                                                log(name)
+                                                列表.push(name);
+                                                tag = true;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            if(tag) {
+                                log("进行重试处理操作")
+                                sleep(500)
+                                log("操作结果：", resend(), feedback())
+                                // 操作完返回上一页
+                                back()
+                                sleep(1000)
+                            } else {
+                                // 3.5 如果全部操作过则翻页，翻页失败则结束
+                                if(!recycler.scrollForward()){
+                                    // 翻页尝试两次
+                                    sleep(3000);
+                                    if(!className("androidx.recyclerview.widget.RecyclerView")
+                                        .boundsInside(0, 0, device.width, device.height)
+                                        .findOne(1000).scrollForward()) {
+                                        
+                                            log("结束操作！")
+                                            return "跳出循环执行";
+                                    }
+                                }
+                            }
+                        }catch(err) {
+                            log("出现异常", err)
+                            // 出现异常返回首页，返回完后重新来过即可
+                            返回首页()
+                        }
+                    }
+                }
+            ),
+        ];
+    循环执行(操作);
+}
+
+/**
+ * 
+ * @param {String} 标题 
+ * @param {Function} 检测 
+ * @param {Function} 执行 
+ * @param {Function} 执行成功后 ！填入此参数后会导致"执行"参数失效！
+ *                      默认会对this.uo属性进行点击，点击成功时才执行
+ */
+function step(标题,检测,执行,执行成功后) {
+    if(typeof 执行成功后 == "function") {
+        执行 = null;
+    }
+    // 创建操作
+    return {
+        标题: 标题 || 检测.toString(),
+        检测: 检测,
+        执行: 执行 || 
+        function () {
+            if(this.uo) {
+                let re = clickOn(this.uo);
+                log("点击" + this.标题, re);
+                if (re) {
+                    return 执行成功后();
+                }
+            } else {
+                console.warn(this.标题 + "\n不存在 this.uo 对象！")
+            }
+        }
+    };
+}
+
+function resend() {
+    // 先拿到当前屏幕上的消息列表
+    let recycler = className("androidx.recyclerview.widget.RecyclerView").findOne(3000);
+    let msg;
+    // 使用pop从后向前遍历
+    while ((msg = recycler.children().pop())) {
+        // 拿到(最后)一条有问题的消息，点击失败时会向上找
+        let errorMessageBody = msg.find(className("android.widget.RelativeLayout"));
+        if(errorMessageBody.length == 1) {
+            let icons = errorMessageBody[0].find(className("ImageView"));
+            if(icons.length == 1) {
+                if(clickOn(icons[0])) {
+                    // 点击Resend
+                    if(clickOn(text("Resend"))) {
+                        return true;
+                    };
+                    return true;
+                }
+            }
+        }
+    }
+    // 点击失败
+    return false;
+}
+function feedback() {
+    let feed;
+    for (let num = 0; num < 3; num++) {
+        feed = null;
+        // 获取控件的最后一个并且复制给feed
+        if((feed = text("This message violated our Community Guidelines. We restrict certain content and actions to protect our community. If you believe this was a mistake, tap Feedback to let us know.")
+                    .find().pop())) {
+            let rect = feed.bounds();
+            // 左边范围
+            let offsetX = 0.5 * (rect.centerX() - rect.left);
+            // 下边范围
+            let offsetY = 0.3 * (rect.centerY() - rect.bottom);
+            // 点击最下面的区域
+            for (let i = 0; i < 10; i++) {
+                console.hide();
+                clickOn({x: rect.left+offsetX, y: rect.bottom+offsetY});
+                console.show();
+                sleep(100)
+            }
+            return true;
+        }
+        // 等待1秒(1000ms)
+        sleep(1000)
+    }
+    return false;
 }
 
 ///////////////////////////
@@ -3444,7 +3653,7 @@ function mi6回复消息() {
     log("新消息总数量：", newMsgCount)
     // 根据条件选择是否进入私信界面
     if(newMsgCount>0) {
-        // 进行下一步，可选没有新消息就直接开始下一个，明天再改成计算的
+        // 进行下一步，可选没有新消息就直接开始下一个
         if(lh_find(className("android.widget.RelativeLayout").clickable(true)
             .boundsInside(device.width*0.85,0,device.width,device.height*0.1), "点击私信", 0)) {
             // 2.5. 获取列表，可以用于滚动
@@ -6437,6 +6646,153 @@ function clickAction(getActionFun, s, ds,pack) {
     }
     return true;
 }
+
+
+/**
+ * 
+ * @param {Function|UiSelector||UiObject} getUOFun ["get Ui Object Function"]   .findOne(sleepTime)   
+ *      控件选择器函数。控件选择器。控件。坐标{x:1,y:1}。rect对象(存在centerX() centerY()即可)   
+ * @param {Number} sleepTime 查找控件时每一次等待时间 500ms 
+ * @param {Number} parentNumber 父级数量，最多向上面几层尝试。 3
+ * @param {Object} rectScope 偏离范围，基于原对象的偏移范围 
+ *                { left: device.width*0.1,
+ *                  right: device.width*0.1,
+ *                  top: device.height*0.1,
+ *                  bottom: device.height*0.1 }
+ */
+function clickOn(getUOFun, sleepTime, parentNumber, rectScope) {
+    //// 初始化
+    // 创建对象
+    let uo, maxNumber = 50, rect/* 坐标范围 */;
+    // 1. 判断是不是一个方法
+    if (typeof getUOFun != "function") {
+        // 不是方法时判断是不是控件选择器
+        if(typeof getUOFun.getClass == "function") {
+            if (getUOFun.getClass() == selector().getClass()) {
+                // 如果s不是一个数字或s小于0时赋值500ms
+                if (typeof sleepTime != "number" || sleepTime < 0) sleepTime = 500;
+                // us暂存控件选择器（暂存）
+                let us = getUOFun;
+                // 创建获取控件的函数
+                getUOFun = function () {
+                    // 如果存在包名则使用包名进行锁定获取，否则不使用
+                    return us.findOne(sleepTime);
+                };
+            } else if(getUOFun.getClass() == depth(0).findOnce().getClass()) {
+                // 将当前类与条件depth(0)（深度0）所找到的"控件"类型一致时执行
+                uo = getUOFun;
+            }
+        } else if(typeof getUOFun == "object") {
+            // 检测是否是坐标
+            if(typeof getUOFun.x == "number" && typeof getUOFun.y == "number" ) {
+                rect = {};
+                rect.centerX = function(){return getUOFun.x}
+                rect.centerY = function(){return getUOFun.y}
+            } else if(typeof getUOFun.centerX == "function" && typeof getUOFun.centerY == "function"){
+                rect = getUOFun;
+            }
+        }
+    };
+    // 规范化范围，默认范围是屏幕的10%
+    if(typeof rectScope != "object") rectScope = {};
+    if(typeof rectScope.left != "number") rectScope.left = device.width*0.1;
+    if(typeof rectScope.right != "number") rectScope.right = device.width*0.1;
+    if(typeof rectScope.top != "number") rectScope.top = device.height*0.1;
+    if(typeof rectScope.bottom != "number") rectScope.bottom = device.height*0.1;
+
+    // 设置标记，最多循环50次
+    let i = 0;
+    do {
+        if (uo) {
+            //// 点击操作
+            // 点击
+            if (uo.click()) {
+                // 点击成功则直接返回跳出循环
+                return true;
+            } else {
+                /// 通过坐标范围获取父控件点击
+                // 获取rect对象
+                rect = uo.bounds();
+                // 进行对象实例化
+                let actualRange = {
+                    left: rect.left - rectScope.left,
+                    right: rect.right - rectScope.right,
+                    top: rect.top - rectScope.top,
+                    bottom: rect.bottom - rectScope.bottom
+                };
+                // 父节点 
+                let pUO = uo, pr = {};
+                // 确保当前控件存在父控件
+                while (typeof pUO.parent == "function") {
+                    // 获取父对象以及父对象的范围
+                    pUO = pUO.parent();
+                    if(!pUO) {
+                        break;
+                    }
+                    pr = pUO.bounds();
+                    // 偏离范围
+                    if(
+                        actualRange.left <= pr.left
+                        && actualRange.right >= pr.right
+                        && actualRange.top <= pr.top
+                        && actualRange.bottom >= pr.bottom
+                    ) {
+                        // 在范围内，可以点击
+                        if(pUO.click()) {
+                            return true;
+                        }
+                    }
+                }
+
+                /// 通过父级层次点击
+                pUO = uo;
+                for (let i = 0; i < parentNumber || 3; i++) {
+                    // 不存在控件时跳出
+                    if(!pUO) {
+                        break;
+                    }
+                    // 存在函数且调用函数返回true
+                    if(typeof pUO.click == "function" && pUO.click()) {
+                        return true;
+                    }
+                    // 获取父控件
+                    pUO = pUO.parent();
+                }
+            }
+            // 通过父控件点击
+            console.verbose("通过控件点击失败！");
+            // 大幅将计数器增加，避免过多尝试
+            i += parseInt(maxNumber*0.2);
+        }
+        // 通过坐标进行点击
+        if(rect) {
+            if (click(rect.centerX(), rect.centerY())) {
+                // 点击成功则跳出循环
+                console.verbose("通过坐标点击，可能无效");
+                return true;
+            } else {
+                // 大幅将计数器增加，避免过多尝试
+                i += parseInt(maxNumber*0.2);
+            }
+        }
+        //// 获取控件
+        // 尝试获取控件，如果以上已经执行完成或者getUOFun不是函数则不需要进行获取。
+        if(typeof getUOFun == "function") {
+            uo = getUOFun();
+        } else {
+            // 不是一个函数直接跳过
+            i = maxNumber;
+            break;
+        }
+    } while (++i < maxNumber)
+
+    if (50 <= i) {
+        log("点击控件超时！")
+        return false;
+    }
+    return true;
+}
+
 /**
  * 打开TikTok并进入个人信息界面
  * @param {*} run 任意值，传入则代表 主页检测
