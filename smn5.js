@@ -5,11 +5,8 @@ var uti;
 var fasle = false;
 {
     let logs = [
-        "更改回复消息的具体实现",
-        "增加一种切换账号模式",
-        "增加采集用户",
-        "修改标签模式",
         "增加消息异常重试",
+        "增加等待时间自定义",
     ];
     uti = logs.pop();
 }
@@ -18,13 +15,13 @@ var tempSave = {
     privacy: 30,
     NUMBER: 0,
     自动打码: false,
-    version: "25" + " -- " + uti,
+    version: "53" + " -- " + uti,
     // 直接发送的消息
     getSayMessage: "Hi",
 };
 
 var server = {
-    serverUrl: "http://3617233570.picp.vip/tiktokjs/",
+    serverUrl: "没有链接",
     add: function (uri, o) {
         this.sendData(this.serverUrl + uri + "/add", o);
     },
@@ -169,8 +166,9 @@ var 路径 = {}
     { 环境: "环境" },
     { 标签: "标签" },
     { 失败环境: "失败环境" },
+    { 已用账号: "已用账号" },
     { 账号进度: "账号进度" },
-    { 已用账号: "已用账号" }
+    { 服务器链接: "服务器链接" },
 ], ".txt")
 // 生成文件夹路径对象
 路径.文件夹 = 创建路径(根路径, [
@@ -239,6 +237,7 @@ threads.start(function () {
     }
 })
 
+server.serverUrl = files.read(路径.服务器链接).split("\n").shift() || "http://3617233570.picp.vip/tiktokjs/";
 function c() {}
 ui.layout(
     <drawer id="drawer">
@@ -253,7 +252,7 @@ ui.layout(
                             {/* <input id="qqyz" textColor="{{color}}" gravity="center" hint="请输入激活码" inputType="number" text="qq1257802889" /> */}
                             <input id="jihuoma" h="0" text="" />
 
-                            <linear padding="5 0 0 0">
+                            <linear padding="5 0 0 0" h="0">
                                 <Switch id="autoService" textColor="red" text="无障碍服务（注意！必须开启才能正常运行脚本）" checked="{{auto.service != null}}" />
                             </linear>
                             
@@ -294,6 +293,8 @@ ui.layout(
                                     <checkbox id="switchVersionzl" text="短版本号" />
                                     <checkbox id="readLocalAccountRecord" text="账号进度" />
                                     <checkbox id="createAccount" text="生成邮箱" />
+                            </linear>
+                            <linear>
                                     <checkbox id="daily" text="日常模式" />
                             </linear>
 
@@ -380,6 +381,15 @@ ui.layout(
                             <linear padding="5 0 0 0">
                                 <text textColor="black" text="指定关注数量: " />
                                 <input lines="1" id="focusUserNumber" w="auto" text="200"/>
+                            </linear>
+                            <linear padding="5 0 0 0">
+                                <checkbox id="setServerUrl" text="" />
+                                <text textColor="black" text="指定服务器地址: " />
+                                <input lines="1" id="serverUrl" w="*" text="{{server.serverUrl}}"/>
+                            </linear>
+                            <linear padding="5 0 0 0">
+                                <text textColor="black" text="停留时间: " />
+                                <input lines="1" id="stopTime" w="*" text="2" inputType="number|numberDecimal"/>
                             </linear>
                             <vertical id="getmodel">
                                 <linear padding="5 0 0 0">
@@ -721,10 +731,20 @@ function 主程序() {
         appPackage = "com.ss.android.ugc.trill";
     }
 
-    if(ui.readLocalAccountRecord.checked){
+    if(ui.readLocalAccountRecord.checked) {
         log("读取本地账号记录");
         accountList = files.read(路径.账号进度).split("\n");
         log("当前已完成的进度：", accountList);
+    }
+
+    if(ui.setServerUrl.checked){
+        log("修改服务器链接")
+        let surl = ui.serverUrl.text();
+        if(5 < surl.length) {
+            server.serverUrl = surl;
+            let fileData = files.read(路径.服务器链接);
+            files.write(路径.服务器链接, surl+"\n"+fileData);
+        }
     }
 
     if (ui.getUserList.checked) {
@@ -790,12 +810,20 @@ function 主程序() {
                 if (tempSave.daily || ui.mi6_rep.checked) {
                     log("回复")
                     返回首页()
-                    //TODO tempSave.RequiredLabels = readRequiredLabelsFile();
+                    // tempSave.RequiredLabels = readRequiredLabelsFile();
                     // 获取标签
                     tempSave.RequiredLabels = getLabelList();
                     if(!tempSave.RequiredLabels || tempSave.RequiredLabels.length < 1 ){
                         console.warn("没有获取到标签数据！停止运行")
                         exit()
+                    }
+                    if(!tempSave.endTime ) {
+                        tempSave.endTime = parseInt(ui.stopTime.text()) * 60 * 1000;
+                        if(0 < tempSave.endTime){}
+                        else {
+                            console.error("时间填写错误！", tempSave.endTime);
+                            exit();
+                        };
                     }
                     mi6回复消息()
                 }
@@ -3634,6 +3662,116 @@ let upFans = {
 
 
 function mi6回复消息() {
+    /*
+     在inbox界面，获取当前的消息数量
+     每一次发送完消息就数量减掉，当数量为0的时候将当前列表上的红色气泡处理完成
+     在处理完当前的气泡之后返回上一页，也就是inbox页面
+     再次获取当前是否还存在未处理的红色气泡
+     在还没有处理完等量的消息之前就会进行翻页，除非翻页到底了
+
+     1. 点击 inbox
+     2. 获取当前的消息，如果消息数量为0则等待stopTime时间，如果时间到了那么就跳出，开始下一个号
+     3. 如果存在消息则点击飞机进入 私信 列表界面
+     4. 处理完当前界面的消息之后开始翻页，只要还存在消息(总消息 - 当前处理的消息)
+     5. 在处理完成(界面上没有新消息，且数量和在外面拿到的一样时)之后返回上一页 inbox
+     6. 将时间记录下来(开始计时)之后继续检测是否存在消息
+    */
+    let endTime = Date.now();
+    let exce = 0;   // 异常次数
+    do {
+        let inboxUO = text("Inbox").findOne(1000);
+        // <1>. 确保在inbox页面
+        if(inboxUO) {
+            // 进入inbox页面
+            inboxUO.parent().click();
+            // <2>. 获取当前消息数量
+            let newMsgCount = -1;
+            let action = text("All activity").findOne(100);
+            if(action) {
+                // 避免没有小红点控件的时候导致新消息为零
+                newMsgCount = 0;
+                action.parent().parent().find(className("android.widget.TextView")).forEach(e=>{
+                    let n = parseInt(e.text());
+                    if(!isNaN(n)) {
+                        newMsgCount = n;
+                        return false;
+                    }
+                })
+            }
+            log("新消息总数量：", newMsgCount);
+            if(newMsgCount == 0) {
+                // 没有新消息 
+                exce=0;
+
+            } else if(0 < newMsgCount) {
+                // 存在新消息
+                exce=0;
+
+                // 继续业务流程
+                // <3>. 点击小飞机进入私信
+                if(lh_find(className("android.widget.RelativeLayout").clickable(true)
+                    .boundsInside(device.width*0.85,0,device.width,device.height*0.1), "点击私信", 0)) {
+                    // <4>. 获取列表，可以用于滚动
+                    actionRecycler = className("androidx.recyclerview.widget.RecyclerView")
+                            .boundsInside(0, 200, device.width, device.height)
+                            .findOne(1000);
+                    // 当失败次数等于3的时候就跳出 <跳出>
+                    for (let i = 0; i < 3;) {
+                        // 等待加载列表
+                        sleep(500);
+                        // 获取当前界面的红色气泡
+                        let sendList = mi6GetNewMsgList();
+                        if(sendList.length > 0){
+                            newMsgCount -= replySendlist(sendList);
+                        } else {
+                            i++;
+                        }
+                        // 当前消息处理数量超过在外部获取的数量时跳出 <跳出>
+                        if(newMsgCount < 1) {
+                            break;
+                        }
+                        // 向后翻页
+                        if(!actionRecycler.scrollForward()){
+                            sleep(100);
+                            console.verbose("重新获取列表控件")
+                            actionRecycler = className("androidx.recyclerview.widget.RecyclerView")
+                                            .boundsInside(0, 200, device.width, device.height)
+                                            .findOne(1000);
+                            if(!actionRecycler.scrollForward()){
+                                i++;
+                            }
+                        } else {
+                            log("翻页")
+                        }
+                        
+                    }
+                }
+
+                // 重置时间
+                endTime = Date.now();
+            } else {
+                // 获取控件异常
+                if(3 < exce++) {
+                    // 连续3次获取控件异常则退出
+                    console.error("连续三次获取控件失败");
+                    exit()
+                }
+            }
+            
+        } else 返回首页();
+
+        // <5>. 等待时间
+        if(endTime+tempSave.endTime < Date.now()) {
+            log("时间到");
+            break;
+        }
+        console.verbose("剩余时间(ms)：" + (tempSave.endTime  - (Date.now() - endTime))); 
+        sleep(1000);
+    } while (true)
+
+    log("回复消息结束")
+    {
+   /*
     log("测试中...")
     // 1. 进入信息界面
     text("Inbox").findOne(1000).parent().click()
@@ -3653,6 +3791,7 @@ function mi6回复消息() {
     log("新消息总数量：", newMsgCount)
     // 根据条件选择是否进入私信界面
     if(newMsgCount>0) {
+    // 以界面是否存在红色气泡做跳出条件
         // 进行下一步，可选没有新消息就直接开始下一个
         if(lh_find(className("android.widget.RelativeLayout").clickable(true)
             .boundsInside(device.width*0.85,0,device.width,device.height*0.1), "点击私信", 0)) {
@@ -3698,6 +3837,8 @@ function mi6回复消息() {
         log("没有新消息")
     }
     log("回复消息结束")
+    */
+    }
 }
 
 function 发送消息() {
@@ -4295,6 +4436,9 @@ function getNewMsgList() {
  * 私信界面
  * 对每一个回复了私信的人进行回复
  * !! 不每次使用最新获取的气泡列表，避免造成实时出现新消息时导致的计数大，从而提前退出
+ * 
+ * //TODO 会点击到红色气泡上，需要做判断。加上输入框检测用
+ * 
  * @param {Array} sendlist 红色气泡列表
  * @returns {Number}    本次共处理的消息数量
  */
@@ -4311,10 +4455,12 @@ function replySendlist(sendlist) {
             // 点击的X轴进行偏移
             click(rect.left - device.width*0.1, rect.centerY())
             sleep(2000);
-            // 拿当前页面的红色气泡列表，通过数量来判断之前的点击是否无效
+            // 拿当前页面的红色气泡列表，通过数量来判断之前的点击是否无效，加上输入框检测
             let newMsgListLength = mi6GetNewMsgList().length;
-            if(newMsgListLength != sendlist.length){
-                break;
+            if(newMsgListLength != sendlist.length) {
+                if(text("Send a message...").findOne(1000)) {
+                    break;
+                }
             }
             log("似乎未进入聊天界面");
         }
@@ -4645,8 +4791,12 @@ function getFansInfoByFansMsgView() {
         fans = {
             username: username,
             name: name,
-            accountUsername: accountInfo.username
+            accountUsername: accountInfo.username,
+            device: "聊天界面创建"
         }
+        // 将当前粉丝信息保存到服务器
+        console.verbose("保存新增的粉丝信息");
+        server.add("fans", server.excludeNull(fans));
     }
     // 返回上一级，聊天界面
     back();
@@ -7268,7 +7418,7 @@ function getAccountList() {
 
 
 function 任务发送指定消息() {
-    // 获取用户链接
+    //TODO 获取用户链接
     let fans;
     do{
         fans = null;
@@ -7279,16 +7429,9 @@ function 任务发送指定消息() {
                 log("通过链接发消息")
             // 打开链接
             openUrlAndSleep3s(fans.url);
-            var 打开方式 = text("TikTok").visibleToUser().findOne(1000)
-            if (打开方式) {
-                log("选择TikTok", 打开方式.parent().parent().click())
-                sleep(1500)
-            }
-            var 始终 = text("始终").visibleToUser().findOne(1000)
-            if (始终) {
-                log("始终 " + 始终.click())
-            }
         } else {
+            log("用户没有链接！");
+            continue;
             log("通过搜索名字发消息")
             // 通过搜索进入
             搜索进入(fans.username, "USERS", 0);
@@ -7297,12 +7440,20 @@ function 任务发送指定消息() {
         // 发送一条消息
             let re = sayHello(fans, fans.sendMsg)
             if(re){
+                //TODO 待测试，这里需要上传本次是否成功的数据追加到粉丝的冗余字段2中
+                log("消息体")
+                log(re)
                 // 上传本次的结果
                 server.post("taskFansLog/add/" + fans.username, server.excludeNull({
                     fans: JSON.stringify(fans),
                     sendMsg: fans.sendMsg,
                     result: JSON.stringify(re)
                 }))
+                // 如果消息成功发送则修改粉丝指定状态，有个坑，false/0 为发送失败，true/1为成功。但是服务器相反！但是服务器相反！但是服务器相反！
+                if(re.status==1) {
+                    // /tiktokjs/fans/setStatus?username=粉丝账号&accountUsername=tiktok账号&status=1（状态）
+                    server.get("/fans/setStatus?username="+fans.username+"&accountUsername="+accountInfo.username+"&status=0");
+                }
             }
         } else break;
     }while(true)
@@ -7386,6 +7537,22 @@ function openUrlAndSleep3s(url,s) {
                 return follow[0];
             } else {
                 console.verbose("文字数量：", follow.length);
+            }
+            // 打开方式
+            try{
+            let 打开方式 = text("TikTok").visibleToUser().findOne(1000)
+            if (打开方式) {
+                log("选择TikTok", 打开方式.parent().parent().click())
+                sleep(1500)
+            }
+            let 始终 = text("始终").visibleToUser().findOne(1000)
+            if (始终) {
+                log("始终 " + 始终.click())
+            }
+            }catch(err) {
+                console.error("选择打开方式失败！")
+                console.verbose(err)
+                console.verbose(err.stack)
             }
             sleep(1000)
         }
