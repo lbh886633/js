@@ -7,6 +7,7 @@ var fasle = false;
     let logs = [
         "增加消息异常重试",
         "增加等待时间自定义",
+        "默认不使用退出账号",
     ];
     uti = logs.pop();
 }
@@ -375,7 +376,8 @@ ui.layout(
                                     <checkbox id="nofor" checked="true" text="关闭循环" />
                                 </linear>
                                 <linear>
-                                    <checkbox id="switchaccount" checked="true" text="登录账号" />
+                                    {/* <checkbox id="switchaccount" checked="true" text="登录账号" /> */}
+                                    <checkbox id="switchaccount" text="登录账号" />
                                 </linear>
                             </vertical>
                             <linear padding="5 0 0 0">
