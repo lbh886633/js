@@ -385,7 +385,7 @@ ui.layout(
                             <linear padding="5 0 0 0">
                                 <checkbox id="setServerUrl" text="" />
                                 <text textColor="black" text="指定服务器地址: " />
-                                <input lines="1" id="serverUrl" w="*" text="{{server.serverUrl}}"/>
+                                <input lines="1" id="serverUrl" w="*" lines="2" text="{{server.serverUrl}}"/>
                             </linear>
                             <linear padding="5 0 0 0">
                                 <text textColor="black" text="停留时间: " />
