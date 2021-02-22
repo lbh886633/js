@@ -15,7 +15,7 @@ var tempSave = {
     privacy: 30,
     NUMBER: 0,
     自动打码: false,
-    version: "53" + " -- " + uti,
+    version: "53" + " -last- " + uti,
     // 直接发送的消息
     getSayMessage: "Hi",
 };
