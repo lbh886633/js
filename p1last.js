@@ -8,6 +8,7 @@ var fasle = false;
         "增加消息异常重试",
         "增加等待时间自定义",
         "默认不使用退出账号",
+        "修复关注用户获取用户列表异常",
     ];
     uti = logs.pop();
 }
@@ -238,7 +239,8 @@ threads.start(function () {
     }
 })
 
-server.serverUrl = files.read(路径.服务器链接).split("\n").shift() || "http://3617233570.picp.vip/tiktokjs/";
+server.serverUrl = files.read(路径.服务器链接).split("\n").shift();
+
 function c() {}
 ui.layout(
     <drawer id="drawer">
@@ -2015,6 +2017,7 @@ function 采集用户() {
             if(action) {
                 if(action.parent().click()){
                     sleep(2000)
+                    等待加载()
                 }
             }
             list = className("androidx.recyclerview.widget.RecyclerView")
@@ -2028,6 +2031,7 @@ function 采集用户() {
 }
 function 获取用户列表(list) {
     log("进入用户列表...")
+    等待加载()
     // 获取列表信息之后获取用户信息
     // 如果出现异常则返回到列表重新获取列表之后继续执行
     // 如果没有出现异常则返回列表后向下滑动后执行
