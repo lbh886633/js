@@ -5,6 +5,7 @@ var uti;
 var fasle = false;
 {
     let logs = [
+        "未加入全字匹配",
         "修复关注用户获取用户列表异常",
         "优化关注用户",
     ];
@@ -7594,7 +7595,7 @@ function openUrlAndSleep3s(url,s) {
         }
     // 声明完后调用
     };
-    dfs(true)
+    dfs(true);
     sleep(1000)
 }
 

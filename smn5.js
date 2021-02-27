@@ -94,7 +94,7 @@ var server = {
     post: function (uri, o) {
         try {
             console.verbose("[↑]" + this.serverUrl +  uri + "\n" + JSON.stringify(o))
-            return http.post(this.serverUrl + uri, o, {'Connection': 'close'}).body;
+            return http.post(this.serverUrl + uri, o||{}, {'Connection': 'close'}).body;
         } catch (err) {
             log("[↑]POST上传出错", err)
         }
@@ -107,7 +107,7 @@ var server = {
     sendData: function (url, o) {
         try {
             console.verbose("[↑]" + url + "\n" + JSON.stringify(o))
-            log(http.post(url, o, {'Connection': 'close'}).body.string());
+            log(http.post(url, o||{}, {'Connection': 'close'}).body.string());
         } catch (err) {
             log("上传出错", err)
         }
@@ -826,6 +826,11 @@ function 主程序() {
                             console.error("时间填写错误！", tempSave.endTime);
                             exit();
                         };
+                    }
+                    // tempSave.issue 携带的问题
+                    tempSave.issue = getIssue();
+                    if(!tempSave.issue || tempSave.issue.length < 1) {
+                        console.warn("未获取到要携带的问题");
                     }
                     mi6回复消息()
                 }
@@ -1917,7 +1922,8 @@ function focusUser(max) {
     log("关注用户")
     let focusNumber = 0;
     max = max || 200;
-    let words = ["Follow","Message","Requested"];
+    // "Edit profile" 是自己
+    let words = ["Follow","Message","Requested","Edit profile"];
     // 获取链接，持有用户
     for (let i = 0; i < 3; i++) {
         while(focusNumber < max) {
@@ -1938,33 +1944,61 @@ function focusUser(max) {
             openUrlAndSleep3s(user.url);
             // 检测当前界面，如果当前界面不是用户信息页面则等待，
             let state;
+            let nowTime = Date.now();
+
             do {
                 state = detectionFollowStatus(true);
                 try{
-                    if(!state) continue;
+                    if(!state) {
+                        // 检测网络
+                        let res;
+                        try{
+                            do {
+                                res = http.get("https://www.google.com");
+                            } while (399 < res.statusCode);
+                        } catch(e) {}
+                        continue;
+                    }
                     if(state.text()=="Follow"){
                         // 点击
                         log("关注：", state.click());
                         // 点击关注，清空状态
                         state = null;
                         sleep(1000)
+                    } else if (state.text() == "Edit profile") {
+                        // 直接跳出，进度减一
+                        focusNumber--;
+                        break;
                     } else {
                         user.label = state.text();
                         // 上传当前状态
                         threads.start(function () {
                             log(server.post("focusList/use/"+user.id+"?label="+user.label,{}).json());
                         })
-                        返回首页(300);
                         break;
                     }
                 }catch(e){
                     console.verbose(e)
                 }
+
+                // 超时
+                if(30000 < (Date.now() - nowTime) ) {
+                    log("超时！")
+                    focusNumber--;
+                    break;
+                }
+                // 其他异常检测
+                if(lh_find(text("OK"), "点击OK", 0, 1000)) {
+                    focusNumber--;
+                    break;
+                }
+                
             } while (!state);
             focusNumber++;
             log("进度：" + focusNumber + "/" + max);
+            返回首页(300);
         }
-        sleep(5000*i)
+        sleep((5000*i) + 1)
     }
     
     function detectionFollowStatus(wait) {
@@ -4959,6 +4993,8 @@ function 消息处理(fans,newMsgList) {
 
     // 触发词优先回复
     let nowMsg=[];
+    // 全字匹配标记，第一次可以触发，之后不会触发
+    let allWord = true;
     // 使用单词去匹配词库并保存
     for (let w in words) {
         // 拿到当前单词，并将当前单词转成小写
@@ -4967,32 +5003,42 @@ function 消息处理(fans,newMsgList) {
         for (let tag in tempSave.RequiredLabels) {
             tag = tempSave.RequiredLabels[tag];
             // {labelName: "国家", words: ["usa","en"](已经处理为小写), ask: ["where are you from?"], reply: ["where are you from?"]}
-            // 如果当前单词存在于标签中，则进行保存，将其转换成小写，这里的indexOf是在字符串中找
-            if(-1 < tag.words.indexOf(w)){
-                // 判断是否存在当前标签，没有就创建
-                if(!fansLabel[tag.labelName]) {
-                    fansLabel[tag.labelName]=[];
+            // 全字匹配
+            if(tag.words.indexOf("*") < 0) {    // 没有全字匹配时
+                // 如果当前单词存在于标签中，则进行保存，将其转换成小写，这里的indexOf是在字符串中找
+                if(-1 < tag.words.indexOf(w)){
+                    // 判断是否存在当前标签，没有就创建
+                    if(!fansLabel[tag.labelName]) {
+                        fansLabel[tag.labelName]=[];
+                    }
+                    // 判断是否已经存在当前标签,如果没有则进行保存，这里的indexOf是在数组中找
+                    if(fansLabel[tag.labelName].indexOf(w) < 0) {
+                        fansLabel[tag.labelName].push(w);
+                        /* 进行粉丝标签保存
+                        {
+                            username: 用户账号
+                            labelName: 标签名字：
+                            labelBody: 触发内容：
+                        }
+                        */
+                        // console.warn("标签保存")
+                        server.add("fansLabel", {
+                            username: fans.username,
+                            labelName: tag.labelName,
+                            labelBody: w
+                        })
+                        if(0 < tag.reply.length) {
+                            // 存在触发词则保存触发词
+                            nowMsg.push(tag.reply[random(0, tag.reply.length-1)]);
+                        }
+                    }
                 }
-                // 判断是否已经存在当前标签,如果没有则进行保存，这里的indexOf是在数组中找
-                if(fansLabel[tag.labelName].indexOf(w) < 0) {
-                    fansLabel[tag.labelName].push(w);
-                    /* 进行粉丝标签保存
-                    {
-                        username: 用户账号
-                        labelName: 标签名字：
-                        labelBody: 触发内容：
-                    }
-                     */
-                    // console.warn("标签保存")
-                    server.add("fansLabel", {
-                        username: fans.username,
-                        labelName: tag.labelName,
-                        labelBody: w
-                    })
-                    if(0 < tag.reply.length) {
-                        // 存在触发词则保存触发词
-                        nowMsg.push(tag.reply[random(0, tag.reply.length-1)]);
-                    }
+            } else {
+                // 存在全字匹配时
+                if(allWord) {
+                    // 关掉本次全字匹配
+                    allWord = false;
+                    // 
                 }
             }
         }
@@ -5011,7 +5057,12 @@ function 消息处理(fans,newMsgList) {
         reMsg = nowMsg.join("\n");
     }
 
-    if(reMsg!="") reMsg+="\n\n\n";
+    let issue = true;
+    if(reMsg!="") {
+        reMsg+="\n\n\n";
+        issue = false;
+    }
+
     // 查找剩余标签内容，执行相应的询问（顺序）
     for (let i = 0; i < tempSave.RequiredLabels.length; i++) {
         /*
@@ -5025,8 +5076,12 @@ function 消息处理(fans,newMsgList) {
         if(!fansLabel[r.labelName]) {
             // let reMsg = Date.now().toString().substring(10) +"> "+ r.info[random(0,r.info.length-1)];
             let appendMsg = r.ask[random(0, r.ask.length-1)];
-            if(appendMsg){
+            if(appendMsg) {
                 reMsg +=  appendMsg;
+                if(issue) {
+                    //TODO 发送 日常+问题 ，连带着 问题可连续性 例子：hi \n where are you from?
+                    reMsg += tempSave.issue[random(0, tempSave.issue.length-1)] || "";
+                }
                 console.info("新消息：", reMsg);
                 return reMsg;
             } else {
@@ -5041,6 +5096,7 @@ function 消息处理(fans,newMsgList) {
         // 不发送新消息
         return false;
     }
+    // 没有新标签的时候会走这里
     return reMsg;
 }
 
@@ -5098,10 +5154,22 @@ function readRequiredLabelsFile(path){
     }
     return data
 }
+
+function getIssue(){
+    let reList = [];
+    let rows = server.post("labelInfo/list?labelName=携带问题").json().rows;
+    for (let i = 0; i < rows.length; i++) {
+        // 是否是询问消息
+        if(rows.type=="ask") {
+            reList.push(rows.body);
+        }
+    }
+    return reList;
+}
 /**
  * 从后台拿到所有的标签
  */
-function getLabelList(){
+function getLabelList() {
     /*
     [
         { "labelName": "国家", "words": "jp,cn,usa", "ask": "where are you from?", "reply": "oh" }, 
@@ -5110,22 +5178,26 @@ function getLabelList(){
         { "labelName": "性别", "words": "man,woman", "ask": null, "reply": null }
     ]
      */
+    let reList = [];
     // 没有 tempSave.LabelsData 数组或者长度为0，都将从服务器获取数据
     if(!tempSave.LabelsData || tempSave.LabelsData.length < 1) {
         // 从服务器拿到标签集合 /tiktokjs/labelInfo/labellist
         tempSave.LabelsData = server.get("labelInfo/labellist");
         for (let i = 0; i < tempSave.LabelsData.length; i++) {
-            if(tempSave.LabelsData[i].words == null) tempSave.LabelsData[i].words ="";
-            if(tempSave.LabelsData[i].ask == null) tempSave.LabelsData[i].ask ="";
-            if(tempSave.LabelsData[i].reply == null) tempSave.LabelsData[i].reply ="";
-            // 将大写转成小写，并且也切割成单词组
-            tempSave.LabelsData[i].words = tempSave.LabelsData[i].words.toLowerCase().split(",");
-            // 切割消息
-            if(tempSave.LabelsData[i].ask) tempSave.LabelsData[i].ask = tempSave.LabelsData[i].ask.split(",");
-            if(tempSave.LabelsData[i].reply) tempSave.LabelsData[i].reply = tempSave.LabelsData[i].reply.split(",");
+            // if(tempSave.LabelsData[i].words == null) tempSave.LabelsData[i].words ="";
+            if(tempSave.LabelsData[i].words != null) {
+                if(tempSave.LabelsData[i].ask == null) tempSave.LabelsData[i].ask ="";
+                if(tempSave.LabelsData[i].reply == null) tempSave.LabelsData[i].reply ="";
+                // 将大写转成小写，并且也切割成单词组
+                tempSave.LabelsData[i].words = tempSave.LabelsData[i].words.toLowerCase().split(",");
+                // 切割消息
+                if(tempSave.LabelsData[i].ask) tempSave.LabelsData[i].ask = tempSave.LabelsData[i].ask.split(",");
+                if(tempSave.LabelsData[i].reply) tempSave.LabelsData[i].reply = tempSave.LabelsData[i].reply.split(",");
+                reList.push(tempSave.LabelsData[i]);
+            }
         }
     }
-    return tempSave.LabelsData;
+    return reList;
 }
 /**
  * 从文件中随机获取到一条消息
@@ -7526,7 +7598,7 @@ function openUrlAndSleep3s(url,s) {
     let words = ["Follow","Message","Requested"];
     function dfs(wait) {
         for (let i = 0;wait && i < 5; i++) {
-            等待加载()
+            // 等待加载()
             let follow = className("android.widget.TextView")
                 .clickable(true).drawingOrder(1).filter(function(uo){
                     return -1 < words.indexOf(uo.text());
@@ -7537,22 +7609,26 @@ function openUrlAndSleep3s(url,s) {
                     return -1 < words.indexOf(uo.text());
                 }).find()
             }
-            if (follow.length == 1){
+            if (follow.length == 1) {
                 return follow[0];
             } else {
                 console.verbose("文字数量：", follow.length);
             }
             // 打开方式
             try{
-            let 打开方式 = text("TikTok").visibleToUser().findOne(1000)
-            if (打开方式) {
-                log("选择TikTok", 打开方式.parent().parent().click())
-                sleep(1500)
-            }
-            let 始终 = text("始终").visibleToUser().findOne(1000)
-            if (始终) {
-                log("始终 " + 始终.click())
-            }
+                // Open App
+                if(lh_find(text("Open App"), "Open App", 0)) {
+                    等待加载()
+                    let 打开方式 = text("TikTok").visibleToUser().findOne(1000)
+                    if (打开方式) {
+                        log("选择TikTok", 打开方式.parent().parent().click())
+                        sleep(1500)
+                    }
+                    let 始终 = text("始终").visibleToUser().findOne(1000)
+                    if (始终) {
+                        log("始终 " + 始终.click())
+                    }
+                }
             }catch(err) {
                 console.error("选择打开方式失败！")
                 console.verbose(err)

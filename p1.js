@@ -1922,7 +1922,8 @@ function focusUser(max) {
     log("关注用户")
     let focusNumber = 0;
     max = max || 200;
-    let words = ["Follow","Message","Requested"];
+    // "Edit profile" 是自己
+    let words = ["Follow","Message","Requested","Edit profile"];
     // 获取链接，持有用户
     for (let i = 0; i < 3; i++) {
         while(focusNumber < max) {
@@ -1943,33 +1944,61 @@ function focusUser(max) {
             openUrlAndSleep3s(user.url);
             // 检测当前界面，如果当前界面不是用户信息页面则等待，
             let state;
+            let nowTime = Date.now();
+
             do {
                 state = detectionFollowStatus(true);
                 try{
-                    if(!state) continue;
+                    if(!state) {
+                        // 检测网络
+                        let res;
+                        try{
+                            do {
+                                res = http.get("https://www.google.com");
+                            } while (399 < res.statusCode);
+                        } catch(e) {}
+                        continue;
+                    }
                     if(state.text()=="Follow"){
                         // 点击
                         log("关注：", state.click());
                         // 点击关注，清空状态
                         state = null;
                         sleep(1000)
+                    } else if (state.text() == "Edit profile") {
+                        // 直接跳出，进度减一
+                        focusNumber--;
+                        break;
                     } else {
                         user.label = state.text();
                         // 上传当前状态
                         threads.start(function () {
                             log(server.post("focusList/use/"+user.id+"?label="+user.label,{}).json());
                         })
-                        返回首页(300);
                         break;
                     }
                 }catch(e){
                     console.verbose(e)
                 }
+
+                // 超时
+                if(30000 < (Date.now() - nowTime) ) {
+                    log("超时！")
+                    focusNumber--;
+                    break;
+                }
+                // 其他异常检测
+                if(lh_find(text("OK"), "点击OK", 0, 1000)) {
+                    focusNumber--;
+                    break;
+                }
+                
             } while (!state);
             focusNumber++;
             log("进度：" + focusNumber + "/" + max);
+            返回首页(300);
         }
-        sleep(5000*i)
+        sleep((5000*i) + 1)
     }
     
     function detectionFollowStatus(wait) {
@@ -7569,7 +7598,7 @@ function openUrlAndSleep3s(url,s) {
     let words = ["Follow","Message","Requested"];
     function dfs(wait) {
         for (let i = 0;wait && i < 5; i++) {
-            等待加载()
+            // 等待加载()
             let follow = className("android.widget.TextView")
                 .clickable(true).drawingOrder(1).filter(function(uo){
                     return -1 < words.indexOf(uo.text());
@@ -7580,22 +7609,26 @@ function openUrlAndSleep3s(url,s) {
                     return -1 < words.indexOf(uo.text());
                 }).find()
             }
-            if (follow.length == 1){
+            if (follow.length == 1) {
                 return follow[0];
             } else {
                 console.verbose("文字数量：", follow.length);
             }
             // 打开方式
             try{
-            let 打开方式 = text("TikTok").visibleToUser().findOne(1000)
-            if (打开方式) {
-                log("选择TikTok", 打开方式.parent().parent().click())
-                sleep(1500)
-            }
-            let 始终 = text("始终").visibleToUser().findOne(1000)
-            if (始终) {
-                log("始终 " + 始终.click())
-            }
+                // Open App
+                if(lh_find(text("Open App"), "Open App", 0)) {
+                    等待加载()
+                    let 打开方式 = text("TikTok").visibleToUser().findOne(1000)
+                    if (打开方式) {
+                        log("选择TikTok", 打开方式.parent().parent().click())
+                        sleep(1500)
+                    }
+                    let 始终 = text("始终").visibleToUser().findOne(1000)
+                    if (始终) {
+                        log("始终 " + 始终.click())
+                    }
+                }
             }catch(err) {
                 console.error("选择打开方式失败！")
                 console.verbose(err)
