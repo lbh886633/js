@@ -1950,6 +1950,7 @@ function focusUser(max) {
                         try{
                             do {
                                 res = http.get("https://www.google.com");
+                                if(399 < res.statusCode) nowTime = Date.now();
                             } while (399 < res.statusCode);
                         } catch(e) {}
                         continue;

@@ -8,6 +8,7 @@ var fasle = false;
         "增加消息异常重试",
         "增加等待时间自定义",
         "修复关注用户获取用户列表异常",
+        "优化关注用户",
     ];
     uti = logs.pop();
 }
@@ -16,7 +17,7 @@ var tempSave = {
     privacy: 30,
     NUMBER: 0,
     自动打码: false,
-    version: "53" + " -- " + uti,
+    version: "54" + " -- " + uti,
     // 直接发送的消息
     getSayMessage: "Hi",
 };
@@ -1955,6 +1956,7 @@ function focusUser(max) {
                         try{
                             do {
                                 res = http.get("https://www.google.com");
+                                if(399 < res.statusCode) nowTime = Date.now();
                             } while (399 < res.statusCode);
                         } catch(e) {}
                         continue;
