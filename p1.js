@@ -1956,12 +1956,20 @@ function focusUser(max) {
             do {
                 state = detectionFollowStatus(true);
                 try{
+                    // 超时检测
+                    if(30000 < (Date.now() - nowTime) ) {
+                        log("超时！")
+                        focusNumber--;
+                        break;
+                    }
+
                     if(!state) {
                         // 检测网络
                         let res;
                         try{
                             do {
                                 res = http.get("https://www.google.com");
+                                // 网络异常才会重置
                                 if(399 < res.statusCode) nowTime = Date.now();
                             } while (399 < res.statusCode);
                         } catch(e) {}
@@ -1989,12 +1997,6 @@ function focusUser(max) {
                     console.verbose(e)
                 }
 
-                // 超时
-                if(30000 < (Date.now() - nowTime) ) {
-                    log("超时！")
-                    focusNumber--;
-                    break;
-                }
                 // 其他异常检测
                 if(lh_find(text("OK"), "点击OK", 0, 1000)) {
                     focusNumber--;

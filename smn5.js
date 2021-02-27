@@ -1956,12 +1956,20 @@ function focusUser(max) {
             do {
                 state = detectionFollowStatus(true);
                 try{
+                    // 超时检测
+                    if(30000 < (Date.now() - nowTime) ) {
+                        log("超时！")
+                        focusNumber--;
+                        break;
+                    }
+
                     if(!state) {
                         // 检测网络
                         let res;
                         try{
                             do {
                                 res = http.get("https://www.google.com");
+                                // 网络异常才会重置
                                 if(399 < res.statusCode) nowTime = Date.now();
                             } while (399 < res.statusCode);
                         } catch(e) {}
@@ -1988,13 +1996,7 @@ function focusUser(max) {
                 }catch(e){
                     console.verbose(e)
                 }
-
-                // 超时
-                if(30000 < (Date.now() - nowTime) ) {
-                    log("超时！")
-                    focusNumber--;
-                    break;
-                }
+                
                 // 其他异常检测
                 if(lh_find(text("OK"), "点击OK", 0, 1000)) {
                     focusNumber--;
@@ -2027,6 +2029,28 @@ function focusUser(max) {
             } else {
                 console.verbose("文字数量：", follow.length);
             }
+
+            // 打开方式，有时出现太慢
+            try{
+                // Open App
+                if(lh_find(text("Open App"), "Open App", 0)) {
+                    等待加载()
+                    let 打开方式 = text("TikTok").visibleToUser().findOne(1000)
+                    if (打开方式) {
+                        log("选择TikTok", 打开方式.parent().parent().click())
+                        sleep(1500)
+                    }
+                    let 始终 = text("始终").visibleToUser().findOne(1000)
+                    if (始终) {
+                        log("始终 " + 始终.click())
+                    }
+                }
+            }catch(err) {
+                console.error("选择打开方式失败！")
+                console.verbose(err)
+                console.verbose(err.stack)
+            }
+            
             sleep(1000)
         }
     }
