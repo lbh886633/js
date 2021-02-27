@@ -8,6 +8,7 @@ var fasle = false;
         "未加入全字匹配",
         "修复关注用户获取用户列表异常",
         "优化关注用户",
+        "优化请求用户时异常",
     ];
     uti = logs.pop();
 }
@@ -1922,7 +1923,12 @@ function focusUser(max) {
     // 获取链接，持有用户
     for (let i = 0; i < 3; i++) {
         while(focusNumber < max) {
-            let user = server.get("focusList/gain");
+            let user;
+            try {
+                user = server.get("focusList/gain");
+            } catch (err) {
+                console.verbose("请求用户异常！");
+            }
             // 没有新用户了
             if(!user) break;
             // 用户不是一个对象，用户没有链接，用户链接长度过短
