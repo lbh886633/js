@@ -2362,12 +2362,11 @@ function resend() {
     // 点击失败
     return false;
 }
-function feedback() {
-    let feed;
+function feedback(feed) {
+    console.hide();
     for (let num = 0; num < 3; num++) {
-        feed = null;
         // 获取控件的最后一个并且复制给feed
-        if((feed = text("This message violated our Community Guidelines. We restrict certain content and actions to protect our community. If you believe this was a mistake, tap Feedback to let us know.")
+        if((feed = feed || text("This message violated our Community Guidelines. We restrict certain content and actions to protect our community. If you believe this was a mistake, tap Feedback to let us know.")
                     .find().pop())) {
             let rect = feed.bounds();
             // 左边范围
@@ -2376,11 +2375,10 @@ function feedback() {
             let offsetY = 0.3 * (rect.centerY() - rect.bottom);
             // 点击最下面的区域
             for (let i = 0; i < 10; i++) {
-                console.hide();
                 clickOn({x: rect.left+offsetX, y: rect.bottom+offsetY});
-                console.show();
                 sleep(100)
             }
+            console.show();
             return true;
         }
         // 等待1秒(1000ms)
@@ -3280,15 +3278,19 @@ function getFansList(fansNameList, fansList, all) {
     log("开始")
     let i=0, tempList = [], tempSave = [], closeTag = 0, zeroFans=0;
     sleep(1000)
+
+    function getList() {
+        return depth(9).className("androidx.recyclerview.widget.RecyclerView")
+                .packageName(appPackage)
+                .filter(function(uo){
+                    return uo.bounds().right - uo.bounds().left > device.width*0.5;
+                }).findOne(3000)
+    }
     while(true){
         sleep(200)
         等待加载(100, 500);
         // 获取粉丝列表父控件
-        let FollowerParent = depth(9).className("androidx.recyclerview.widget.RecyclerView")
-                            .packageName(appPackage)
-                            .filter(function(uo){
-                                return uo.bounds().right - uo.bounds().left > device.width*0.5;
-                            }).findOne(3000)
+        let FollowerParent = getList();
         if(!(textContains("FOLLOWERS").findOne(500) || textContains("粉絲").findOne(500)) || !FollowerParent) {
             log("未获取到粉丝列表！如果脚本卡住，请手动进入粉丝列表")
             sleep(3000);
@@ -3356,10 +3358,7 @@ function getFansList(fansNameList, fansList, all) {
                         // 返回粉丝列表
                         for (var i = 0; i < 5; i++) {
                             sleep(1000)
-                            let fansList = depth(9).className("androidx.recyclerview.widget.RecyclerView")
-                                            .packageName(appPackage).filter(function(uo){
-                                                return uo.bounds().right - uo.bounds().left > device.width*0.5;
-                                            }).findOne(3000)
+                            let fansList = getList();
                             if(fansList) {
                                 if (FollowerList.length-3 < fansList.children().length
                                     || FollowerList.length == fansList.children().length
@@ -3392,10 +3391,7 @@ function getFansList(fansNameList, fansList, all) {
                         sleep(1000);
                     }
 
-                    let fansList  = depth(9).className("androidx.recyclerview.widget.RecyclerView")
-                                    .packageName(appPackage).filter(function(uo){
-                                        return uo.bounds().right - uo.bounds().left > device.width*0.5;
-                                    }).findOne(3000)
+                    let fansList  = getList();
                     if(fansList) {
                         if (FollowerList.length-3 < fansList.children().length
                         || FollowerList.length == fansList.children().length
@@ -4319,11 +4315,10 @@ function sendMsg(msg){
 }
 // 检测到整句话则提示用户
 function detectionMsgStatus() {
-    log("=====   消息处理    ======")
     let uo = text("This message violated our Community Guidelines. We restrict certain content and actions to protect our community. If you believe this was a mistake, tap Feedback to let us know.")
             .findOne(100);
     if(uo) {
-        feedback();
+        feedback(uo);
         // if(autoConfirm(5000, false, "手动反馈？")){
         //     let pauseJS = true;
         //     let f = floaty.rawWindow(<frame><button id="runJS">继续运行</button></frame>)
