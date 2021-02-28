@@ -3276,7 +3276,11 @@ function getFansList(fansNameList, fansList, all) {
     }catch(e){fansList=[]}
 
     log("开始")
-    let i=0, tempList = [], tempSave = [], closeTag = 0, zeroFans=0;
+    let i=0, tempList = [], tempSave = [], closeTag = 0, zeroFans=0, 
+    // 获取当前粉丝总量
+    fansTotal,
+    // 已保存粉丝数量
+    saveNumber = fansNameList.length;
     sleep(1000)
 
     function getList() {
@@ -3287,6 +3291,7 @@ function getFansList(fansNameList, fansList, all) {
                         && uo.bounds().right - uo.bounds().left > device.width*0.5;
                 }).findOne(3000)
     }
+
     while(true){
         sleep(200)
         等待加载(100, 500);
@@ -3297,7 +3302,14 @@ function getFansList(fansNameList, fansList, all) {
             sleep(3000);
             continue;
         }
-
+        // 第一次的时候获取粉丝总数
+        if(!fansTotal) {
+            let FOLLOWERSText = textContains("FOLLOWERS").findOne(500);
+            if(FOLLOWERSText) {
+                FOLLOWERSText = FOLLOWERSText.text();
+                fansTotal = parseInt(FOLLOWERSText.substring(FOLLOWERSText.indexOf(" ") + 1));
+            }
+        }
         // 获取粉丝列表，每一个都是粉丝控件
         let FollowerList = FollowerParent.children();
         // 分数
@@ -3406,7 +3418,8 @@ function getFansList(fansNameList, fansList, all) {
             }
         }
 
-        console.info("保存数量：", score,"当前进展：", getFansNum, "总进展：", countGetFansNum)
+        console.info("保存数量：", score,"当前进展：", getFansNum, "总进展：", countGetFansNum, 
+                    "当前账号粉丝已保存：", saveNumber, "/", fansTotal)
         if(score == 0) {
             if(!all) {
                 log("当前粉丝均已保存，停止继续遍历");
@@ -3415,17 +3428,25 @@ function getFansList(fansNameList, fansList, all) {
             // 判断本次列表是否和上次相同
             let similar = 0;
             if(tempSave.tempList) {
-            tempList.forEach(e=>{
-                if(tempSave.tempList.indexOf(e)>-1)
-                    similar++;
-            })
-        }
-        log("相似度：" + similar/tempList.length, "   标记：",closeTag)
-        // 当相似性超过8成时跳出循环
-        if(!isNaN(similar/tempList.length) && similar/tempList.length > 0.8 && 3 < closeTag++){
-            console.warn("到底了")
-            break;
-        }
+                tempList.forEach(e=>{
+                    if(tempSave.tempList.indexOf(e)>-1)
+                        similar++;
+                })
+            }
+            log("相似度：" + similar/tempList.length, "   标记：",closeTag)
+            // 当相似性超过8成时跳出循环，加入一个条件，需要在总粉丝于500以内时粉丝相差不到50个才跳出
+            if(!isNaN(similar/tempList.length) && similar/tempList.length > 0.8 && 3 < closeTag++){
+                if(fansTotal < 500) {
+                    if(fansTotal-saveNumber < 50) {
+                        console.warn("到底了")
+                        break;
+                    }
+                    // 总粉丝小于500个，且没有完全遍历时继续遍历。
+                } else {
+                    console.warn("提前结束")
+                    break;
+                }
+            }
         }
         // 将本次暂存数据保存起来用于下次对比
         tempSave.tempList = tempList;
