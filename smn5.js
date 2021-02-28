@@ -4274,14 +4274,22 @@ function sendMsg(msg, sayHelloTag) {
         if(3 < msgs.length) {
             return false;
         } else {
-            // 先拿到第一个名字
-            let temp, sender = msgs.pop().sender;
-            // 如果消息全部拿完则继续发送
-            while((temp == msgs.pop())) {
-                // 如果有一个发送人不同，且消息为有效，则跳出，不进行发送消息
-                if(temp.status && sender != temp.sender) {
-                    return false;
+            try{
+                // 先拿到第一个名字
+                let temp, sender;
+                // 如果消息全部拿完则继续发送
+                while((temp == msgs.pop())) {
+                    if(!sender) {
+                        sender = temp.sender;
+                    }
+                    // 如果有一个发送人不同，且消息为有效，则跳出，不进行发送消息
+                    if(temp.status && sender != temp.sender) {
+                        return false;
+                    }
                 }
+            }catch(err) {
+                log(err)
+                console.verbose(msgs)
             }
         }
     }
