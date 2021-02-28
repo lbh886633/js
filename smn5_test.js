@@ -3276,10 +3276,11 @@ function getFansList(fansNameList, fansList, all) {
     sleep(1000)
 
     function getList() {
-        return depth(9).className("androidx.recyclerview.widget.RecyclerView")
+        return className("androidx.recyclerview.widget.RecyclerView")
                 .packageName(appPackage)
                 .filter(function(uo){
-                    return uo.bounds().right - uo.bounds().left > device.width*0.5;
+                    return (uo.depth() == 9 || uo.depth() == 10)
+                        && uo.bounds().right - uo.bounds().left > device.width*0.5;
                 }).findOne(3000)
     }
     while(true){
