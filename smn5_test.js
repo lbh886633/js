@@ -6,9 +6,8 @@ var fasle = false;
 {
     let logs = [
         "未加入全字匹配",
-        "修复关注用户获取用户列表异常",
-        "优化关注用户",
         "优化请求用户时异常",
+        "优化打招呼",
     ];
     uti = logs.pop();
 }
@@ -4320,15 +4319,16 @@ function detectionMsgStatus() {
     let uo = text("This message violated our Community Guidelines. We restrict certain content and actions to protect our community. If you believe this was a mistake, tap Feedback to let us know.")
             .findOne(100);
     if(uo) {
-        if(autoConfirm(5000, false, "手动反馈？")){
-            let pauseJS = true;
-            let f = floaty.rawWindow(<frame><button id="runJS">继续运行</button></frame>)
-            f.runJS.click(()=>{pauseJS=false})
-            while(pauseJS) sleep(1000);
-            log("继续运行");
-        } else {
-            feedback();
-        }
+        feedback();
+        // if(autoConfirm(5000, false, "手动反馈？")){
+        //     let pauseJS = true;
+        //     let f = floaty.rawWindow(<frame><button id="runJS">继续运行</button></frame>)
+        //     f.runJS.click(()=>{pauseJS=false})
+        //     while(pauseJS) sleep(1000);
+        //     log("继续运行");
+        // } else {
+        //     feedback();
+        // }
     }
 }
 
