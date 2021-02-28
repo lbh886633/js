@@ -6,7 +6,7 @@ var fasle = false;
 {
     let logs = [
         "优化请求用户时异常",
-        "优化打招呼",
+        "优化打招呼v2",
     ];
     uti = logs.pop();
 }
@@ -365,6 +365,7 @@ ui.layout(
                                     <checkbox id="sayhellobyurl" text="链接问候" />
                                     <checkbox id="sayhellobysearch" text="搜索问候" />
                                     <checkbox id="getsay" checked="true" text="采集发送" />
+                                    <checkbox id="getall" checked="true" text="重新扫完" />
                                 </linear>
                                 <linear padding="10 1 ">
                                     <img bg="#C3916A" w="*" h="1"/>
@@ -804,7 +805,7 @@ function 主程序() {
                 }
 
                 if (tempSave.daily || ui.mi6_fan.checked) {
-                    log("打招呼")
+                    log("采集粉丝信息，打招呼")
                     采集粉丝信息()
                 }
 
@@ -3232,8 +3233,11 @@ function 采集粉丝信息() {
     log("已采集过的粉丝数量：", fansNameList.length)
     // 扫描全部
     let allTag=true;
+    if(ui.getall.checked) {
+        log("从头开始全部扫描一遍")
+        fansNameList = [];
     // 粉丝列表小于等于服务器保存的记录则给用户提示，是否继续采集粉丝
-    if(accountInfo.fansNumber <= fansNameList.length) {
+    } else if(accountInfo.fansNumber <= fansNameList.length) {
         if(autoConfirm(5000,false, "粉丝似乎已经全部采集，是否继续采集？",
             "当前粉丝数："+fansNameList.length+"\n已保存的粉丝数：" + accountInfo.fansNumber)) {
             allTag = false;
@@ -3278,7 +3282,7 @@ function getFansList(fansNameList, fansList, all) {
     log("开始")
     let i=0, tempList = [], tempSave = [], closeTag = 0, zeroFans=0, 
     // 获取当前粉丝总量
-    fansTotal,
+    fansTotal = accountInfo.fansNumber,
     // 已保存粉丝数量
     saveNumber = fansNameList.length;
     sleep(1000)
@@ -3302,14 +3306,7 @@ function getFansList(fansNameList, fansList, all) {
             sleep(3000);
             continue;
         }
-        // 第一次的时候获取粉丝总数
-        if(!fansTotal) {
-            let FOLLOWERSText = textContains("FOLLOWERS").findOne(500);
-            if(FOLLOWERSText) {
-                FOLLOWERSText = FOLLOWERSText.text();
-                fansTotal = parseInt(FOLLOWERSText.substring(FOLLOWERSText.indexOf(" ") + 1));
-            }
-        }
+        
         // 获取粉丝列表，每一个都是粉丝控件
         let FollowerList = FollowerParent.children();
         // 分数
@@ -3437,7 +3434,7 @@ function getFansList(fansNameList, fansList, all) {
             // 当相似性超过8成时跳出循环，加入一个条件，需要在总粉丝于500以内时粉丝相差不到50个才跳出
             if(!isNaN(similar/tempList.length) && similar/tempList.length > 0.8 && 3 < closeTag++){
                 if(fansTotal < 500) {
-                    if(fansTotal-saveNumber < 50) {
+                    if((fansTotal-saveNumber) < 50) {
                         console.warn("到底了")
                         break;
                     }
@@ -4218,56 +4215,77 @@ function sayHello(f, msg){
     }
 
     // 发送消息
-    re = sendMsg(msg);
-    f.sayHello++;
-    if(!f.reservedA) f.reservedA = "";
-    if(re.status){
-        f.reservedA += "打招呼成功。";
-        // 4、将数据保存到 已打招呼.txt中
-        // 发送完之后保存到文件中
-        console.info("打招呼成功", re.msg)
-        f.sayHello = re.msg;
-        f.sayHelloException = re.exc;
-        files.append(路径.文件夹.私信 + accountInfo.envi + "_已打招呼.txt", f);
-    } else {
-        f.reservedA += "打招呼失败。";
-        // 消息发送失败
-        // 保存到发送失败文件中
-        console.warn("打招呼失败")
-        f.sayHello = re.msg;
-        f.sayHelloException = re.exc;
-        files.append(路径.文件夹.私信 + accountInfo.envi + "_打招呼失败.txt", f);
+    re = sendMsg(msg, "sayHello");
+    if(re) {
+        f.sayHello++;
+        if(!f.reservedA) f.reservedA = "";
+        if(re.status){
+            f.reservedA += "打招呼成功。";
+            // 4、将数据保存到 已打招呼.txt中
+            // 发送完之后保存到文件中
+            console.info("打招呼成功", re.msg)
+            f.sayHello = re.msg;
+            f.sayHelloException = re.exc;
+            files.append(路径.文件夹.私信 + accountInfo.envi + "_已打招呼.txt", f);
+        } else {
+            f.reservedA += "打招呼失败。";
+            // 消息发送失败
+            // 保存到发送失败文件中
+            console.warn("打招呼失败")
+            f.sayHello = re.msg;
+            f.sayHelloException = re.exc;
+            files.append(路径.文件夹.私信 + accountInfo.envi + "_打招呼失败.txt", f);
+        }
+        // 将本次打招呼信息提交到服务器
+        // 保存已打招呼的粉丝信息
+        server.get("fans/sayhello?username="+f.username);
+        /*
+            msg: 消息内容
+            prefix: 消息前缀：
+            suffix: 消息后缀：
+            accountUsername: tiktok账号：
+            sender: 发送人：
+            code: 类型代码：
+            fansUsername: 粉丝的账号：
+            status: 0
+            device: 设备
+            reservedA: 保留字段a
+            reservedB: 保留字段b：
+        */
+        // 保存本次的聊天记录结果
+        if(typeof re.status != "number") {
+            re.status = re.status? 0 : 1;
+        }
+        re.accountUsername = accountInfo.username;
+        re.fansUsername = f.username;
+        log("保存消息")
+        if(!re.fansUsername) re.fansUsername = fans.username||"-";
+        server.add("record", server.excludeNull(re));
+        return re;
     }
-    // 将本次打招呼信息提交到服务器
-    // 保存已打招呼的粉丝信息
-    server.get("fans/sayhello?username="+f.username);
-    /*
-        msg: 消息内容
-        prefix: 消息前缀：
-        suffix: 消息后缀：
-        accountUsername: tiktok账号：
-        sender: 发送人：
-        code: 类型代码：
-        fansUsername: 粉丝的账号：
-        status: 0
-        device: 设备
-        reservedA: 保留字段a
-        reservedB: 保留字段b：
-    */
-    // 保存本次的聊天记录结果
-    if(typeof re.status != "number") {
-        re.status = re.status? 0 : 1;
-    }
-    re.accountUsername = accountInfo.username;
-    re.fansUsername = f.username;
-    log("保存消息")
-    if(!re.fansUsername) re.fansUsername = fans.username||"-";
-    server.add("record", server.excludeNull(re));
-    return re;
 }
 
 // 在聊天界面发送消息
-function sendMsg(msg){
+function sendMsg(msg, sayHelloTag) {
+    if(sayHelloTag) {
+        // 检测是否自己发送过消息
+        let msgs = 获取消息();
+        // 检测是否存在自己发送的消息，或者对方的消息过多
+        if(3 < msgs.length) {
+            return false;
+        } else {
+            // 先拿到第一个名字
+            let temp, sender = msgs.pop().sender;
+            // 如果消息全部拿完则继续发送
+            while((temp == msgs.pop())) {
+                // 如果有一个发送人不同，且消息为有效，则跳出，不进行发送消息
+                if(temp.status && sender != temp.sender) {
+                    return false;
+                }
+            }
+        }
+    }
+
     log("发送消息：", msg)
     for (let j = 0; j < 5; j++) {
         // 检测消息页面（需要判断是否存在输入框）
