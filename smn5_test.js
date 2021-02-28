@@ -2043,6 +2043,28 @@ function focusUser(max) {
             } else {
                 console.verbose("文字数量：", follow.length);
             }
+
+            // 打开方式，有时出现太慢
+            try{
+                // Open App
+                if(lh_find(text("Open App"), "Open App", 0)) {
+                    等待加载()
+                    let 打开方式 = text("TikTok").visibleToUser().findOne(1000)
+                    if (打开方式) {
+                        log("选择TikTok", 打开方式.parent().parent().click())
+                        sleep(1500)
+                    }
+                    let 始终 = text("始终").visibleToUser().findOne(1000)
+                    if (始终) {
+                        log("始终 " + 始终.click())
+                    }
+                }
+            }catch(err) {
+                console.error("选择打开方式失败！")
+                console.verbose(err)
+                console.verbose(err.stack)
+            }
+            
             sleep(1000)
         }
     }
@@ -4304,6 +4326,8 @@ function detectionMsgStatus() {
             f.runJS.click(()=>{pauseJS=false})
             while(pauseJS) sleep(1000);
             log("继续运行");
+        } else {
+            feedback();
         }
     }
 }
@@ -4318,6 +4342,8 @@ function detectionMsgStatusBackup(msg) {
                 let f = floaty.rawWindow(<frame><button id="runJS">继续运行</button></frame>)
                 f.runJS.click(()=>{pauseJS=false})
                 while(pauseJS) sleep(1000);
+            } else {
+                feedback();
             }
         }
     }catch(e){
@@ -7649,7 +7675,7 @@ function autoConfirm(num, choose, title, content, callback) {
                 }
             })
         }
-        toastLog("点击失败！");
+        // toastLog("点击失败！");
     })
     return confirm(title, content, callback);
 }

@@ -4332,6 +4332,8 @@ function detectionMsgStatus() {
             f.runJS.click(()=>{pauseJS=false})
             while(pauseJS) sleep(1000);
             log("继续运行");
+        } else {
+            feedback();
         }
     }
 }
@@ -4346,6 +4348,8 @@ function detectionMsgStatusBackup(msg) {
                 let f = floaty.rawWindow(<frame><button id="runJS">继续运行</button></frame>)
                 f.runJS.click(()=>{pauseJS=false})
                 while(pauseJS) sleep(1000);
+            } else {
+                feedback();
             }
         }
     }catch(e){
@@ -7715,7 +7719,7 @@ function autoConfirm(num, choose, title, content, callback) {
                 }
             })
         }
-        toastLog("点击失败！");
+        // toastLog("点击失败！");
     })
     return confirm(title, content, callback);
 }
