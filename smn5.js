@@ -7795,10 +7795,11 @@ function signIn() {
             标题: "选择账号",
             uo: null,
             检测: function() {
-                this.uo = text("Select account").depth(8).findOne(100);
+                this.uo = text("Select account").findOne(100);
                 return this.uo
             },
             执行: function() {
+                log("进行账号选择")
                 try{
                     let listUO = className("androidx.recyclerview.widget.RecyclerView").findOne(1000);
                     // 回到头顶
