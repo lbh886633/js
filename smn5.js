@@ -1923,12 +1923,19 @@ function 返回首页(dayleTime) {
 function focusUser(max) {
     log("关注用户")
     let focusNumber = 0;
+    let focusException = 0;
     max = max || 200;
     // "Edit profile" 是自己
     let words = ["Follow","Message","Requested","Edit profile"];
     // 获取链接，持有用户
     for (let i = 0; i < 3; i++) {
         while(focusNumber < max) {
+            // 检测当前是否是关注异常
+            if(2 < focusException) {
+                log("关注异常，提前结束");
+                focusNumber = max;
+                break;
+            }
             let user;
             try {
                 user = server.get("focusList/gain");
@@ -1952,7 +1959,7 @@ function focusUser(max) {
             // 检测当前界面，如果当前界面不是用户信息页面则等待，
             let state;
             let nowTime = Date.now();
-
+            let clickNumber = 0;
             do {
                 state = detectionFollowStatus(true);
                 try{
@@ -1977,10 +1984,20 @@ function focusUser(max) {
                     }
                     if(state.text()=="Follow"){
                         // 点击
-                        log("关注：", state.click());
-                        // 点击关注，清空状态
-                        state = null;
-                        sleep(1000)
+                        if(state.click()) {
+                            console.verbose("点击关注");
+                            // 点击关注，清空状态
+                            state = null;
+                            if( 2 < clickNumber++) {
+                                // 关注异常
+                                log("关注异常！")
+                                focusException++;
+                                //TODO 向服务器取消持有
+                                // server.post
+                                break;
+                            }
+                            sleep(1000)
+                        }
                     } else if (state.text() == "Edit profile") {
                         // 直接跳出，进度减一
                         focusNumber--;
@@ -2008,7 +2025,10 @@ function focusUser(max) {
             log("进度：" + focusNumber + "/" + max);
             返回首页(300);
         }
-        sleep((5000*i) + 1)
+
+        if(focusNumber < max) {
+            sleep((5000*i) + 1)
+        }
     }
     
     function detectionFollowStatus(wait) {
