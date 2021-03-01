@@ -8,6 +8,7 @@ var fasle = false;
         "未加入全字匹配",
         "优化请求用户时异常",
         "优化打招呼v2",
+        "增加打开的链接日志显示",
     ];
     uti = logs.pop();
 }
@@ -7642,6 +7643,7 @@ function openUrlAndSleep3s(url,s) {
             url = url.replace(ch,map[mapKey])
        }
     }
+    console.verbose("打开链接", url);
     app.startActivity({ 
         action: "android.intent.action.VIEW", 
         data: url, 

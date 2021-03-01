@@ -7,6 +7,7 @@ var fasle = false;
     let logs = [
         "优化请求用户时异常",
         "优化打招呼v2",
+        "增加打开的链接日志显示",
     ];
     uti = logs.pop();
 }
@@ -15,7 +16,7 @@ var tempSave = {
     privacy: 30,
     NUMBER: 0,
     自动打码: false,
-    version: "55" + " -- " + uti,
+    version: "56" + " -- " + uti,
     // 直接发送的消息
     getSayMessage: "Hi",
 };
@@ -7684,6 +7685,7 @@ function openUrlAndSleep3s(url,s) {
             url = url.replace(ch,map[mapKey])
        }
     }
+    console.verbose("打开链接", url);
     app.startActivity({ 
         action: "android.intent.action.VIEW", 
         data: url, 
