@@ -7579,6 +7579,7 @@ function nextAccount() {
     log("账号切换结束")
 }
 function getAccountList() {
+    accounts.list = [];
     for (let i = 0; i < 5; i++) {
         try{
             // 点击
@@ -7627,7 +7628,7 @@ function getAccountList() {
         }catch(e){}
     }
     log(accounts.list)
-    log(accounts.list.length)
+    log("数量：",accounts.list.length)
     return accounts;
 }
 
