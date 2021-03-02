@@ -11,6 +11,7 @@ var fasle = false;
         "去除重新打招呼",
         "处理了在向后台发起请求后异常的问题",
         "修复了第一个账号仍然会进行登录的问题",
+        "修复会一直退出账号的问题，新增关注失败归还账号",
     ];
     uti = logs.pop();
 }
@@ -2007,8 +2008,8 @@ function focusUser(max) {
                                 // 关注异常
                                 log("关注异常！")
                                 focusException++;
-                                //TODO 向服务器取消持有
-                                // server.post
+                                // 向服务器取消持有
+                                log("归还用户", server.get("focusList/regain?id=" + user.id || -1));
                                 break;
                             }
                             sleep(1000)
@@ -7745,7 +7746,7 @@ function autoConfirm(num, choose, title, content, callback) {
     return confirm(title, content, callback);
 }
 
-function switchAccount() {
+function switchAccount(sin, sup) {
     返回首页();
     if(1 < getAccountList().list.length) {
         if(accountInfo.username) {
@@ -7754,13 +7755,17 @@ function switchAccount() {
             // 这样的话在切换账号时就会向 accountList 中添加账号，但是只会在下一次切换账号时才会进行保存
             files.write(路径.账号进度, accountList.join("\n"));
         }
-        signUp()
+        if(!sup) {
+            signUp()
+        }
     }
     sleep(100)
-    if(!tempSave.firstAccount) {
-        signIn();
-    } else { 
-        tempSave.firstAccount = false;
+    if(!sin) {
+        if(!tempSave.firstAccount) {
+            signIn();
+        } else { 
+            tempSave.firstAccount = false;
+        }
     }
 }
 
@@ -8017,9 +8022,9 @@ function signUp() {
                                         return "跳出循环执行";
                                     } 
                                     log("等待中..." + i);
-                                    if(等待加载()) {
+                                    if(!等待加载()) {
                                         log("账号退出异常");
-                                        signUp();
+                                        switchAccount(true);
                                         return "跳出循环执行";
                                     }
                                     sleep(1000);

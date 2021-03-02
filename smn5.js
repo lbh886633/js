@@ -10,7 +10,7 @@ var fasle = false;
         "去除重新打招呼",
         "处理了在向后台发起请求后异常的问题",
         "修复了第一个账号仍然会进行登录的问题",
-        "测试版本",
+        "修复会一直退出账号的问题，新增关注失败归还账号",
     ];
     uti = logs.pop();
 }
@@ -19,7 +19,7 @@ var tempSave = {
     privacy: 30,
     NUMBER: 0,
     自动打码: false,
-    version: "60" + " -- " + uti,
+    version: "61" + " -- " + uti,
     // 直接发送的消息
     getSayMessage: "Hi",
     firstAccount: true,
@@ -2012,8 +2012,8 @@ function focusUser(max) {
                                 // 关注异常
                                 log("关注异常！")
                                 focusException++;
-                                //TODO 向服务器取消持有
-                                // server.post
+                                // 向服务器取消持有
+                                log("归还用户", server.get("focusList/regain?id=" + user.id || -1));
                                 break;
                             }
                             sleep(1000)
@@ -6823,7 +6823,6 @@ function 等待加载(s,num) {
         if(i%5==0) console.verbose("等待加载中")
         sleep(300)
     }
-    console.warn(i,num,i<num)
     return i < num
 }
 
@@ -8077,7 +8076,7 @@ function signUp() {
                                         return "跳出循环执行";
                                     } 
                                     log("等待中..." + i);
-                                    if(等待加载()) {
+                                    if(!等待加载()) {
                                         log("账号退出异常");
                                         switchAccount(true);
                                         return "跳出循环执行";
