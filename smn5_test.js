@@ -10,6 +10,7 @@ var fasle = false;
         "优化打招呼与退出账号",
         "去除重新打招呼",
         "处理了在向后台发起请求后异常的问题",
+        "修复了第一个账号仍然会进行登录的问题",
     ];
     uti = logs.pop();
 }
@@ -7753,11 +7754,14 @@ function switchAccount() {
             // 这样的话在切换账号时就会向 accountList 中添加账号，但是只会在下一次切换账号时才会进行保存
             files.write(路径.账号进度, accountList.join("\n"));
         }
-        if(!tempSave.firstAccount) signUp()
-        else tempSave.firstAccount = false;
+        signUp()
     }
     sleep(100)
-    signIn()
+    if(!tempSave.firstAccount) {
+        signIn();
+    } else { 
+        tempSave.firstAccount = false;
+    }
 }
 
 // 需要全局参数 accountList
