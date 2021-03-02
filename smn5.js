@@ -11,7 +11,6 @@ var fasle = false;
         "处理了在向后台发起请求后异常的问题",
         "修复了第一个账号仍然会进行登录的问题",
         "修复会一直退出账号的问题，新增关注失败归还账号",
-        "测试",
     ];
     uti = logs.pop();
 }
@@ -7602,12 +7601,12 @@ function getAccountList() {
                     || (r.bottom - r.top < 220
                         && r.bottom - r.top > 180)
                     )
-                    &&
-                    (
-                        // depth 深度限制
-                        e.depth() == 3
-                        || e.depth() == 10
-                    )
+                    // &&
+                    // (
+                    //     // depth 深度限制
+                    //     e.depth() == 3
+                    //     || e.depth() == 10
+                    // )
                 ) {
                     let text = e.find(className("TextView"));
                     if(1 < text.length) {
@@ -7812,24 +7811,18 @@ function autoConfirm(num, choose, title, content, callback) {
 
 function switchAccount(sin, sup) {
     返回首页();
-    let len = getAccountList().list
-    log(len.length, len, 1 < len.length)
-    if(1 < len.length) {
+    if(1 < getAccountList().list.length) {
         if(accountInfo.username) {
-            log("账号记录")
+            log("记录账号进度")
             // files.append(路径.账号进度, "\n"+accountInfo.username);
             // 这样的话在切换账号时就会向 accountList 中添加账号，但是只会在下一次切换账号时才会进行保存
             files.write(路径.账号进度, accountList.join("\n"));
         }
-        log("sup", sup)
         if(!sup) {
-            log("退出账号")
-            sleep(3000)
             signUp()
         }
     }
     sleep(100)
-    log("sin", sin)
     if(!sin) {
         if(!tempSave.firstAccount) {
             signIn();

@@ -7553,7 +7553,7 @@ function getAccountList() {
                     }
                 }
             });
-            // 获取到的账号列表小于8个时提示是否重新获取
+            // 获取到的账号列表小于1个时提示是否重新获取
             if(accounts.list.length < 1) {
                 if(autoConfirm(2000,true,"是否重新获取？当前获取到的账号列表如下：",accounts.list.join("\n"))){
                     // 跳过本次，重新获取
@@ -7565,6 +7565,8 @@ function getAccountList() {
             break;
         }catch(e){}
     }
+    log(accounts.list)
+    log("数量：",accounts.list.length)
     return accounts;
 }
 
@@ -7750,7 +7752,7 @@ function switchAccount(sin, sup) {
     返回首页();
     if(1 < getAccountList().list.length) {
         if(accountInfo.username) {
-            log("账号记录")
+            log("记录账号进度")
             // files.append(路径.账号进度, "\n"+accountInfo.username);
             // 这样的话在切换账号时就会向 accountList 中添加账号，但是只会在下一次切换账号时才会进行保存
             files.write(路径.账号进度, accountList.join("\n"));
