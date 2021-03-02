@@ -5314,7 +5314,12 @@ function readRequiredLabelsFile(path){
 
 function getIssue(){
     let reList = [];
-    let rows = server.post("labelInfo/list?labelName=携带问题").json().rows;
+    let rows = server.post("labelInfo/list?labelName=携带问题");
+    log(rows)
+    rows = rows.json()
+    log(rows)
+    rows = rows.rows;
+    log(rows)
     for (let i = 0; i < rows.length; i++) {
         // 是否是询问消息
         if(rows.type=="ask") {
