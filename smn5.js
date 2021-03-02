@@ -7811,7 +7811,9 @@ function autoConfirm(num, choose, title, content, callback) {
 
 function switchAccount(sin, sup) {
     返回首页();
-    if(1 < getAccountList().list.length) {
+    let len = getAccountList().list
+    log(len.length, len)
+    if(1 < len) {
         if(accountInfo.username) {
             log("账号记录")
             // files.append(路径.账号进度, "\n"+accountInfo.username);
@@ -7819,6 +7821,8 @@ function switchAccount(sin, sup) {
             files.write(路径.账号进度, accountList.join("\n"));
         }
         if(!sup) {
+            log("退出账号")
+            sleep(3000)
             signUp()
         }
     }
