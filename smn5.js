@@ -5137,8 +5137,8 @@ function 消息处理(fans, newMsgList) {
         log("获取粉丝标签失败！");
     }
 
-    // log("=== 已存标签 ===")
-    // log(fansLabel)
+    log("=== 已存标签 ===")
+    log(fansLabel)
 
     // 触发词优先回复
     let nowMsg=[];
