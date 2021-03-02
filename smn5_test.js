@@ -66,7 +66,7 @@ var server = {
      * 请求json数据并反序列化对象进行返回，失败时不返回数据undefined
      * @param {String} uri URI地址
      */
-    get: function (uri) {
+    get: function (uri, option) {
         try {
             console.info("[↓]" + this.serverUrl + uri);
             let re = http.get(this.serverUrl + uri, {'Connection': 'close'});
@@ -78,9 +78,16 @@ var server = {
             log("请求失败", err);
             console.verbose(err.name);
             console.verbose(err.message);
-            if(err.toString().indexOf("IOException")){
-                log("重试中...")
-                return this.get(uri)
+            if(err.name.indexOf("Error") < 0) {
+                // 初始化次数
+                if(typeof option != "object" ) {
+                    option = option || {number: 0};
+                }
+                // 3次上限
+                if(option.number < 3 || err) {
+                    log("重试中...")
+                    return this.get(uri)
+                }
             }
         }
     },
@@ -101,7 +108,7 @@ var server = {
      * @param {Object} o 
      * @returns {String} 返回的是 消息体
      */
-    post: function (uri, o) {
+    post: function (uri, o, option) {
         try {
             console.verbose("[↑]" + this.serverUrl +  uri + "\n" + JSON.stringify(o))
             return http.post(this.serverUrl + uri, o||{}, {'Connection': 'close'}).body;
@@ -109,9 +116,16 @@ var server = {
             log("[↑]POST上传出错", err)
             console.verbose(err.name);
             console.verbose(err.message);
-            if(err.toString().indexOf("TimeoutException")){
-                log("重试中...")
-                return this.get(uri)
+            if(err.name.indexOf("Error") < 0) {
+                // 初始化次数
+                if(typeof option != "object" ) {
+                    option = option || {number: 0};
+                }
+                // 3次上限
+                if(option.number < 3 || err) {
+                    log("重试中...")
+                    return this.post(uri, o)
+                }
             }
         }
     },
@@ -120,7 +134,7 @@ var server = {
      * @param {String} url uri 例子"account/add"
      * @param {Object|String} o 
      */
-    sendData: function (url, o) {
+    sendData: function (url, o, option) {
         try {
             console.verbose("[↑]" + url + "\n" + JSON.stringify(o))
             log(http.post(url, o||{}, {'Connection': 'close'}).body.string());
@@ -128,9 +142,16 @@ var server = {
             log("上传出错", err)
             console.verbose(err.name);
             console.verbose(err.message);
-            if(err.toString().indexOf("TimeoutException")){
-                log("重试中...")
-                return this.get(uri)
+            if(err.name.indexOf("Error") < 0) {
+                // 初始化次数
+                if(typeof option != "object" ) {
+                    option = option || {number: 0};
+                }
+                // 3次上限
+                if(option.number < 3 || err) {
+                    log("重试中...")
+                    return this.sendData(uri, o)
+                }
             }
         }
     },
@@ -7524,6 +7545,7 @@ function nextAccount() {
     log("账号切换结束")
 }
 function getAccountList() {
+    accounts.list = [];
     for (let i = 0; i < 5; i++) {
         try{
             // 点击
@@ -7757,8 +7779,8 @@ function switchAccount(sin, sup) {
             // 这样的话在切换账号时就会向 accountList 中添加账号，但是只会在下一次切换账号时才会进行保存
             files.write(路径.账号进度, accountList.join("\n"));
         }
-        if(!sup) {
-            signUp()
+        if(!sup && !tempSave.firstAccount) {
+            signUp();
         }
     }
     sleep(100)

@@ -65,7 +65,7 @@ var server = {
      * 请求json数据并反序列化对象进行返回，失败时不返回数据undefined
      * @param {String} uri URI地址
      */
-    get: function (uri) {
+    get: function (uri, option) {
         try {
             console.info("[↓]" + this.serverUrl + uri);
             let re = http.get(this.serverUrl + uri, {'Connection': 'close'});
@@ -77,9 +77,16 @@ var server = {
             log("请求失败", err);
             console.verbose(err.name);
             console.verbose(err.message);
-            if(err.toString().indexOf("IOException")){
-                log("重试中...")
-                return this.get(uri)
+            if(err.name.indexOf("Error") < 0) {
+                // 初始化次数
+                if(typeof option != "object" ) {
+                    option = option || {number: 0};
+                }
+                // 3次上限
+                if(option.number < 3 || err) {
+                    log("重试中...")
+                    return this.get(uri)
+                }
             }
         }
     },
@@ -100,7 +107,7 @@ var server = {
      * @param {Object} o 
      * @returns {String} 返回的是 消息体
      */
-    post: function (uri, o) {
+    post: function (uri, o, option) {
         try {
             console.verbose("[↑]" + this.serverUrl +  uri + "\n" + JSON.stringify(o))
             return http.post(this.serverUrl + uri, o||{}, {'Connection': 'close'}).body;
@@ -108,9 +115,16 @@ var server = {
             log("[↑]POST上传出错", err)
             console.verbose(err.name);
             console.verbose(err.message);
-            if(err.toString().indexOf("TimeoutException")){
-                log("重试中...")
-                return this.get(uri)
+            if(err.name.indexOf("Error") < 0) {
+                // 初始化次数
+                if(typeof option != "object" ) {
+                    option = option || {number: 0};
+                }
+                // 3次上限
+                if(option.number < 3 || err) {
+                    log("重试中...")
+                    return this.post(uri, o)
+                }
             }
         }
     },
@@ -119,7 +133,7 @@ var server = {
      * @param {String} url uri 例子"account/add"
      * @param {Object|String} o 
      */
-    sendData: function (url, o) {
+    sendData: function (url, o, option) {
         try {
             console.verbose("[↑]" + url + "\n" + JSON.stringify(o))
             log(http.post(url, o||{}, {'Connection': 'close'}).body.string());
@@ -127,9 +141,16 @@ var server = {
             log("上传出错", err)
             console.verbose(err.name);
             console.verbose(err.message);
-            if(err.toString().indexOf("TimeoutException")){
-                log("重试中...")
-                return this.get(uri)
+            if(err.name.indexOf("Error") < 0) {
+                // 初始化次数
+                if(typeof option != "object" ) {
+                    option = option || {number: 0};
+                }
+                // 3次上限
+                if(option.number < 3 || err) {
+                    log("重试中...")
+                    return this.sendData(uri, o)
+                }
             }
         }
     },
@@ -3438,33 +3459,39 @@ function getFansList(fansNameList, fansList, all) {
         }
 
         console.info("保存数量：", score,"当前进展：", getFansNum, "总进展：", countGetFansNum, 
-                    "当前账号粉丝已保存：", saveNumber, "/", fansTotal)
+                    "当前账号粉丝已保存：", saveNumber/fansTotal*100,"%")
         if(score == 0) {
-            if(!all) {
-                log("当前粉丝均已保存，停止继续遍历");
-                break;
-            }
-            // 判断本次列表是否和上次相同
-            let similar = 0;
-            if(tempSave.tempList) {
-                tempList.forEach(e=>{
-                    if(tempSave.tempList.indexOf(e)>-1)
-                        similar++;
-                })
-            }
-            log("相似度：" + similar/tempList.length, "   标记：",closeTag)
-            // 当相似性超过8成时跳出循环，加入一个条件，需要在总粉丝于500以内时粉丝相差不到50个才跳出
-            if(!isNaN(similar/tempList.length) && similar/tempList.length > 0.8 && 3 < closeTag++){
-                if(fansTotal < 500) {
-                    if((fansTotal-saveNumber) < 50) {
-                        console.warn("到底了")
-                        break;
-                    }
-                    // 总粉丝小于500个，且没有完全遍历时继续遍历。
-                } else {
-                    console.warn("提前结束")
+            // 数量差 10%
+            // fansNameList
+            if(fansTotal - fansNameList.length < fansTotal * 0.1) {
+                if(!all) {
+                    log("当前粉丝均已保存，停止继续遍历");
                     break;
                 }
+                // 判断本次列表是否和上次相同
+                let similar = 0;
+                if(tempSave.tempList) {
+                    tempList.forEach(e => {
+                        if(tempSave.tempList.indexOf(e)>-1)
+                            similar++;
+                    })
+                }
+                log("相似度：" + similar/tempList.length, "   标记：",closeTag)
+                // 当相似性超过8成时跳出循环，加入一个条件，需要在总粉丝于500以内时粉丝相差不到50个才跳出
+                if(!isNaN(similar/tempList.length) && similar/tempList.length > 0.8 && 3 < closeTag++){
+                    if(fansTotal < 500) {
+                        if((fansTotal-saveNumber) < 50) {
+                            console.warn("到底了")
+                            break;
+                        }
+                        // 总粉丝小于500个，且没有完全遍历时继续遍历。
+                    } else {
+                        console.warn("提前结束")
+                        break;
+                    }
+                }
+            } else {
+                console.verbose("")
             }
         }
         // 将本次暂存数据保存起来用于下次对比
@@ -7818,8 +7845,8 @@ function switchAccount(sin, sup) {
             // 这样的话在切换账号时就会向 accountList 中添加账号，但是只会在下一次切换账号时才会进行保存
             files.write(路径.账号进度, accountList.join("\n"));
         }
-        if(!sup) {
-            signUp()
+        if(!sup && !tempSave.firstAccount) {
+            signUp();
         }
     }
     sleep(100)
