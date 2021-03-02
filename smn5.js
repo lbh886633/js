@@ -7626,6 +7626,8 @@ function getAccountList() {
             break;
         }catch(e){}
     }
+    log(accounts.list)
+    log(accounts.list.length)
     return accounts;
 }
 
