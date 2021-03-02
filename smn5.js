@@ -11,6 +11,7 @@ var fasle = false;
         "处理了在向后台发起请求后异常的问题",
         "修复了第一个账号仍然会进行登录的问题",
         "修复会一直退出账号的问题，新增关注失败归还账号",
+        "测试",
     ];
     uti = logs.pop();
 }
@@ -7599,6 +7600,12 @@ function getAccountList() {
                         && r.bottom - r.top > device.height*0.07)
                     || (r.bottom - r.top < 220
                         && r.bottom - r.top > 180)
+                    )
+                    &&
+                    (
+                        // depth 深度限制
+                        e.depth() == 3
+                        || e.depth() == 10
                     )
                 ) {
                     let text = e.find(className("TextView"));
