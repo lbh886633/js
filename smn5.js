@@ -10,6 +10,7 @@ var fasle = false;
         "去除重新打招呼",
         "处理了在向后台发起请求后异常的问题",
         "修复了第一个账号仍然会进行登录的问题",
+        "测试版本",
     ];
     uti = logs.pop();
 }
@@ -6822,6 +6823,7 @@ function 等待加载(s,num) {
         if(i%5==0) console.verbose("等待加载中")
         sleep(300)
     }
+    console.warn(i,num,i<num)
     return i < num
 }
 
@@ -7799,7 +7801,7 @@ function autoConfirm(num, choose, title, content, callback) {
     return confirm(title, content, callback);
 }
 
-function switchAccount() {
+function switchAccount(sin, sup) {
     返回首页();
     if(1 < getAccountList().list.length) {
         if(accountInfo.username) {
@@ -7808,13 +7810,17 @@ function switchAccount() {
             // 这样的话在切换账号时就会向 accountList 中添加账号，但是只会在下一次切换账号时才会进行保存
             files.write(路径.账号进度, accountList.join("\n"));
         }
-        signUp()
+        if(!sup) {
+            signUp()
+        }
     }
     sleep(100)
-    if(!tempSave.firstAccount) {
-        signIn();
-    } else { 
-        tempSave.firstAccount = false;
+    if(!sin) {
+        if(!tempSave.firstAccount) {
+            signIn();
+        } else { 
+            tempSave.firstAccount = false;
+        }
     }
 }
 
@@ -8073,7 +8079,7 @@ function signUp() {
                                     log("等待中..." + i);
                                     if(等待加载()) {
                                         log("账号退出异常");
-                                        signUp();
+                                        switchAccount(true);
                                         return "跳出循环执行";
                                     }
                                     sleep(1000);
