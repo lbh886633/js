@@ -5137,8 +5137,8 @@ function 消息处理(fans, newMsgList) {
         log("获取粉丝标签失败！");
     }
 
-    log("=== 已存标签 ===")
-    log(fansLabel)
+    // log("=== 已存标签 ===")
+    // log(fansLabel)
 
     // 触发词优先回复
     let nowMsg=[];
@@ -5214,7 +5214,7 @@ function 消息处理(fans, newMsgList) {
 
     let issue = true;
     if(reMsg!="") {
-        reMsg+="\n\n\n";
+        // reMsg+="\n\n\n";
         issue = false;
     }
 
@@ -5239,6 +5239,9 @@ function 消息处理(fans, newMsgList) {
                     let iss = tempSave.issue[random(0, tempSave.issue.length-1)];
                     if(!iss) log("没有要携带的问题！", tempSave.issue)
                     log("问题：", iss);
+                    if(iss) {
+                        reMsg += "\n\n\n";
+                    }
                     reMsg += iss || "";
                 }
                 console.info("新消息：", reMsg);
