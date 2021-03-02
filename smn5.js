@@ -11,6 +11,7 @@ var fasle = false;
         "处理了在向后台发起请求后异常的问题",
         "修复了第一个账号仍然会进行登录的问题",
         "修复会一直退出账号的问题，新增关注失败归还账号",
+        "修复对携带问题的解析失败",
     ];
     uti = logs.pop();
 }
@@ -19,7 +20,7 @@ var tempSave = {
     privacy: 30,
     NUMBER: 0,
     自动打码: false,
-    version: "61" + " -- " + uti,
+    version: "62" + " -- " + uti,
     // 直接发送的消息
     getSayMessage: "Hi",
     firstAccount: true,
@@ -3459,7 +3460,7 @@ function getFansList(fansNameList, fansList, all) {
         }
 
         console.info("保存数量：", score,"当前进展：", getFansNum, "总进展：", countGetFansNum, 
-                    "当前账号粉丝已保存：", saveNumber/fansTotal*100,"%")
+                    "当前账号粉丝已保存：", saveNumber / fansTotal*100,"%")
         if(score == 0) {
             // 数量差 10%
             // fansNameList
@@ -5317,12 +5318,10 @@ function getIssue(){
     let rows = server.post("labelInfo/list?labelName=携带问题").json().rows;
     for (let i = 0; i < rows.length; i++) {
         // 是否是询问消息
-        if(rows.type=="ask") {
-            log("进行保存")
-            reList.push(rows.body);
+        if(rows[i].type=="ask") {
+            reList.push(rows[i].body);
         }
     }
-    log("结果：", reList)
     return reList;
 }
 /**

@@ -12,6 +12,7 @@ var fasle = false;
         "处理了在向后台发起请求后异常的问题",
         "修复了第一个账号仍然会进行登录的问题",
         "修复会一直退出账号的问题，新增关注失败归还账号",
+        "修复对携带问题的解析失败",
     ];
     uti = logs.pop();
 }
@@ -3455,33 +3456,39 @@ function getFansList(fansNameList, fansList, all) {
         }
 
         console.info("保存数量：", score,"当前进展：", getFansNum, "总进展：", countGetFansNum, 
-                    "当前账号粉丝已保存：", saveNumber, "/", fansTotal)
+                    "当前账号粉丝已保存：", saveNumber / fansTotal*100,"%")
         if(score == 0) {
-            if(!all) {
-                log("当前粉丝均已保存，停止继续遍历");
-                break;
-            }
-            // 判断本次列表是否和上次相同
-            let similar = 0;
-            if(tempSave.tempList) {
-                tempList.forEach(e=>{
-                    if(tempSave.tempList.indexOf(e)>-1)
-                        similar++;
-                })
-            }
-            log("相似度：" + similar/tempList.length, "   标记：",closeTag)
-            // 当相似性超过8成时跳出循环，加入一个条件，需要在总粉丝于500以内时粉丝相差不到50个才跳出
-            if(!isNaN(similar/tempList.length) && similar/tempList.length > 0.8 && 3 < closeTag++){
-                if(fansTotal < 500) {
-                    if((fansTotal-saveNumber) < 50) {
-                        console.warn("到底了")
-                        break;
-                    }
-                    // 总粉丝小于500个，且没有完全遍历时继续遍历。
-                } else {
-                    console.warn("提前结束")
+            // 数量差 10%
+            // fansNameList
+            if(fansTotal - fansNameList.length < fansTotal * 0.1) {
+                if(!all) {
+                    log("当前粉丝均已保存，停止继续遍历");
                     break;
                 }
+                // 判断本次列表是否和上次相同
+                let similar = 0;
+                if(tempSave.tempList) {
+                    tempList.forEach(e => {
+                        if(tempSave.tempList.indexOf(e)>-1)
+                            similar++;
+                    })
+                }
+                log("相似度：" + similar/tempList.length, "   标记：",closeTag)
+                // 当相似性超过8成时跳出循环，加入一个条件，需要在总粉丝于500以内时粉丝相差不到50个才跳出
+                if(!isNaN(similar/tempList.length) && similar/tempList.length > 0.8 && 3 < closeTag++){
+                    if(fansTotal < 500) {
+                        if((fansTotal-saveNumber) < 50) {
+                            console.warn("到底了")
+                            break;
+                        }
+                        // 总粉丝小于500个，且没有完全遍历时继续遍历。
+                    } else {
+                        console.warn("提前结束")
+                        break;
+                    }
+                }
+            } else {
+                console.verbose("")
             }
         }
         // 将本次暂存数据保存起来用于下次对比
