@@ -7615,7 +7615,7 @@ function getAccountList() {
                     }
                 }
             });
-            // 获取到的账号列表小于8个时提示是否重新获取
+            // 获取到的账号列表小于1个时提示是否重新获取
             if(accounts.list.length < 1) {
                 if(autoConfirm(2000,true,"是否重新获取？当前获取到的账号列表如下：",accounts.list.join("\n"))){
                     // 跳过本次，重新获取
@@ -7813,7 +7813,7 @@ function autoConfirm(num, choose, title, content, callback) {
 function switchAccount(sin, sup) {
     返回首页();
     let len = getAccountList().list
-    log(len.length, len)
+    log(len.length, len, 1 < len.length)
     if(1 < len.length) {
         if(accountInfo.username) {
             log("账号记录")
@@ -7829,6 +7829,7 @@ function switchAccount(sin, sup) {
         }
     }
     sleep(100)
+    log("sin", sin)
     if(!sin) {
         if(!tempSave.firstAccount) {
             signIn();
