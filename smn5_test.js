@@ -9,6 +9,7 @@ var fasle = false;
         "优化请求用户时异常",
         "优化打招呼v2",
         "增加打开的链接日志显示",
+        "优化打招呼与退出账号",
     ];
     uti = logs.pop();
 }
@@ -3452,12 +3453,12 @@ function getFansList(fansNameList, fansList, all) {
         let scrollDown = FollowerParent.scrollForward();
         if(!scrollDown) {
             // 重新获取
-            FollowerParent = depth(9).className("androidx.recyclerview.widget.RecyclerView")
-                            .packageName(appPackage).filter(function(uo){
-                                return uo.bounds().right - uo.bounds().left > device.width*0.5;
-                            }).findOne(3000)
+            FollowerParent = getList();
             if(FollowerParent) {
-                scrollDown = FollowerParent.scrollForward();
+                if(!(scrollDown = FollowerParent.scrollForward())) {
+                    log("到底了，退出此账号");
+                    break;
+                }
             } else {
                 console.error("不在列表界面")
             }
@@ -4569,7 +4570,6 @@ function getNewMsgList() {
  * 对每一个回复了私信的人进行回复
  * !! 不每次使用最新获取的气泡列表，避免造成实时出现新消息时导致的计数大，从而提前退出
  * 
- * //TODO 会点击到红色气泡上，需要做判断。加上输入框检测用
  * 
  * @param {Array} sendlist 红色气泡列表
  * @returns {Number}    本次共处理的消息数量
@@ -7604,7 +7604,8 @@ function 循环执行(数组, 等待时间) {
     while (-1 < 进度) {
         下标 = 进度%数组.length;
         if(typeof 数组[下标] == "object") {
-            if(/* false */true && 数组[下标].标题) console.verbose("当前操作步骤：", 数组[下标].标题);
+            // 这里写true是可以查看日志
+            if(true && 数组[下标].标题) console.verbose("当前操作步骤：", 数组[下标].标题);
             if(数组[下标].检测()) 进度 = 数组[下标].执行() != "跳出循环执行" ? 进度 : -2;
             sleep(等待);
         }
@@ -7981,7 +7982,10 @@ function signUp() {
                                         return "跳出循环执行";
                                     } 
                                     log("等待中..." + i);
-                                    等待加载()
+                                    if(等待加载()) {
+                                        log("账号退出异常");
+                                        返回首页()
+                                    }
                                     sleep(1000);
                                 }
                             }
