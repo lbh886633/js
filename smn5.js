@@ -7814,13 +7814,14 @@ function switchAccount(sin, sup) {
     返回首页();
     let len = getAccountList().list
     log(len.length, len)
-    if(1 < len) {
+    if(1 < len.length) {
         if(accountInfo.username) {
             log("账号记录")
             // files.append(路径.账号进度, "\n"+accountInfo.username);
             // 这样的话在切换账号时就会向 accountList 中添加账号，但是只会在下一次切换账号时才会进行保存
             files.write(路径.账号进度, accountList.join("\n"));
         }
+        log("sup", sup)
         if(!sup) {
             log("退出账号")
             sleep(3000)
