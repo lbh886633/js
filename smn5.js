@@ -5236,14 +5236,14 @@ function 消息处理(fans, newMsgList) {
                 if(issue) {
                     //TODO 发送 日常+问题 ，连带着 问题可连续性 例子：hi \n where are you from?
                     let iss = tempSave.issue[random(0, tempSave.issue.length-1)];
-                    log(iss)
+                    if(!iss) log("没有要携带的问题！", tempSave.issue)
+                    log("问题：", iss);
                     reMsg += iss || "";
                 }
                 console.info("新消息：", reMsg);
                 return reMsg;
             } else {
-                log("以下标签询问消息为空!");
-                log(r);
+                log(r.labelName,"标签的询问消息为空!");
             }
         }
     }
