@@ -8,6 +8,7 @@ var fasle = false;
         "增加打开的链接日志显示",
         "优化打招呼与退出账号",
         "去除重新打招呼",
+        "处理了在向后台发起请求后异常的问题",
     ];
     uti = logs.pop();
 }
@@ -16,7 +17,7 @@ var tempSave = {
     privacy: 30,
     NUMBER: 0,
     自动打码: false,
-    version: "58" + " -- " + uti,
+    version: "59" + " -- " + uti,
     // 直接发送的消息
     getSayMessage: "Hi",
     firstAccount: true,
@@ -72,7 +73,12 @@ var server = {
             return JSON.parse(re.body.string());
         } catch (err) {
             log("请求失败", err);
-            console.verbose(err.stack);
+            console.verbose(err.name);
+            console.verbose(err.message);
+            if(err.toString().indexOf("IOException")){
+                log("重试中...")
+                return this.get(uri)
+            }
         }
     },
     // 排除对象中的null与undefined数据
@@ -98,6 +104,12 @@ var server = {
             return http.post(this.serverUrl + uri, o||{}, {'Connection': 'close'}).body;
         } catch (err) {
             log("[↑]POST上传出错", err)
+            console.verbose(err.name);
+            console.verbose(err.message);
+            if(err.toString().indexOf("TimeoutException")){
+                log("重试中...")
+                return this.get(uri)
+            }
         }
     },
     /**
@@ -111,6 +123,12 @@ var server = {
             log(http.post(url, o||{}, {'Connection': 'close'}).body.string());
         } catch (err) {
             log("上传出错", err)
+            console.verbose(err.name);
+            console.verbose(err.message);
+            if(err.toString().indexOf("TimeoutException")){
+                log("重试中...")
+                return this.get(uri)
+            }
         }
     },
     /**
@@ -7773,7 +7791,9 @@ function switchAccount() {
     if(1 < getAccountList().list.length) {
         if(accountInfo.username) {
             log("账号记录")
-            files.append(路径.账号进度, "\n"+accountInfo.username);
+            // files.append(路径.账号进度, "\n"+accountInfo.username);
+            // 这样的话在切换账号时就会向 accountList 中添加账号，但是只会在下一次切换账号时才会进行保存
+            files.write(路径.账号进度, accountList.join("\n"));
         }
         if(!tempSave.firstAccount) signUp()
         else tempSave.firstAccount = false;
@@ -7811,6 +7831,16 @@ function signIn() {
             uo: null,
             检测: function() {
                 this.uo = text("Add account").findOne(100)
+                if(!this.uo) {
+                    // 检测是否是账号已经满了
+                    if(1 < getAccountList().list.length) {
+                        // 进行账号退出
+                        if(autoConfirm(3000, true, "账号已满，是否退出一个账号？")) {
+                            log("退出一个账号");
+                            signUp();
+                        }
+                    }
+                }
                 return this.uo
             },
             执行: function() {

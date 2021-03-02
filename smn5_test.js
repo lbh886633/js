@@ -6,10 +6,10 @@ var fasle = false;
 {
     let logs = [
         "未加入全字匹配",
-        "优化请求用户时异常",
-        "优化打招呼v2",
         "增加打开的链接日志显示",
         "优化打招呼与退出账号",
+        "去除重新打招呼",
+        "处理了在向后台发起请求后异常的问题",
     ];
     uti = logs.pop();
 }
@@ -21,6 +21,7 @@ var tempSave = {
     version: "测试版 -- " + uti,
     // 直接发送的消息
     getSayMessage: "Hi",
+    firstAccount: true,
 };
 
 var server = {
@@ -73,7 +74,12 @@ var server = {
             return JSON.parse(re.body.string());
         } catch (err) {
             log("请求失败", err);
-            console.verbose(err.stack);
+            console.verbose(err.name);
+            console.verbose(err.message);
+            if(err.toString().indexOf("IOException")){
+                log("重试中...")
+                return this.get(uri)
+            }
         }
     },
     // 排除对象中的null与undefined数据
@@ -99,6 +105,12 @@ var server = {
             return http.post(this.serverUrl + uri, o||{}, {'Connection': 'close'}).body;
         } catch (err) {
             log("[↑]POST上传出错", err)
+            console.verbose(err.name);
+            console.verbose(err.message);
+            if(err.toString().indexOf("TimeoutException")){
+                log("重试中...")
+                return this.get(uri)
+            }
         }
     },
     /**
@@ -112,6 +124,12 @@ var server = {
             log(http.post(url, o||{}, {'Connection': 'close'}).body.string());
         } catch (err) {
             log("上传出错", err)
+            console.verbose(err.name);
+            console.verbose(err.message);
+            if(err.toString().indexOf("TimeoutException")){
+                log("重试中...")
+                return this.get(uri)
+            }
         }
     },
     /**
@@ -368,7 +386,7 @@ ui.layout(
                                     <checkbox id="sayhellobyurl" text="链接问候" />
                                     <checkbox id="sayhellobysearch" text="搜索问候" />
                                     <checkbox id="getsay" checked="true" text="采集发送" />
-                                    <checkbox id="getall" checked="true" text="重新扫完" />
+                                    {/* <checkbox id="getall" checked="true" text="重新扫完" /> */}
                                 </linear>
                                 <linear padding="10 1 ">
                                     <img bg="#C3916A" w="*" h="1"/>
@@ -2288,7 +2306,6 @@ function 消息异常检测重试() {
                                     if(!className("androidx.recyclerview.widget.RecyclerView")
                                         .boundsInside(0, 0, device.width, device.height)
                                         .findOne(1000).scrollForward()) {
-                                        
                                             log("结束操作！")
                                             return "跳出循环执行";
                                     }
@@ -3231,11 +3248,12 @@ function 采集粉丝信息() {
     log("已采集过的粉丝数量：", fansNameList.length)
     // 扫描全部
     let allTag=true;
-    if(ui.getall.checked) {
+/*     if(ui.getall.checked) {
         log("从头开始全部扫描一遍")
         fansNameList = [];
     // 粉丝列表小于等于服务器保存的记录则给用户提示，是否继续采集粉丝
-    } else if(accountInfo.fansNumber <= fansNameList.length) {
+    } else  */
+    if(accountInfo.fansNumber <= fansNameList.length) {
         if(autoConfirm(5000,false, "粉丝似乎已经全部采集，是否继续采集？",
             "当前粉丝数："+fansNameList.length+"\n已保存的粉丝数：" + accountInfo.fansNumber)) {
             allTag = false;
@@ -3348,7 +3366,7 @@ function getFansList(fansNameList, fansList, all) {
                         let fans = getFansInfo(username);
 
                         //  发送私信
-                        if(ui.getsay.checked){
+                        if(ui.getsay.checked) {
                             // 随机拿到一条信息
                             tempSave.getSayMessage = getHelloMessage();
                             if(isNaN(tempSave.NUMBER)) tempSave.NUMBER = 1;
@@ -3456,7 +3474,7 @@ function getFansList(fansNameList, fansList, all) {
             FollowerParent = getList();
             if(FollowerParent) {
                 if(!(scrollDown = FollowerParent.scrollForward())) {
-                    log("到底了，退出此账号");
+                    log("到底了！");
                     break;
                 }
             } else {
@@ -6736,7 +6754,7 @@ function 切换环境(cmd) {
 }
 
 // 中间的红蓝球加载动画
-function 等待加载(s,num){
+function 等待加载(s,num) {
     if(!(num>1)) num = 100
     let i = 0
     sleep(s||2000)
@@ -7731,9 +7749,12 @@ function switchAccount() {
     if(1 < getAccountList().list.length) {
         if(accountInfo.username) {
             log("账号记录")
-            files.append(路径.账号进度, "\n"+accountInfo.username);
+            // files.append(路径.账号进度, "\n"+accountInfo.username);
+            // 这样的话在切换账号时就会向 accountList 中添加账号，但是只会在下一次切换账号时才会进行保存
+            files.write(路径.账号进度, accountList.join("\n"));
         }
-        signUp()
+        if(!tempSave.firstAccount) signUp()
+        else tempSave.firstAccount = false;
     }
     sleep(100)
     signIn()
@@ -7768,6 +7789,16 @@ function signIn() {
             uo: null,
             检测: function() {
                 this.uo = text("Add account").findOne(100)
+                if(!this.uo) {
+                    // 检测是否是账号已经满了
+                    if(1 < getAccountList().list.length) {
+                        // 进行账号退出
+                        if(autoConfirm(3000, true, "账号已满，是否退出一个账号？")) {
+                            log("退出一个账号");
+                            signUp();
+                        }
+                    }
+                }
                 return this.uo
             },
             执行: function() {
@@ -7938,7 +7969,7 @@ function signUp() {
                 return this.uo
             },
             执行: function() {
-                let re = this.uo.click();
+                let re = this.uo.click() || this.uo.parent().click() || this.uo.parent().parent().click();
                 log("点击" + this.标题, re)
                 if (re) {
                     循环执行([
@@ -7984,7 +8015,8 @@ function signUp() {
                                     log("等待中..." + i);
                                     if(等待加载()) {
                                         log("账号退出异常");
-                                        返回首页()
+                                        signUp();
+                                        return "跳出循环执行";
                                     }
                                     sleep(1000);
                                 }
@@ -7992,15 +8024,16 @@ function signUp() {
                         },
                     ]);
                     return "跳出循环执行";
-                } else {
-                    if(!this.uo.parent().click()){
-                        this.uo.parent().parent().click()
-                    }
+                } 
+                // else {
+                    // if(!this.uo.parent().click()){
+                    //     this.uo.parent().parent().click()
+                    // }
                    /*  // 向下滑动
                     scrollable(true).find().forEach(e=>{
                         log("滑动 ", e.scrollForward());
                     }) */
-                }
+                // }
             }
         },
     ]
