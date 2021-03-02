@@ -9,6 +9,7 @@ var fasle = false;
         "优化打招呼与退出账号",
         "去除重新打招呼",
         "处理了在向后台发起请求后异常的问题",
+        "测试私信",
     ];
     uti = logs.pop();
 }
@@ -17,7 +18,7 @@ var tempSave = {
     privacy: 30,
     NUMBER: 0,
     自动打码: false,
-    version: "59" + " -- " + uti,
+    version: "60" + " -- " + uti,
     // 直接发送的消息
     getSayMessage: "Hi",
     firstAccount: true,
@@ -5072,11 +5073,14 @@ function addFans(obj,arr) {
  * @param {UIObject} fans  保存的粉丝的信息
  * @param {Array} newMsgList 新的聊天记录
  */
-function 消息处理(fans,newMsgList) {
+function 消息处理(fans, newMsgList) {
 
     // log("==== 粉丝信息以及新消息 ====")
     // console.verbose(fans);
     // console.verbose(newMsgList);
+
+    //TODO 0. 将自己的消息排除掉
+    console.verbose(newMsgList)
 
     // 1. 分析新消息单词数组
     let words = [];
@@ -5084,7 +5088,7 @@ function 消息处理(fans,newMsgList) {
         m = newMsgList[m];
         if(m.sender != accountInfo.name){
             // 对方的消息
-            let newWords = m.msg.split(/\s/)
+            let newWords = m.msg.split(/[\s,.，。]/)
             for (let w in newWords) {
                 // 排除前缀
                 w = newWords[w].replace("[消息发送失败]", "");
@@ -5104,8 +5108,8 @@ function 消息处理(fans,newMsgList) {
         log("获取粉丝标签失败！");
     }
 
-    // log("=== 已存标签 ===")
-    // log(fansLabel)
+    log("=== 已存标签 ===")
+    log(fansLabel)
 
     // 触发词优先回复
     let nowMsg=[];
@@ -5118,14 +5122,24 @@ function 消息处理(fans,newMsgList) {
         // 拿到当前标签内容 包括 label（标签） words（关键字） info（信息）
         for (let tag in tempSave.RequiredLabels) {
             tag = tempSave.RequiredLabels[tag];
+
             // {labelName: "国家", words: ["usa","en"](已经处理为小写), ask: ["where are you from?"], reply: ["where are you from?"]}
+
             // 全字匹配
-            if(tag.words.indexOf("*") < 0) {    // 没有全字匹配时
+            if(tag.words.indexOf("*") < 0) {    
+                // 没有全字匹配时
                 // 如果当前单词存在于标签中，则进行保存，将其转换成小写，这里的indexOf是在字符串中找
                 if(-1 < tag.words.indexOf(w)){
                     // 判断是否存在当前标签，没有就创建
                     if(!fansLabel[tag.labelName]) {
                         fansLabel[tag.labelName]=[];
+                        // 第一次创建将进行消息回复
+                        try{
+                            if(0 < tag.reply.length) {
+                                // 存在触发词则保存触发词
+                                nowMsg.push(tag.reply[random(0, tag.reply.length-1)]);
+                            }
+                        }catch(e){}
                     }
                     // 判断是否已经存在当前标签,如果没有则进行保存，这里的indexOf是在数组中找
                     if(fansLabel[tag.labelName].indexOf(w) < 0) {
@@ -5143,10 +5157,6 @@ function 消息处理(fans,newMsgList) {
                             labelName: tag.labelName,
                             labelBody: w
                         })
-                        if(0 < tag.reply.length) {
-                            // 存在触发词则保存触发词
-                            nowMsg.push(tag.reply[random(0, tag.reply.length-1)]);
-                        }
                     }
                 }
             } else {
@@ -5179,7 +5189,8 @@ function 消息处理(fans,newMsgList) {
         issue = false;
     }
 
-    // 查找剩余标签内容，执行相应的询问（顺序）
+    console.verbose("issue:", issue);
+    // 查找剩余标签内容，执行相应的询问（顺序），会追加日常的询问语句
     for (let i = 0; i < tempSave.RequiredLabels.length; i++) {
         /*
             [
@@ -5196,7 +5207,9 @@ function 消息处理(fans,newMsgList) {
                 reMsg +=  appendMsg;
                 if(issue) {
                     //TODO 发送 日常+问题 ，连带着 问题可连续性 例子：hi \n where are you from?
-                    reMsg += tempSave.issue[random(0, tempSave.issue.length-1)] || "";
+                    let iss = tempSave.issue[random(0, tempSave.issue.length-1)];
+                    log(iss)
+                    reMsg += iss || "";
                 }
                 console.info("新消息：", reMsg);
                 return reMsg;
