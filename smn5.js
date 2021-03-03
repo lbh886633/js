@@ -72,7 +72,7 @@ var server = {
             console.info("[↓]" + this.serverUrl + uri);
             let re = http.get(this.serverUrl + uri, {'Connection': 'close'});
             if (re.statusCode != 200) {
-                throw "请求失败，状态码：" + re.statusCode;
+                throw {name:"请求失败", message: "状态码：" + re.statusCode};
             }
             return JSON.parse(re.body.string());
         } catch (err) {
@@ -2131,7 +2131,7 @@ function 采集用户() {
             exit();
         }
         openUrlAndSleep3s(url.url)
-        let list 
+        let list;
         do{
             sleep(1000)
             // 进入粉丝列表
@@ -2143,9 +2143,12 @@ function 采集用户() {
                 }
             }
             list = className("androidx.recyclerview.widget.RecyclerView")
+                .packageName(appPackage)
                 .filter(function(uo){
-                    return device.width*0.8 < uo.bounds().right - uo.bounds().left;
-                }).depth(9).enabled(true).findOne(1000)
+                    return (uo.depth() == 9 || uo.depth() == 10)
+                        && device.width*0.8 < uo.bounds().right - uo.bounds().left;
+                }).enabled(true).findOne(1000)
+
         }while(!list)
         // 获取用户列表的控件
         获取用户列表(list);
@@ -2158,11 +2161,15 @@ function 获取用户列表(list) {
     // 如果出现异常则返回到列表重新获取列表之后继续执行
     // 如果没有出现异常则返回列表后向下滑动后执行
     let saveList = [];
-    let userList = list || className("androidx.recyclerview.widget.RecyclerView")
+    let userList = list || getListUO();
+    function getListUO() {
+        return className("androidx.recyclerview.widget.RecyclerView")
+                .packageName(appPackage)
                 .filter(function(uo){
-                    return device.width*0.8 < uo.bounds().right - uo.bounds().left;
-                })
-                .findOne(1000);
+                    return (uo.depth() == 9 || uo.depth() == 10)
+                        && device.width*0.8 < uo.bounds().right - uo.bounds().left;
+                }).enabled(true).findOne(1000)
+    }
     /*
         获取当前页面的用户信息，
         正常：返回列表之后滑动到下一页
@@ -2183,13 +2190,10 @@ function 获取用户列表(list) {
             scrol = false;
         }
         for (let i = 0; i < 5; i++) {
-            userList = className("androidx.recyclerview.widget.RecyclerView")
-                    .filter(function(uo){
-                        return device.width*0.8 < uo.bounds().right - uo.bounds().left;
-                    }).findOne(1000)
-            if(userList) log("存在")
+            userList = getListUO();
+            if(userList) log("存在");
             if(userList) break;
-            else back()
+            else back();
         }
         sleep(2000)
         if(scrol){
