@@ -5273,6 +5273,7 @@ function 消息处理(fans, newMsgList) {
     }
 
     console.verbose("issue:", issue);
+    log(reMsg)
     // 查找剩余标签内容，执行相应的询问（顺序），会追加日常的询问语句
     for (let i = 0; i < tempSave.RequiredLabels.length; i++) {
         /*
@@ -5287,6 +5288,7 @@ function 消息处理(fans, newMsgList) {
             // let reMsg = Date.now().toString().substring(10) +"> "+ r.info[random(0,r.info.length-1)];
             let appendMsg = r.ask[random(0, r.ask.length-1)];
             if(appendMsg) {
+                console.verbose(reMsg," ==之前== ",appendMsg)
                 reMsg +=  appendMsg;
                 if(issue) {
                     //TODO 发送 日常+问题 ，连带着 问题可连续性 例子：hi \n where are you from?
