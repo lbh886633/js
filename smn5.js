@@ -24,7 +24,7 @@ var tempSave = {
     privacy: 30,
     NUMBER: 0,
     自动打码: false,
-    version: "63" + " -- " + uti,
+    version: "64" + " -- " + uti,
     // 直接发送的消息
     getSayMessage: "Hi",
     firstAccount: true,
@@ -3894,49 +3894,51 @@ function mi6回复消息() {
             if(newMsgCount == smallRedPointTag || 0 < newMsgCount) {
                 // 存在新消息
                 exce=0;
-
-                // 继续业务流程
-                // <3>. 点击小飞机进入私信，以后可以将三个弄成函数
-                if(lh_find(className("android.widget.RelativeLayout").clickable(true)
-                    .boundsInside(device.width*0.85,0,device.width,device.height*0.1), "点击私信", 0)) {
-                    // <4>. 获取列表，可以用于滚动
-                    actionRecycler = id("cqg").className("androidx.recyclerview.widget.RecyclerView")
-                            .boundsInside(0, 200, device.width, device.height)
-                            .filter(function(uo){ return device.width*0.8 < uo.bounds().right - uo.bounds().left; })
-                            .findOne(1000);
-                    // 当失败次数等于3的时候就跳出 <跳出>
-                    for (let i = 0; i < 3;) {
-                        // 等待加载列表
-                        sleep(500);
-                        // 获取当前界面的红色气泡
-                        let sendList = mi6GetNewMsgList();
-                        if(sendList.length > 0){
-                            newMsgCount -= replySendlist(sendList);
-                        } else {
-                            i++;
-                        }
-                        // 当前消息处理数量超过在外部获取的数量时跳出 <跳出>
-                        if(newMsgCount < 1 && newMsgCount != smallRedPointTag) {
-                            break;
-                        }
-                        // 向后翻页
-                        if(!actionRecycler.scrollForward()){
-                            sleep(100);
-                            console.verbose("重新获取列表控件")
-                            actionRecycler = id("cqg").className("androidx.recyclerview.widget.RecyclerView")
-                                            .boundsInside(0, 200, device.width, device.height)
-                                            .filter(function(uo) { return device.width*0.8 < uo.bounds().right - uo.bounds().left; })
-                                            .findOne(1000);
-                            if(!actionRecycler.scrollForward()){
+                try{
+                    // 继续业务流程
+                    // <3>. 点击小飞机进入私信，以后可以将三个弄成函数
+                    if(lh_find(className("android.widget.RelativeLayout").clickable(true)
+                        .boundsInside(device.width*0.85,0,device.width,device.height*0.1), "点击私信", 0)) {
+                        // <4>. 获取列表，可以用于滚动
+                        actionRecycler = id("cqg").className("androidx.recyclerview.widget.RecyclerView")
+                                .boundsInside(0, 200, device.width, device.height)
+                                .filter(function(uo){ return device.width*0.8 < uo.bounds().right - uo.bounds().left; })
+                                .findOne(1000);
+                        // 当失败次数等于3的时候就跳出 <跳出>
+                        for (let i = 0; i < 3;) {
+                            // 等待加载列表
+                            sleep(500);
+                            // 获取当前界面的红色气泡
+                            let sendList = mi6GetNewMsgList();
+                            if(sendList.length > 0){
+                                newMsgCount -= replySendlist(sendList);
+                            } else {
                                 i++;
                             }
-                        } else {
-                            log("翻页")
+                            // 当前消息处理数量超过在外部获取的数量时跳出 <跳出>
+                            if(newMsgCount < 1 && newMsgCount != smallRedPointTag) {
+                                break;
+                            }
+                            // 向后翻页
+                            if(!actionRecycler.scrollForward()){
+                                sleep(100);
+                                console.verbose("重新获取列表控件")
+                                actionRecycler = id("cqg").className("androidx.recyclerview.widget.RecyclerView")
+                                                .boundsInside(0, 200, device.width, device.height)
+                                                .filter(function(uo) { return device.width*0.8 < uo.bounds().right - uo.bounds().left; })
+                                                .findOne(1000);
+                                if(!actionRecycler.scrollForward()){
+                                    i++;
+                                }
+                            } else {
+                                log("翻页")
+                            }
+                            
                         }
-                        
                     }
+                }catch(e){
+                    console.log(e)
                 }
-
                 // 重置时间
                 endTime = Date.now();
             } else {
@@ -7909,9 +7911,8 @@ function switchAccount(sin, sup) {
             signIn();
         } else { 
             tempSave.firstAccount = false;
+            返回首页()
         }
-    } else {
-        返回首页()
     }
 }
 
