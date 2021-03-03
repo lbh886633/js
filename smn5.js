@@ -12,6 +12,7 @@ var fasle = false;
         "修复了第一个账号仍然会进行登录的问题",
         "修复会一直退出账号的问题，新增关注失败归还账号",
         "修复对携带问题的解析失败",
+        "测试版本",
     ];
     uti = logs.pop();
 }
@@ -435,7 +436,7 @@ ui.layout(
                             </linear>
                             <linear padding="5 0 0 0">
                                 <text textColor="black" text="停留时间: " />
-                                <input lines="1" id="stopTime" w="*" text="2" inputType="number|numberDecimal"/>
+                                <input lines="1" id="stopTime" w="*" text="1" inputType="number|numberDecimal"/>
                             </linear>
                             <vertical id="getmodel">
                                 <linear padding="5 0 0 0">
@@ -3830,6 +3831,7 @@ function mi6回复消息() {
     */
     let endTime = Date.now();
     let exce = 0;   // 异常次数
+    let smallRedPointTag = -998;
     do {
         let inboxUO = text("Inbox").findOne(1000);
         // <1>. 确保在inbox页面
@@ -3850,12 +3852,19 @@ function mi6回复消息() {
                     }
                 })
             }
-            log("新消息总数量：", newMsgCount);
             if(newMsgCount == 0) {
                 // 没有新消息 
-                exce=0;
-
-            } else if(0 < newMsgCount) {
+                exce = 0;
+                
+                // 加入小红点检测，如果有小红点的话就设置消息数量为 10000
+                let redPointUO = boundsInside(device.width*0.8, 0, device.width, device.height*0.2)
+                    .className("android.widget.RelativeLayout").clickable(true).find();
+                if(redPointUO.length == 1) {
+                    newMsgCount = smallRedPointTag;
+                }
+            }
+            log("新消息总数量：", newMsgCount == smallRedPointTag? "小红点" : newMsgCount);
+            if(newMsgCount == smallRedPointTag || 0 < newMsgCount) {
                 // 存在新消息
                 exce=0;
 
@@ -3879,7 +3888,7 @@ function mi6回复消息() {
                             i++;
                         }
                         // 当前消息处理数量超过在外部获取的数量时跳出 <跳出>
-                        if(newMsgCount < 1) {
+                        if(newMsgCount < 1 && newMsgCount != smallRedPointTag) {
                             break;
                         }
                         // 向后翻页
@@ -7632,12 +7641,6 @@ function getAccountList() {
                     || (r.bottom - r.top < 220
                         && r.bottom - r.top > 180)
                     )
-                    // &&
-                    // (
-                    //     // depth 深度限制
-                    //     e.depth() == 3
-                    //     || e.depth() == 10
-                    // )
                 ) {
                     let text = e.find(className("TextView"));
                     if(1 < text.length) {
