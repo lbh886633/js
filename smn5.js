@@ -13,6 +13,7 @@ var fasle = false;
         "修复会一直退出账号的问题，新增关注失败归还账号",
         "修复对携带问题的解析失败",
         "修复采集进入列表不动，关注频繁时提示提前跳出。",
+        "优化get请求处理方式",
     ];
     uti = logs.pop();
 }
@@ -77,9 +78,13 @@ var server = {
             return JSON.parse(re.body.string());
         } catch (err) {
             log("请求失败", err);
-            console.verbose(err.name);
-            console.verbose(err.message);
-            if(err.name.indexOf("Error") < 0) {
+            try {
+                if(err.name.indexOf("Error") < 0) {
+                    throw "重试";
+                }
+                console.verbose(err.name);
+                console.verbose(err.message);
+            }catch(e) {
                 // 初始化次数
                 if(typeof option != "object" ) {
                     option = option || {number: 0};
