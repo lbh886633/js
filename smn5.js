@@ -4572,9 +4572,12 @@ function 获取消息(){
                 try{
                     let msgBox =  m[1].children()
                     status = !(msgBox.findOne(className("android.widget.ImageView")));
-                    msg = (status ? "" : "[消息发送失败]")
-                        + msgBox.findOne(className("android.widget.TextView")).text();
                     sender = msgBox.findOne(className("com.bytedance.ies.dmt.ui.widget.DmtTextView")).desc();
+                    msg = "";
+                    log(sender, " === ",accountInfo.username)
+                    // 先赋空字符串用于避免获取失败时导致后面的分割一起失败
+                    msg = (status && sender == accountInfo.username ? "" : "[消息发送失败] ")
+                        + msgBox.findOne(className("android.widget.TextView")).text();
                 }catch(err){
                     log("获取消息异常，异常信息：", err)
                 }
