@@ -13,6 +13,7 @@ var fasle = false;
         "修复了第一个账号仍然会进行登录的问题",
         "修复会一直退出账号的问题，新增关注失败归还账号",
         "修复对携带问题的解析失败",
+        "修复采集进入列表不动，关注频繁时提示提前跳出。",
     ];
     uti = logs.pop();
 }
@@ -72,7 +73,7 @@ var server = {
             console.info("[↓]" + this.serverUrl + uri);
             let re = http.get(this.serverUrl + uri, {'Connection': 'close'});
             if (re.statusCode != 200) {
-                throw "请求失败，状态码：" + re.statusCode;
+                throw {name:"请求失败", message: "状态码：" + re.statusCode};
             }
             return JSON.parse(re.body.string());
         } catch (err) {
@@ -436,7 +437,7 @@ ui.layout(
                             </linear>
                             <linear padding="5 0 0 0">
                                 <text textColor="black" text="停留时间: " />
-                                <input lines="1" id="stopTime" w="*" text="2" inputType="number|numberDecimal"/>
+                                <input lines="1" id="stopTime" w="*" text="1" inputType="number|numberDecimal"/>
                             </linear>
                             <vertical id="getmodel">
                                 <linear padding="5 0 0 0">
@@ -1842,6 +1843,11 @@ function mi6关注操作(num) {
                     var 关注间隔 = random(Number(ui.gzjg.text()), Number(ui.gzjg1.text()))
                     sleep(关注间隔)
                 }
+                if(关注.length == text("Follow").visibleToUser().find().length) {
+                    if(autoConfirm(3000,false,"似乎关注失败了，是否开始下一个账号？")) {
+                        计数 = 限制;
+                    }
+                }
                 if(计数 >= 限制 || 计数标志 >= 限制 ) {
                     log("跳出循环", 计数, 计数标志)
                     break
@@ -2126,7 +2132,7 @@ function 采集用户() {
             exit();
         }
         openUrlAndSleep3s(url.url)
-        let list 
+        let list;
         do{
             sleep(1000)
             // 进入粉丝列表
@@ -2138,9 +2144,12 @@ function 采集用户() {
                 }
             }
             list = className("androidx.recyclerview.widget.RecyclerView")
+                .packageName(appPackage)
                 .filter(function(uo){
-                    return device.width*0.8 < uo.bounds().right - uo.bounds().left;
-                }).depth(9).enabled(true).findOne(1000)
+                    return (uo.depth() == 9 || uo.depth() == 10)
+                        && device.width*0.8 < uo.bounds().right - uo.bounds().left;
+                }).enabled(true).findOne(1000)
+
         }while(!list)
         // 获取用户列表的控件
         获取用户列表(list);
@@ -2153,11 +2162,15 @@ function 获取用户列表(list) {
     // 如果出现异常则返回到列表重新获取列表之后继续执行
     // 如果没有出现异常则返回列表后向下滑动后执行
     let saveList = [];
-    let userList = list || className("androidx.recyclerview.widget.RecyclerView")
+    let userList = list || getListUO();
+    function getListUO() {
+        return className("androidx.recyclerview.widget.RecyclerView")
+                .packageName(appPackage)
                 .filter(function(uo){
-                    return device.width*0.8 < uo.bounds().right - uo.bounds().left;
-                })
-                .findOne(1000);
+                    return (uo.depth() == 9 || uo.depth() == 10)
+                        && device.width*0.8 < uo.bounds().right - uo.bounds().left;
+                }).enabled(true).findOne(1000)
+    }
     /*
         获取当前页面的用户信息，
         正常：返回列表之后滑动到下一页
@@ -2178,13 +2191,10 @@ function 获取用户列表(list) {
             scrol = false;
         }
         for (let i = 0; i < 5; i++) {
-            userList = className("androidx.recyclerview.widget.RecyclerView")
-                    .filter(function(uo){
-                        return device.width*0.8 < uo.bounds().right - uo.bounds().left;
-                    }).findOne(1000)
-            if(userList) log("存在")
+            userList = getListUO();
+            if(userList) log("存在");
             if(userList) break;
-            else back()
+            else back();
         }
         sleep(2000)
         if(scrol){
@@ -3826,6 +3836,7 @@ function mi6回复消息() {
     */
     let endTime = Date.now();
     let exce = 0;   // 异常次数
+    let smallRedPointTag = -998;
     do {
         let inboxUO = text("Inbox").findOne(1000);
         // <1>. 确保在inbox页面
@@ -3846,12 +3857,19 @@ function mi6回复消息() {
                     }
                 })
             }
-            log("新消息总数量：", newMsgCount);
             if(newMsgCount == 0) {
                 // 没有新消息 
-                exce=0;
+                exce = 0;
 
-            } else if(0 < newMsgCount) {
+                // 加入小红点检测，如果有小红点的话就设置消息数量为 10000
+                let redPointUO = boundsInside(device.width*0.8, 0, device.width, device.height*0.2)
+                    .className("android.widget.RelativeLayout").clickable(true).find();
+                if(redPointUO.length == 1) {
+                    newMsgCount = smallRedPointTag;
+                }
+            }
+            log("新消息总数量：", newMsgCount == smallRedPointTag? "小红点" : newMsgCount);
+            if(newMsgCount == smallRedPointTag || 0 < newMsgCount) {
                 // 存在新消息
                 exce=0;
 
@@ -3875,7 +3893,7 @@ function mi6回复消息() {
                             i++;
                         }
                         // 当前消息处理数量超过在外部获取的数量时跳出 <跳出>
-                        if(newMsgCount < 1) {
+                        if(newMsgCount < 1 && newMsgCount != smallRedPointTag) {
                             break;
                         }
                         // 向后翻页
