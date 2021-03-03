@@ -864,7 +864,7 @@ function 主程序() {
                     返回首页()
                     // tempSave.RequiredLabels = readRequiredLabelsFile();
                     // 获取标签
-                    tempSave.RequiredLabels = getLabelList();
+                    tempSave.RequiredLabels = tempSave.RequiredLabels || getLabelList();
                     if(!tempSave.RequiredLabels || tempSave.RequiredLabels.length < 1 ){
                         console.warn("没有获取到标签数据！停止运行")
                         exit()
@@ -878,7 +878,7 @@ function 主程序() {
                         };
                     }
                     // tempSave.issue 携带的问题
-                    tempSave.issue = getIssue();
+                    tempSave.issue = tempSave.issue || getIssue();
                     if(!tempSave.issue || tempSave.issue.length < 1) {
                         console.warn("未获取到要携带的问题");
                     }
