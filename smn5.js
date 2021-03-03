@@ -12,7 +12,7 @@ var fasle = false;
         "修复了第一个账号仍然会进行登录的问题",
         "修复会一直退出账号的问题，新增关注失败归还账号",
         "修复对携带问题的解析失败",
-        "测试版本",
+        "测试版本__修复采集进入列表不动，关注频繁时提示提前跳出。",
     ];
     uti = logs.pop();
 }
@@ -21,7 +21,7 @@ var tempSave = {
     privacy: 30,
     NUMBER: 0,
     自动打码: false,
-    version: "62" + " -- " + uti,
+    version: "63" + " -- " + uti,
     // 直接发送的消息
     getSayMessage: "Hi",
     firstAccount: true,
@@ -1846,6 +1846,11 @@ function mi6关注操作(num) {
                     }
                     var 关注间隔 = random(Number(ui.gzjg.text()), Number(ui.gzjg1.text()))
                     sleep(关注间隔)
+                }
+                if(关注.length == text("Follow").visibleToUser().find().length) {
+                    if(autoConfirm(3000,false,"似乎关注失败了，是否开始下一个账号？")) {
+                        计数 = 限制;
+                    }
                 }
                 if(计数 >= 限制 || 计数标志 >= 限制 ) {
                     log("跳出循环", 计数, 计数标志)
