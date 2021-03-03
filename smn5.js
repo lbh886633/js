@@ -14,6 +14,7 @@ var fasle = false;
         "修复对携带问题的解析失败",
         "修复采集进入列表不动，关注频繁时提示提前跳出。",
         "优化get请求处理方式",
+        "优化小红点",
     ];
     uti = logs.pop();
 }
@@ -3870,10 +3871,10 @@ function mi6回复消息() {
                 // 没有新消息 
                 exce = 0;
                 
-                // 加入小红点检测，如果有小红点的话就设置消息数量为 10000
+                // 加入小红点检测，如果有小红点的话就设置消息数量为 smallRedPointTag
                 let redPointUO = boundsInside(device.width*0.8, 0, device.width, device.height*0.2)
                     .className("android.widget.RelativeLayout").clickable(true).find();
-                if(redPointUO.length == 1) {
+                if(redPointUO.length == 1 && 1 < redPointUO.children().length) {
                     newMsgCount = smallRedPointTag;
                 }
             }
