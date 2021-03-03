@@ -4574,9 +4574,9 @@ function 获取消息(){
                     status = !(msgBox.findOne(className("android.widget.ImageView")));
                     sender = msgBox.findOne(className("com.bytedance.ies.dmt.ui.widget.DmtTextView")).desc();
                     msg = "";
-                    log(sender, " === ",accountInfo.username)
+                    log(sender, " === ",accountInfo.username, " === ",accountInfo.name)
                     // 先赋空字符串用于避免获取失败时导致后面的分割一起失败
-                    msg = (status && sender == accountInfo.username ? "" : "[消息发送失败] ")
+                    msg = (status && (sender == accountInfo.username || sender == accountInfo.name )? "" : "[消息发送失败] ")
                         + msgBox.findOne(className("android.widget.TextView")).text();
                 }catch(err){
                     log("获取消息异常，异常信息：", err)
@@ -5167,7 +5167,17 @@ function 消息处理(fans, newMsgList) {
 
     //TODO 0. 将自己的消息排除掉
     console.verbose(newMsgList)
-
+    {
+        let temp = []
+        newMsgList.forEach((e)=>{
+            if(e.sender != accountInfo.name && e.sender != accountInfo.username) {
+                temp.push(e);
+            } else {
+                console.verbose("排除", e);
+            }
+        })
+        newMsgList = temp;
+    }
     // 1. 分析新消息单词数组
     let words = [];
     for (let m in newMsgList) {
@@ -5267,6 +5277,8 @@ function 消息处理(fans, newMsgList) {
     // 如果有标签消息则进行标签消息回复，没有则不进行回复
     if(0 < nowMsg.length) {
         reMsg = nowMsg.join("\n");
+        // 直接跳出，不需要继续打招呼
+        return reMsg;
     }
 
     let issue = true;
