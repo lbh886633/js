@@ -15,6 +15,7 @@ var fasle = false;
         "修复采集进入列表不动，关注频繁时提示提前跳出。",
         "优化get请求处理方式",
         "优化小红点",
+        "测试_优化",
     ];
     uti = logs.pop();
 }
@@ -3830,6 +3831,7 @@ let upFans = {
 
 
 function mi6回复消息() {
+    
     /*
      在inbox界面，获取当前的消息数量
      每一次发送完消息就数量减掉，当数量为0的时候将当前列表上的红色气泡处理完成
@@ -3856,10 +3858,12 @@ function mi6回复消息() {
             // <2>. 获取当前消息数量
             let newMsgCount = -1;
             let action = text("All activity").findOne(100);
+            let parentUO;
             if(action) {
+                parentUO = action.parent().parent();
                 // 避免没有小红点控件的时候导致新消息为零
                 newMsgCount = 0;
-                action.parent().parent().find(className("android.widget.TextView")).forEach(e=>{
+                parentUO.find(className("android.widget.TextView")).forEach(e=>{
                     let n = parseInt(e.text());
                     if(!isNaN(n)) {
                         newMsgCount = n;
@@ -3872,9 +3876,17 @@ function mi6回复消息() {
                 exce = 0;
                 
                 // 加入小红点检测，如果有小红点的话就设置消息数量为 smallRedPointTag
-                let redPointUO = boundsInside(device.width*0.8, 0, device.width, device.height*0.2)
+                let redPointUOs;
+                if(parentUO) {
+                    redPointUOs = parentUO.find(
+                        boundsInside(device.width*0.8, 0, device.width, device.height*0.2)
+                        .className("android.widget.RelativeLayout").clickable(true)
+                    )
+                } else {
+                redPointUOs = boundsInside(device.width*0.8, 0, device.width, device.height*0.2)
                     .className("android.widget.RelativeLayout").clickable(true).find();
-                if(redPointUO.length == 1 && 1 < redPointUO.children().length) {
+                }
+                if(redPointUOs.length == 1 && 1 < redPointUOs.children().length) {
                     newMsgCount = smallRedPointTag;
                 }
             }
@@ -3884,12 +3896,13 @@ function mi6回复消息() {
                 exce=0;
 
                 // 继续业务流程
-                // <3>. 点击小飞机进入私信
+                // <3>. 点击小飞机进入私信，以后可以将三个弄成函数
                 if(lh_find(className("android.widget.RelativeLayout").clickable(true)
                     .boundsInside(device.width*0.85,0,device.width,device.height*0.1), "点击私信", 0)) {
                     // <4>. 获取列表，可以用于滚动
-                    actionRecycler = className("androidx.recyclerview.widget.RecyclerView")
+                    actionRecycler = id("cqg").className("androidx.recyclerview.widget.RecyclerView")
                             .boundsInside(0, 200, device.width, device.height)
+                            .filter(function(uo){ return device.width*0.8 < uo.bounds().right - uo.bounds().left; })
                             .findOne(1000);
                     // 当失败次数等于3的时候就跳出 <跳出>
                     for (let i = 0; i < 3;) {
@@ -3910,8 +3923,9 @@ function mi6回复消息() {
                         if(!actionRecycler.scrollForward()){
                             sleep(100);
                             console.verbose("重新获取列表控件")
-                            actionRecycler = className("androidx.recyclerview.widget.RecyclerView")
+                            actionRecycler = id("cqg").className("androidx.recyclerview.widget.RecyclerView")
                                             .boundsInside(0, 200, device.width, device.height)
+                                            .filter(function(uo) { return device.width*0.8 < uo.bounds().right - uo.bounds().left; })
                                             .findOne(1000);
                             if(!actionRecycler.scrollForward()){
                                 i++;
@@ -4593,10 +4607,15 @@ function 获取消息(){
 }
 
 function mi6GetNewMsgList() {
-    let sendlist = boundsInside(900, 200, device.width, device.height).className("TextView").filter(function(uo){
-        let t = uo.text();
-        return t.indexOf(":") < 0 && t.indexOf("-") < 0 && !isNaN(parseInt(t));
+    // let sendlist = boundsInside(900, 200, device.width, device.height).className("TextView").filter(function(uo){
+    //     let t = uo.text();
+    //     return t.indexOf(":") < 0 && t.indexOf("-") < 0 && !isNaN(parseInt(t));
+    // }).find();
+    // 气泡的上一级的id
+    let sendlist = id("bfk").filter(function(uo){
+        return 0 < uo.children().length
     }).find();
+
     return sendlist;
 }
 
@@ -4658,20 +4677,25 @@ function replySendlist(sendlist) {
     for (let i = 0; i < sendlist.length; i++) {
         reNum += parseInt(sendlist[i].text());
         // 4. 进入聊天界面
-        let rect = sendlist[i].bounds();
-        for (let j = 0; j < 5; j++) {
-            // 点击的X轴进行偏移
-            click(rect.left - device.width*0.1, rect.centerY())
-            sleep(2000);
-            // 拿当前页面的红色气泡列表，通过数量来判断之前的点击是否无效，加上输入框检测
-            let newMsgListLength = mi6GetNewMsgList().length;
-            if(newMsgListLength != sendlist.length) {
-                if(text("Send a message...").findOne(1000)) {
-                    break;
+        if(clickOn(sendlist[i])) {
+            // 备用方案
+            let rect = sendlist[i].bounds();
+            for (let j = 0; j < 5; j++) {
+                // 点击的X轴进行偏移
+                click(rect.left - device.width*0.1, rect.centerY())
+                sleep(2000);
+                // 拿当前页面的红色气泡列表，通过数量来判断之前的点击是否无效，加上输入框检测
+                let newMsgListLength = mi6GetNewMsgList().length;
+                if(newMsgListLength != sendlist.length) {
+                    if(text("Send a message...").findOne(1000)) {
+                        break;
+                    }
                 }
+                log("似乎未进入聊天界面");
             }
-            log("似乎未进入聊天界面");
         }
+        
+
         // 回复消息
         mi6ReplyMsg();
         // 7. 返回上一级
@@ -4705,6 +4729,10 @@ function replySendlist(sendlist) {
  * 回复消息
  */
 function mi6ReplyMsg() {
+    // 判断是否是聊天界面
+    if(!text("Send a message...").findOne(1000)) {
+        return false;
+    }
     // 获取到对方名字并去查粉丝数据
     log("正在获取粉丝数据")
     // 拿顶部的用户名字,数据库中没有信息则进入右上角拿对方账号信息
@@ -4716,7 +4744,11 @@ function mi6ReplyMsg() {
                     .findOne(3000);
         if(tempUO) {
             let fansName = tempUO.text();
-            fans = server.get("fans/name/" + fansName + "?accountUsername=" + accountInfo.username)
+            try{
+                fans = server.get("fans/name/" + fansName + "?accountUsername=" + accountInfo.username)
+            }catch(err) {
+                fans = server.get("fans/name?username=" + fansName + "&accountUsername=" + accountInfo.username)
+            }
         }
     }
 
