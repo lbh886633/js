@@ -3905,7 +3905,7 @@ function mi6回复消息() {
                                 .filter(function(uo){ return device.width*0.8 < uo.bounds().right - uo.bounds().left; })
                                 .findOne(1000);
                         // 当失败次数等于3的时候就跳出 <跳出>
-                        for (let i = 0; i < 3;) {
+                        for (let i = 0; i < 20;) {
                             // 等待加载列表
                             sleep(500);
                             // 获取当前界面的红色气泡
