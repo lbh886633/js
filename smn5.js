@@ -15,7 +15,7 @@ var fasle = false;
         "修复采集进入列表不动，关注频繁时提示提前跳出。",
         "优化get请求处理方式",
         "优化小红点",
-        "测试_优化",
+        "测试_修改请求方式",
     ];
     uti = logs.pop();
 }
@@ -24,7 +24,7 @@ var tempSave = {
     privacy: 30,
     NUMBER: 0,
     自动打码: false,
-    version: "64" + " -- " + uti,
+    version: "65" + " -- " + uti,
     // 直接发送的消息
     getSayMessage: "Hi",
     firstAccount: true,
@@ -2061,7 +2061,7 @@ function focusUser(max) {
                         user.label = state.text();
                         // 上传当前状态
                         threads.start(function () {
-                            log(server.post("focusList/use/"+user.id+"?label="+user.label,{}).json());
+                            log(server.post("focusList/use?id="+user.id+"&label="+user.label,{}).json());
                         })
                         break;
                     }
@@ -2996,7 +2996,7 @@ function 修改资料() {
         返回首页();
         // 重新检查当前用户名
         runTikTok();
-        server.get("account/update/" + nowUsername +"?newUsername=" + accountInfo.username);
+        server.get("account/update?username=" + nowUsername +"&newUsername=" + accountInfo.username);
     }
 }
 
@@ -4746,11 +4746,7 @@ function mi6ReplyMsg() {
                     .findOne(3000);
         if(tempUO) {
             let fansName = tempUO.text();
-            try{
-                fans = server.get("fans/name/" + fansName + "?accountUsername=" + accountInfo.username)
-            }catch(err) {
-                fans = server.get("fans/name?username=" + fansName + "&accountUsername=" + accountInfo.username)
-            }
+            fans = server.get("fans/name?username=" + fansName + "&accountUsername=" + accountInfo.username)
         }
     }
 
@@ -5018,7 +5014,7 @@ function getFansInfoByFansMsgView() {
                 // 拿粉丝数据
                 // 从服务器拿到粉丝的信息 包含聊天记录  msg = server.get("record/
                 // 通过粉丝账号以及tiktok账号找粉丝信息http://localhost:8081/tiktokjs/fans/username/ivethgrijalva9?accountUsername=kwepixzr76675
-                fans = server.get("fans/username/" + username + "?accountUsername=" + accountInfo.username)
+                fans = server.get("fans/username?username=" + username + "&accountUsername=" + accountInfo.username)
                 break;
             } catch (err) {
                 console.verbose("获取对方账号异常", err)
@@ -5189,7 +5185,7 @@ function 消息处理(fans, newMsgList) {
     // 拿到粉丝当前标签内容,粉丝标签信息 {"标签1": ["触发词1", "触发词2"],"标签2": ["触发词1", "触发词2"],"标签3": ["触发词1", "触发词2"]}
     let fansLabel = {};
     try{
-        if(fans.username) fansLabel = server.get("fansLabel/getlabel/" + fans.username).label;
+        if(fans.username) fansLabel = server.get("fansLabel/getlabel?username=" + fans.username).label;
     }catch(err) {
         log(err)
         log("获取粉丝标签失败！");
