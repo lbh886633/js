@@ -3883,9 +3883,10 @@ function mi6回复消息() {
                         .className("android.widget.RelativeLayout").clickable(true)
                     )
                 } else {
-                redPointUOs = boundsInside(device.width*0.8, 0, device.width, device.height*0.2)
-                    .className("android.widget.RelativeLayout").clickable(true).find();
+                    redPointUOs = boundsInside(device.width*0.8, 0, device.width, device.height*0.2)
+                        .className("android.widget.RelativeLayout").clickable(true).find();
                 }
+                log(redPointUOs)
                 if(redPointUOs.length == 1 && 1 < redPointUOs.children().length) {
                     newMsgCount = smallRedPointTag;
                 }
@@ -7910,6 +7911,8 @@ function switchAccount(sin, sup) {
         } else { 
             tempSave.firstAccount = false;
         }
+    } else {
+        返回首页()
     }
 }
 
