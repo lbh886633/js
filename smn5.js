@@ -326,7 +326,7 @@ ui.layout(
                                     <radio id="getUserList" text="采集用户" />
                                     <radio id="focusUser" text="关注用户" />
                                     <radio id="detectionException" text="检测异常" />
-                                    <radio id="functionTest" text="测试" />
+                                    <radio id="functionTest" text="测" />
                                 </radiogroup>
                                 
                                 <radiogroup orientation="horizontal" h="0">
@@ -5355,7 +5355,7 @@ function 消息处理(fans, newMsgList) {
             let appendMsg = server.post("labelInfo/list", {labelName: r.labelName,type: "reply"},).json().rows;
             log(appendMsg)
             appendMsg = 0 < appendMsg.length ? appendMsg[random(0, appendMsg.length-1)].body : null;
-            
+
             if(appendMsg) {
                 console.verbose(reMsg," ==之前== ",appendMsg)
                 reMsg +=  appendMsg;
