@@ -5349,8 +5349,33 @@ function 消息处理(fans, newMsgList) {
         r = tempSave.RequiredLabels[i];
         // 由于粉丝的标签是字符串，所以继续使用标签暂存对象来进行判断
         if(!fansLabel[r.labelName]) {
+            log("正在获取要发送的消息");
+            // 消息动态获取
+            // let appendMsg = server.get("labelInfo/randomIssue?labelName=" + r.labelName, {resouce: true}).body.string();
+            let appendMsg = server.post("labelInfo/list", {labelName: r.labelName,type: "reply"},).json().rows;
+            log(appendMsg)
+            appendMsg = 0 < appendMsg.length ? appendMsg[random(0, appendMsg.length-1)].body : null;
+            
+            if(appendMsg) {
+                console.verbose(reMsg," ==之前== ",appendMsg)
+                reMsg +=  appendMsg;
+                if(issue) {
+                    try{
+                        // 问题动态获取
+                        iss = server.get("labelInfo/randomIssue?labelName=携带问题", {resouce: true}).body.string();
+                        if(iss) reMsg += "\n\n\n" + iss;
+                    }catch(e){
+                        log("携带问题失败", e)
+                    }
+                }
+                console.info("新消息：", reMsg);
+                return reMsg;
+            } else {
+                log(r.labelName,"标签的询问消息为空!");
+            }
+{
             // let reMsg = Date.now().toString().substring(10) +"> "+ r.info[random(0,r.info.length-1)];
-            let appendMsg = r.ask[random(0, r.ask.length-1)];
+/*             let appendMsg = r.ask[random(0, r.ask.length-1)];
             if(appendMsg) {
                 console.verbose(reMsg," ==之前== ",appendMsg)
                 reMsg +=  appendMsg;
@@ -5363,7 +5388,7 @@ function 消息处理(fans, newMsgList) {
                         reMsg += "\n\n\n";
                     }
                     reMsg += iss || "";
-                    //TODO try{
+                    // try{
                         // iss = server.get("labelInfo/randomIssue?labelName=携带问题", {resouce: true}).body.string();
                         // if(iss) reMsg += "\n\n\n" + iss;
                     // }catch(e){
@@ -5375,6 +5400,8 @@ function 消息处理(fans, newMsgList) {
             } else {
                 log(r.labelName,"标签的询问消息为空!");
             }
+ */
+}
         }
     }
     
