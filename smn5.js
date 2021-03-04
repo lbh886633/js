@@ -18,6 +18,7 @@ var fasle = false;
         "修改请求方式",
         "在回复完对方秒回还能继续回复",
         "修复在发送消息失败时一直重新发送",
+        "回复消息实时从后台获取",
     ];
     uti = logs.pop();
 }
@@ -26,7 +27,7 @@ var tempSave = {
     privacy: 30,
     NUMBER: 0,
     自动打码: false,
-    version: "65" + " -- " + uti,
+    version: "66" + " -- " + uti,
     // 直接发送的消息
     getSayMessage: "Hi",
     firstAccount: true,
@@ -4720,7 +4721,6 @@ function replySendlist(sendlist) {
             }
         }
 
-
         do{
             // 回复消息
             mi6ReplyMsg();
@@ -5352,7 +5352,7 @@ function 消息处理(fans, newMsgList) {
             log("正在获取要发送的消息");
             // 消息动态获取
             // let appendMsg = server.get("labelInfo/randomIssue?labelName=" + r.labelName, {resouce: true}).body.string();
-            let appendMsg = server.post("labelInfo/list", {labelName: r.labelName,type: "reply"},).json().rows;
+            let appendMsg = server.post("labelInfo/list", {labelName: r.labelName, type: "reply"}).json().rows;
             log(appendMsg)
             appendMsg = 0 < appendMsg.length ? appendMsg[random(0, appendMsg.length-1)].body : null;
 
@@ -5373,9 +5373,11 @@ function 消息处理(fans, newMsgList) {
             } else {
                 log(r.labelName,"标签的询问消息为空!");
             }
+        }
 {
+/*
             // let reMsg = Date.now().toString().substring(10) +"> "+ r.info[random(0,r.info.length-1)];
-/*             let appendMsg = r.ask[random(0, r.ask.length-1)];
+             let appendMsg = r.ask[random(0, r.ask.length-1)];
             if(appendMsg) {
                 console.verbose(reMsg," ==之前== ",appendMsg)
                 reMsg +=  appendMsg;
@@ -5400,9 +5402,9 @@ function 消息处理(fans, newMsgList) {
             } else {
                 log(r.labelName,"标签的询问消息为空!");
             }
- */
-}
         }
+*/
+}
     }
     
     if(reMsg=="") {

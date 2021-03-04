@@ -18,6 +18,8 @@ var fasle = false;
         "优化小红点",
         "修改请求方式",
         "在回复完对方秒回还能继续回复",
+        "修复在发送消息失败时一直重新发送",
+        "回复消息实时从后台获取",
     ];
     uti = logs.pop();
 }
@@ -326,7 +328,7 @@ ui.layout(
                                     <radio id="getUserList" text="采集用户" />
                                     <radio id="focusUser" text="关注用户" />
                                     <radio id="detectionException" text="检测异常" />
-                                    <radio id="functionTest" text="测试" />
+                                    <radio id="functionTest" text="测" />
                                 </radiogroup>
                                 
                                 <radiogroup orientation="horizontal" h="0">
@@ -4724,7 +4726,7 @@ function replySendlist(sendlist) {
             // 回复消息
         mi6ReplyMsg();
         // 如果上一条消息是自己发送的则跳出，不是则再继续聊天
-        }while(!上一条消息是否为自己发送的())
+        }while(!上一条消息是否为自己发送的(true))
 
         // 7. 返回上一级
         for (let i = 0; i < 5; i++) {
@@ -4752,12 +4754,16 @@ function replySendlist(sendlist) {
     } */
 }
 //TODO
-function 上一条消息是否为自己发送的() {
+/**
+ * 
+ * @param {Boolean} tag 不检查是否发送成功的标记
+ */
+function 上一条消息是否为自己发送的(tag) {
     let 新消息列表 = 获取消息();
     if(0 < 新消息列表.length) {
         log("最新一条消息的发送人：", 新消息列表[0].sender)
         if(新消息列表[0].sender == accountInfo.name || 新消息列表[0].sender == accountInfo.username) {
-            if(新消息列表[0].status) {
+            if(tag || 新消息列表[0].status) {
                 // 如果是自己发送的则返回 true
                 return true;
             }else {
