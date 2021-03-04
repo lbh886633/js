@@ -4595,7 +4595,7 @@ function 获取消息(){
                     status = !(msgBox.findOne(className("android.widget.ImageView")));
                     sender = msgBox.findOne(className("com.bytedance.ies.dmt.ui.widget.DmtTextView")).desc();
                     msg = "";
-                    log(sender, " === ",accountInfo.username, " === ",accountInfo.name)
+                    // log(sender, " === ",accountInfo.name)
                     // 先赋空字符串用于避免获取失败时导致后面的分割一起失败
                     msg = (status && (sender == accountInfo.username || sender == accountInfo.name )? "" : "[消息发送失败] ")
                         + msgBox.findOne(className("android.widget.TextView")).text();
@@ -4798,7 +4798,7 @@ function mi6ReplyMsg() {
                     .findOne(3000);
         if(tempUO) {
             let fansName = tempUO.text();
-            fans = server.get("fans/name?username=" + fansName + "&accountUsername=" + accountInfo.username)
+            fans = server.get("fans/name?name=" + fansName + "&accountUsername=" + accountInfo.username)
         }
     }
 
@@ -5358,7 +5358,7 @@ function 消息处理(fans, newMsgList) {
         */
         r = tempSave.RequiredLabels[i];
         // 由于粉丝的标签是字符串，所以继续使用标签暂存对象来进行判断
-        if(!fansLabel[r.labelName]) {
+        if(r.labelName != "携带问题" && !fansLabel[r.labelName]) {
             let appendMsg = r.ask[random(0, r.ask.length-1)];
             console.verbose(appendMsg);
             if(appendMsg) {
