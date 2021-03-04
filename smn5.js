@@ -5282,7 +5282,17 @@ function 消息处理(fans, newMsgList) {
                         try{
                             if(0 < tag.reply.length) {
                                 // 存在触发词则保存触发词
-                                nowMsg.push(tag.reply[random(0, tag.reply.length-1)]);
+                                // nowMsg.push(tag.reply[random(0, tag.reply.length-1)]);
+
+                                // 消息动态获取
+                                // let appendMsg = server.get("labelInfo/randomIssue?labelName=" + r.labelName, {resouce: true}).body.string();
+                                // let appendMsg = server.post("labelInfo/list", {labelName: r.labelName, type: "reply"}).json().rows;
+
+                                let replyes = server.post("labelInfo/list", {labelName: r.labelName, type: "reply"}).json().rows;
+                                log(replyes)
+                                if(0 < replyes.length) {
+                                    nowMsg.push(replyes[random(0, replyes.length-1)].body);
+                                }
                             }
                         }catch(e){}
                     }
@@ -5350,9 +5360,8 @@ function 消息处理(fans, newMsgList) {
         // 由于粉丝的标签是字符串，所以继续使用标签暂存对象来进行判断
         if(!fansLabel[r.labelName]) {
             log("正在获取要发送的消息");
-            // 消息动态获取
-            // let appendMsg = server.get("labelInfo/randomIssue?labelName=" + r.labelName, {resouce: true}).body.string();
-            let appendMsg = server.post("labelInfo/list", {labelName: r.labelName, type: "reply"}).json().rows;
+            
+            let appendMsg = r.ask[random(0, r.ask.length-1)];
             log(appendMsg)
             appendMsg = 0 < appendMsg.length ? appendMsg[random(0, appendMsg.length-1)].body : null;
 
