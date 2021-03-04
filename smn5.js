@@ -32,6 +32,26 @@ var tempSave = {
 
 var server = {
     serverUrl: "没有链接",
+    again: function (err,option) {
+        try{
+            if(err.name.indexOf("Error") < 0) {
+                throw "重试";
+            }
+            console.verbose(err.name);
+            console.verbose(err.message);
+        } catch(e) {
+            // 初始化次数
+            if(typeof option != "object" ) {
+                option = option || {};
+            }
+            option.number = option.number || 0;
+            // 3次上限
+            if(option.number < 3 || err) {
+                log("重试中...", option.number)
+                return option;
+            }
+        }
+    },
     add: function (uri, o) {
         this.sendData(this.serverUrl + uri + "/add", o);
     },
@@ -77,25 +97,15 @@ var server = {
             if (re.statusCode != 200) {
                 throw {name:"请求失败", message: "状态码：" + re.statusCode};
             }
+            if(option && option.resouce){
+                return re;
+            }
             return JSON.parse(re.body.string());
         } catch (err) {
             log("请求失败", err);
-            try {
-                if(err.name.indexOf("Error") < 0) {
-                    throw "重试";
-                }
-                console.verbose(err.name);
-                console.verbose(err.message);
-            }catch(e) {
-                // 初始化次数
-                if(typeof option != "object" ) {
-                    option = option || {number: 0};
-                }
-                // 3次上限
-                if(option.number < 3 || err) {
-                    log("重试中...")
-                    return this.get(uri)
-                }
+            let re = this.again(err, option);
+            if(re) {
+                return this.get(uri, re);
             }
         }
     },
@@ -119,21 +129,15 @@ var server = {
     post: function (uri, o, option) {
         try {
             console.verbose("[↑]" + this.serverUrl +  uri + "\n" + JSON.stringify(o))
+            if(option && option.resouce){
+                return http.post(this.serverUrl + uri, o||{}, {'Connection': 'close'});
+            }
             return http.post(this.serverUrl + uri, o||{}, {'Connection': 'close'}).body;
         } catch (err) {
             log("[↑]POST上传出错", err)
-            console.verbose(err.name);
-            console.verbose(err.message);
-            if(err.name.indexOf("Error") < 0) {
-                // 初始化次数
-                if(typeof option != "object" ) {
-                    option = option || {number: 0};
-                }
-                // 3次上限
-                if(option.number < 3 || err) {
-                    log("重试中...")
-                    return this.post(uri, o)
-                }
+            let re = this.again(err, option);
+            if(re) {
+                return this.post(uri, o, re)
             }
         }
     },
@@ -148,18 +152,9 @@ var server = {
             log(http.post(url, o||{}, {'Connection': 'close'}).body.string());
         } catch (err) {
             log("上传出错", err)
-            console.verbose(err.name);
-            console.verbose(err.message);
-            if(err.name.indexOf("Error") < 0) {
-                // 初始化次数
-                if(typeof option != "object" ) {
-                    option = option || {number: 0};
-                }
-                // 3次上限
-                if(option.number < 3 || err) {
-                    log("重试中...")
-                    return this.sendData(uri, o)
-                }
+            let re = this.again(err, option);
+            if(re) {
+                return this.sendData(uri, o, re)
             }
         }
     },
@@ -329,6 +324,7 @@ ui.layout(
                                     <radio id="getUserList" text="采集用户" />
                                     <radio id="focusUser" text="关注用户" />
                                     <radio id="detectionException" text="检测异常" />
+                                    <radio id="functionTest" text="测试" />
                                 </radiogroup>
                                 
                                 <radiogroup orientation="horizontal" h="0">
@@ -769,6 +765,28 @@ function 主程序() {
         exit();
     }
     dec = false;
+
+    //TODO
+    if(ui.functionTest.checked) {
+        // 在执行完之后如果还为true则等待继续
+        let cf = floaty.rawWindow(<frame><button id="but">开始测试</button></frame>)
+        cf.setPosition(device.width*0.6, device.height*0.3)
+        cf.setPosition(400,800)
+        cf.but.click(()=>{
+            toast("继续")
+            cf.close()
+            cf = null
+        })
+        while(cf){
+            sleep(300);
+        }
+
+        try{
+            上一条消息是否为自己发送的();
+        }catch(e){
+            log(e)
+        }
+    }
 
     if(ui.createAccount.checked){
         log("邮箱生成");
@@ -4728,7 +4746,19 @@ function replySendlist(sendlist) {
         }
     } */
 }
-
+//TODO
+function 上一条消息是否为自己发送的() {
+    let 新消息列表 = 获取消息();
+    if(0 < 新消息列表.length) {
+        log("最新一条消息的发送人：", 新消息列表[0].sender)
+        if(新消息列表[0].sender == accountInfo.name || 新消息列表[0].sender == accountInfo.username) {
+            if(新消息列表[0].status) {
+                // 如果是自己发送的则返回 true
+                return true;
+            }
+        }
+    }
+}
 /**
  * 聊天界面
  * 回复消息
@@ -4738,6 +4768,11 @@ function mi6ReplyMsg() {
     if(!text("Send a message...").findOne(1000)) {
         return false;
     }
+    
+    if(上一条消息是否为自己发送的()) {
+
+    }
+
     // 获取到对方名字并去查粉丝数据
     log("正在获取粉丝数据")
     // 拿顶部的用户名字,数据库中没有信息则进入右上角拿对方账号信息
@@ -5306,7 +5341,7 @@ function 消息处理(fans, newMsgList) {
                 console.verbose(reMsg," ==之前== ",appendMsg)
                 reMsg +=  appendMsg;
                 if(issue) {
-                    //TODO 发送 日常+问题 ，连带着 问题可连续性 例子：hi \n where are you from?
+                    // 发送 日常+问题 ，连带着 问题可连续性 例子：hi \n where are you from?
                     let iss = tempSave.issue[random(0, tempSave.issue.length-1)];
                     if(!iss) log("没有要携带的问题！", tempSave.issue)
                     log("问题：", iss);
@@ -5314,6 +5349,12 @@ function 消息处理(fans, newMsgList) {
                         reMsg += "\n\n\n";
                     }
                     reMsg += iss || "";
+                    //TODO try{
+                        // iss = server.get("labelInfo/randomIssue?labelName=携带问题", {resouce: true}).body.string();
+                        // if(iss) reMsg += "\n\n\n" + iss;
+                    // }catch(e){
+                    //     log("携带问题失败", e)
+                    // }
                 }
                 console.info("新消息：", reMsg);
                 return reMsg;
