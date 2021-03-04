@@ -15,6 +15,9 @@ var fasle = false;
         "修复对携带问题的解析失败",
         "修复采集进入列表不动，关注频繁时提示提前跳出。",
         "优化get请求处理方式",
+        "优化小红点",
+        "修改请求方式",
+        "在回复完对方秒回还能继续回复",
     ];
     uti = logs.pop();
 }
@@ -31,6 +34,26 @@ var tempSave = {
 
 var server = {
     serverUrl: "没有链接",
+    again: function (err,option) {
+        try{
+            if(err.name.indexOf("Error") < 0) {
+                throw "重试";
+            }
+            console.verbose(err.name);
+            console.verbose(err.message);
+        } catch(e) {
+            // 初始化次数
+            if(typeof option != "object" ) {
+                option = option || {};
+            }
+            option.number = option.number || 0;
+            // 3次上限
+            if(option.number < 3 || err) {
+                log("重试中...", option.number)
+                return option;
+            }
+        }
+    },
     add: function (uri, o) {
         this.sendData(this.serverUrl + uri + "/add", o);
     },
@@ -76,25 +99,15 @@ var server = {
             if (re.statusCode != 200) {
                 throw {name:"请求失败", message: "状态码：" + re.statusCode};
             }
+            if(option && option.resouce){
+                return re;
+            }
             return JSON.parse(re.body.string());
         } catch (err) {
             log("请求失败", err);
-            try {
-                if(err.name.indexOf("Error") < 0) {
-                    throw "重试";
-                }
-                console.verbose(err.name);
-                console.verbose(err.message);
-            }catch(e) {
-                // 初始化次数
-                if(typeof option != "object" ) {
-                    option = option || {number: 0};
-                }
-                // 3次上限
-                if(option.number < 3 || err) {
-                    log("重试中...")
-                    return this.get(uri)
-                }
+            let re = this.again(err, option);
+            if(re) {
+                return this.get(uri, re);
             }
         }
     },
@@ -118,21 +131,15 @@ var server = {
     post: function (uri, o, option) {
         try {
             console.verbose("[↑]" + this.serverUrl +  uri + "\n" + JSON.stringify(o))
+            if(option && option.resouce){
+                return http.post(this.serverUrl + uri, o||{}, {'Connection': 'close'});
+            }
             return http.post(this.serverUrl + uri, o||{}, {'Connection': 'close'}).body;
         } catch (err) {
             log("[↑]POST上传出错", err)
-            console.verbose(err.name);
-            console.verbose(err.message);
-            if(err.name.indexOf("Error") < 0) {
-                // 初始化次数
-                if(typeof option != "object" ) {
-                    option = option || {number: 0};
-                }
-                // 3次上限
-                if(option.number < 3 || err) {
-                    log("重试中...")
-                    return this.post(uri, o)
-                }
+            let re = this.again(err, option);
+            if(re) {
+                return this.post(uri, o, re)
             }
         }
     },
@@ -147,18 +154,9 @@ var server = {
             log(http.post(url, o||{}, {'Connection': 'close'}).body.string());
         } catch (err) {
             log("上传出错", err)
-            console.verbose(err.name);
-            console.verbose(err.message);
-            if(err.name.indexOf("Error") < 0) {
-                // 初始化次数
-                if(typeof option != "object" ) {
-                    option = option || {number: 0};
-                }
-                // 3次上限
-                if(option.number < 3 || err) {
-                    log("重试中...")
-                    return this.sendData(uri, o)
-                }
+            let re = this.again(err, option);
+            if(re) {
+                return this.sendData(uri, o, re)
             }
         }
     },
@@ -328,6 +326,7 @@ ui.layout(
                                     <radio id="getUserList" text="采集用户" />
                                     <radio id="focusUser" text="关注用户" />
                                     <radio id="detectionException" text="检测异常" />
+                                    <radio id="functionTest" text="测试" />
                                 </radiogroup>
                                 
                                 <radiogroup orientation="horizontal" h="0">
@@ -769,6 +768,28 @@ function 主程序() {
     }
     dec = false;
 
+    //TODO
+    if(ui.functionTest.checked) {
+        // 在执行完之后如果还为true则等待继续
+        let cf = floaty.rawWindow(<frame><button id="but">开始测试</button></frame>)
+        cf.setPosition(device.width*0.6, device.height*0.3)
+        cf.setPosition(400,800)
+        cf.but.click(()=>{
+            toast("继续")
+            cf.close()
+            cf = null
+        })
+        while(cf){
+            sleep(300);
+        }
+
+        try{
+            上一条消息是否为自己发送的();
+        }catch(e){
+            log(e)
+        }
+    }
+
     if(ui.createAccount.checked){
         log("邮箱生成");
         邮箱生成();
@@ -877,6 +898,11 @@ function 主程序() {
                             console.error("时间填写错误！", tempSave.endTime);
                             exit();
                         };
+                    }
+                    // tempSave.issue 携带的问题
+                    tempSave.issue = tempSave.issue || getIssue();
+                    if(!tempSave.issue || tempSave.issue.length < 1) {
+                        console.warn("未获取到要携带的问题");
                     }
                     mi6回复消息()
                 }
@@ -2055,7 +2081,7 @@ function focusUser(max) {
                         user.label = state.text();
                         // 上传当前状态
                         threads.start(function () {
-                            log(server.post("focusList/use/"+user.id+"?label="+user.label,{}).json());
+                            log(server.post("focusList/use?id="+user.id+"&label="+user.label,{}).json());
                         })
                         break;
                     }
@@ -2990,7 +3016,7 @@ function 修改资料() {
         返回首页();
         // 重新检查当前用户名
         runTikTok();
-        server.get("account/update/" + nowUsername +"?newUsername=" + accountInfo.username);
+        server.get("account/update?username=" + nowUsername +"&newUsername=" + accountInfo.username);
     }
 }
 
@@ -3825,6 +3851,7 @@ let upFans = {
 
 
 function mi6回复消息() {
+    
     /*
      在inbox界面，获取当前的消息数量
      每一次发送完消息就数量减掉，当数量为0的时候将当前列表上的红色气泡处理完成
@@ -3851,10 +3878,12 @@ function mi6回复消息() {
             // <2>. 获取当前消息数量
             let newMsgCount = -1;
             let action = text("All activity").findOne(100);
+            let parentUO;
             if(action) {
+                parentUO = action.parent().parent();
                 // 避免没有小红点控件的时候导致新消息为零
                 newMsgCount = 0;
-                action.parent().parent().find(className("android.widget.TextView")).forEach(e=>{
+                parentUO.find(className("android.widget.TextView")).forEach(e=>{
                     let n = parseInt(e.text());
                     if(!isNaN(n)) {
                         newMsgCount = n;
@@ -3865,11 +3894,19 @@ function mi6回复消息() {
             if(newMsgCount == 0) {
                 // 没有新消息 
                 exce = 0;
-
-                // 加入小红点检测，如果有小红点的话就设置消息数量为 10000
-                let redPointUO = boundsInside(device.width*0.8, 0, device.width, device.height*0.2)
-                    .className("android.widget.RelativeLayout").clickable(true).find();
-                if(redPointUO.length == 1) {
+                
+                // 加入小红点检测，如果有小红点的话就设置消息数量为 smallRedPointTag
+                let redPointUOs;
+                if(parentUO) {
+                    redPointUOs = parentUO.find(
+                        boundsInside(device.width*0.8, 0, device.width, device.height*0.2)
+                        .className("android.widget.RelativeLayout").clickable(true)
+                    )
+                } else {
+                    redPointUOs = boundsInside(device.width*0.8, 0, device.width, device.height*0.2)
+                        .className("android.widget.RelativeLayout").clickable(true).find();
+                }
+                if(redPointUOs.length == 1 && 1 < redPointUOs[0].children().length) {
                     newMsgCount = smallRedPointTag;
                 }
             }
@@ -3877,47 +3914,51 @@ function mi6回复消息() {
             if(newMsgCount == smallRedPointTag || 0 < newMsgCount) {
                 // 存在新消息
                 exce=0;
-
-                // 继续业务流程
-                // <3>. 点击小飞机进入私信
-                if(lh_find(className("android.widget.RelativeLayout").clickable(true)
-                    .boundsInside(device.width*0.85,0,device.width,device.height*0.1), "点击私信", 0)) {
-                    // <4>. 获取列表，可以用于滚动
-                    actionRecycler = className("androidx.recyclerview.widget.RecyclerView")
-                            .boundsInside(0, 200, device.width, device.height)
-                            .findOne(1000);
-                    // 当失败次数等于3的时候就跳出 <跳出>
-                    for (let i = 0; i < 3;) {
-                        // 等待加载列表
-                        sleep(500);
-                        // 获取当前界面的红色气泡
-                        let sendList = mi6GetNewMsgList();
-                        if(sendList.length > 0){
-                            newMsgCount -= replySendlist(sendList);
-                        } else {
-                            i++;
-                        }
-                        // 当前消息处理数量超过在外部获取的数量时跳出 <跳出>
-                        if(newMsgCount < 1 && newMsgCount != smallRedPointTag) {
-                            break;
-                        }
-                        // 向后翻页
-                        if(!actionRecycler.scrollForward()){
-                            sleep(100);
-                            console.verbose("重新获取列表控件")
-                            actionRecycler = className("androidx.recyclerview.widget.RecyclerView")
-                                            .boundsInside(0, 200, device.width, device.height)
-                                            .findOne(1000);
-                            if(!actionRecycler.scrollForward()){
+                try{
+                    // 继续业务流程
+                    // <3>. 点击小飞机进入私信，以后可以将三个弄成函数
+                    if(lh_find(className("android.widget.RelativeLayout").clickable(true)
+                        .boundsInside(device.width*0.85,0,device.width,device.height*0.1), "点击私信", 0)) {
+                        // <4>. 获取列表，可以用于滚动
+                        actionRecycler = id("cqg").className("androidx.recyclerview.widget.RecyclerView")
+                                .boundsInside(0, 200, device.width, device.height)
+                                .filter(function(uo){ return device.width*0.8 < uo.bounds().right - uo.bounds().left; })
+                                .findOne(1000);
+                        // 当失败次数等于3的时候就跳出 <跳出>
+                        for (let i = 0; i < 20;) {
+                            // 等待加载列表
+                            sleep(500);
+                            // 获取当前界面的红色气泡
+                            let sendList = mi6GetNewMsgList();
+                            if(sendList.length > 0){
+                                newMsgCount -= replySendlist(sendList);
+                            } else {
                                 i++;
                             }
-                        } else {
-                            log("翻页")
+                            // 当前消息处理数量超过在外部获取的数量时跳出 <跳出>
+                            if(newMsgCount < 1 && newMsgCount != smallRedPointTag) {
+                                break;
+                            }
+                            // 向后翻页
+                            if(!actionRecycler.scrollForward()){
+                                sleep(100);
+                                console.verbose("重新获取列表控件")
+                                actionRecycler = id("cqg").className("androidx.recyclerview.widget.RecyclerView")
+                                                .boundsInside(0, 200, device.width, device.height)
+                                                .filter(function(uo) { return device.width*0.8 < uo.bounds().right - uo.bounds().left; })
+                                                .findOne(1000);
+                                if(!actionRecycler.scrollForward()){
+                                    i++;
+                                }
+                            } else {
+                                log("翻页")
+                            }
+                            
                         }
-                        
                     }
+                }catch(e){
+                    console.log(e)
                 }
-
                 // 重置时间
                 endTime = Date.now();
             } else {
@@ -4551,9 +4592,12 @@ function 获取消息(){
                 try{
                     let msgBox =  m[1].children()
                     status = !(msgBox.findOne(className("android.widget.ImageView")));
-                    msg = (status ? "" : "[消息发送失败]")
-                        + msgBox.findOne(className("android.widget.TextView")).text();
                     sender = msgBox.findOne(className("com.bytedance.ies.dmt.ui.widget.DmtTextView")).desc();
+                    msg = "";
+                    log(sender, " === ",accountInfo.username, " === ",accountInfo.name)
+                    // 先赋空字符串用于避免获取失败时导致后面的分割一起失败
+                    msg = (status && (sender == accountInfo.username || sender == accountInfo.name )? "" : "[消息发送失败] ")
+                        + msgBox.findOne(className("android.widget.TextView")).text();
                 }catch(err){
                     log("获取消息异常，异常信息：", err)
                 }
@@ -4588,10 +4632,15 @@ function 获取消息(){
 }
 
 function mi6GetNewMsgList() {
-    let sendlist = boundsInside(900, 200, device.width, device.height).className("TextView").filter(function(uo){
-        let t = uo.text();
-        return t.indexOf(":") < 0 && t.indexOf("-") < 0 && !isNaN(parseInt(t));
+    // let sendlist = boundsInside(900, 200, device.width, device.height).className("TextView").filter(function(uo){
+    //     let t = uo.text();
+    //     return t.indexOf(":") < 0 && t.indexOf("-") < 0 && !isNaN(parseInt(t));
+    // }).find();
+    // 气泡的上一级的id
+    let sendlist = id("bfk").filter(function(uo){
+        return 0 < uo.children().length
     }).find();
+
     return sendlist;
 }
 
@@ -4653,22 +4702,30 @@ function replySendlist(sendlist) {
     for (let i = 0; i < sendlist.length; i++) {
         reNum += parseInt(sendlist[i].text());
         // 4. 进入聊天界面
-        let rect = sendlist[i].bounds();
-        for (let j = 0; j < 5; j++) {
-            // 点击的X轴进行偏移
-            click(rect.left - device.width*0.1, rect.centerY())
-            sleep(2000);
-            // 拿当前页面的红色气泡列表，通过数量来判断之前的点击是否无效，加上输入框检测
-            let newMsgListLength = mi6GetNewMsgList().length;
-            if(newMsgListLength != sendlist.length) {
-                if(text("Send a message...").findOne(1000)) {
-                    break;
+        if(clickOn(sendlist[i])) {
+            // 备用方案
+            let rect = sendlist[i].bounds();
+            for (let j = 0; j < 5; j++) {
+                // 点击的X轴进行偏移
+                click(rect.left - device.width*0.1, rect.centerY())
+                sleep(2000);
+                // 拿当前页面的红色气泡列表，通过数量来判断之前的点击是否无效，加上输入框检测
+                let newMsgListLength = mi6GetNewMsgList().length;
+                if(newMsgListLength != sendlist.length) {
+                    if(text("Send a message...").findOne(1000)) {
+                        break;
+                    }
                 }
+                log("似乎未进入聊天界面");
             }
-            log("似乎未进入聊天界面");
         }
-        // 回复消息
+    
+        do{
+            // 回复消息
         mi6ReplyMsg();
+        // 如果上一条消息是自己发送的则跳出，不是则再继续聊天
+        }while(!上一条消息是否为自己发送的())
+
         // 7. 返回上一级
         for (let i = 0; i < 5; i++) {
             back();
@@ -4694,12 +4751,37 @@ function replySendlist(sendlist) {
         }
     } */
 }
-
+//TODO
+function 上一条消息是否为自己发送的() {
+    let 新消息列表 = 获取消息();
+    if(0 < 新消息列表.length) {
+        log("最新一条消息的发送人：", 新消息列表[0].sender)
+        if(新消息列表[0].sender == accountInfo.name || 新消息列表[0].sender == accountInfo.username) {
+            if(新消息列表[0].status) {
+                // 如果是自己发送的则返回 true
+                return true;
+            }else {
+                // ------- 可以顺便处理 -------
+                // log("处理发送失败", resend(), feedback());
+            }
+        }
+    }
+}
 /**
  * 聊天界面
  * 回复消息
  */
 function mi6ReplyMsg() {
+    // 判断是否是聊天界面
+    if(!text("Send a message...").findOne(1000)) {
+        return false;
+    }
+    // 如果上一条消息是自己发送的则跳出
+    if(上一条消息是否为自己发送的()) {
+        log("最新消息是自己发送的，取消本次的消息发送")
+        return false;
+    }
+
     // 获取到对方名字并去查粉丝数据
     log("正在获取粉丝数据")
     // 拿顶部的用户名字,数据库中没有信息则进入右上角拿对方账号信息
@@ -4711,7 +4793,7 @@ function mi6ReplyMsg() {
                     .findOne(3000);
         if(tempUO) {
             let fansName = tempUO.text();
-            fans = server.get("fans/name/" + fansName + "?accountUsername=" + accountInfo.username)
+            fans = server.get("fans/name?username=" + fansName + "&accountUsername=" + accountInfo.username)
         }
     }
 
@@ -4979,7 +5061,7 @@ function getFansInfoByFansMsgView() {
                 // 拿粉丝数据
                 // 从服务器拿到粉丝的信息 包含聊天记录  msg = server.get("record/
                 // 通过粉丝账号以及tiktok账号找粉丝信息http://localhost:8081/tiktokjs/fans/username/ivethgrijalva9?accountUsername=kwepixzr76675
-                fans = server.get("fans/username/" + username + "?accountUsername=" + accountInfo.username)
+                fans = server.get("fans/username?username=" + username + "&accountUsername=" + accountInfo.username)
                 break;
             } catch (err) {
                 console.verbose("获取对方账号异常", err)
@@ -5121,19 +5203,32 @@ function addFans(obj,arr) {
  * @param {UIObject} fans  保存的粉丝的信息
  * @param {Array} newMsgList 新的聊天记录
  */
-function 消息处理(fans,newMsgList) {
+function 消息处理(fans, newMsgList) {
 
     // log("==== 粉丝信息以及新消息 ====")
     // console.verbose(fans);
     // console.verbose(newMsgList);
 
+    //TODO 0. 将自己的消息排除掉
+    console.verbose(newMsgList)
+    {
+        let temp = []
+        newMsgList.forEach((e)=>{
+            if(e.sender != accountInfo.name && e.sender != accountInfo.username) {
+                temp.push(e);
+            } else {
+                console.verbose("排除", e);
+            }
+        })
+        newMsgList = temp;
+    }
     // 1. 分析新消息单词数组
     let words = [];
     for (let m in newMsgList) {
         m = newMsgList[m];
         if(m.sender != accountInfo.name){
             // 对方的消息
-            let newWords = m.msg.split(/\s/)
+            let newWords = m.msg.split(/[\s,.，。]/)
             for (let w in newWords) {
                 // 排除前缀
                 w = newWords[w].replace("[消息发送失败]", "");
@@ -5147,14 +5242,14 @@ function 消息处理(fans,newMsgList) {
     // 拿到粉丝当前标签内容,粉丝标签信息 {"标签1": ["触发词1", "触发词2"],"标签2": ["触发词1", "触发词2"],"标签3": ["触发词1", "触发词2"]}
     let fansLabel = {};
     try{
-        if(fans.username) fansLabel = server.get("fansLabel/getlabel/" + fans.username).label;
+        if(fans.username) fansLabel = server.get("fansLabel/getlabel?username=" + fans.username).label;
     }catch(err) {
         log(err)
         log("获取粉丝标签失败！");
     }
 
-    // log("=== 已存标签 ===")
-    // log(fansLabel)
+    log("=== 已存标签 ===")
+    log(fansLabel)
 
     // 触发词优先回复
     let nowMsg=[];
@@ -5165,7 +5260,9 @@ function 消息处理(fans,newMsgList) {
         // 拿到当前标签内容 包括 label（标签） words（关键字） info（信息）
         for (let tag in tempSave.RequiredLabels) {
             tag = tempSave.RequiredLabels[tag];
+
             // {labelName: "国家", words: ["usa","en"](已经处理为小写), ask: ["where are you from?"], reply: ["where are you from?"]}
+
             // 如果当前单词存在于标签中，则进行保存，将其转换成小写，这里的indexOf是在字符串中找
             if(-1 < tag.words.indexOf(w)){
                 // 判断是否存在当前标签，没有就创建
@@ -5297,10 +5394,22 @@ function readRequiredLabelsFile(path){
     }
     return data
 }
+
+function getIssue(){
+    let reList = [];
+    let rows = server.post("labelInfo/list?labelName=携带问题").json().rows;
+    for (let i = 0; i < rows.length; i++) {
+        // 是否是询问消息
+        if(rows[i].type=="ask") {
+            reList.push(rows[i].body);
+        }
+    }
+    return reList;
+}
 /**
  * 从后台拿到所有的标签
  */
-function getLabelList(){
+function getLabelList() {
     /*
     [
         { "labelName": "国家", "words": "jp,cn,usa", "ask": "where are you from?", "reply": "oh" }, 
@@ -5309,22 +5418,26 @@ function getLabelList(){
         { "labelName": "性别", "words": "man,woman", "ask": null, "reply": null }
     ]
      */
+    let reList = [];
     // 没有 tempSave.LabelsData 数组或者长度为0，都将从服务器获取数据
     if(!tempSave.LabelsData || tempSave.LabelsData.length < 1) {
         // 从服务器拿到标签集合 /tiktokjs/labelInfo/labellist
         tempSave.LabelsData = server.get("labelInfo/labellist");
         for (let i = 0; i < tempSave.LabelsData.length; i++) {
-            if(tempSave.LabelsData[i].words == null) tempSave.LabelsData[i].words ="";
-            if(tempSave.LabelsData[i].ask == null) tempSave.LabelsData[i].ask ="";
-            if(tempSave.LabelsData[i].reply == null) tempSave.LabelsData[i].reply ="";
-            // 将大写转成小写，并且也切割成单词组
-            tempSave.LabelsData[i].words = tempSave.LabelsData[i].words.toLowerCase().split(",");
-            // 切割消息
-            if(tempSave.LabelsData[i].ask) tempSave.LabelsData[i].ask = tempSave.LabelsData[i].ask.split(",");
-            if(tempSave.LabelsData[i].reply) tempSave.LabelsData[i].reply = tempSave.LabelsData[i].reply.split(",");
+            // if(tempSave.LabelsData[i].words == null) tempSave.LabelsData[i].words ="";
+            if(tempSave.LabelsData[i].words != null) {
+                if(tempSave.LabelsData[i].ask == null) tempSave.LabelsData[i].ask ="";
+                if(tempSave.LabelsData[i].reply == null) tempSave.LabelsData[i].reply ="";
+                // 将大写转成小写，并且也切割成单词组
+                tempSave.LabelsData[i].words = tempSave.LabelsData[i].words.toLowerCase().split(",");
+                // 切割消息
+                if(tempSave.LabelsData[i].ask) tempSave.LabelsData[i].ask = tempSave.LabelsData[i].ask.split(",");
+                if(tempSave.LabelsData[i].reply) tempSave.LabelsData[i].reply = tempSave.LabelsData[i].reply.split(",");
+                reList.push(tempSave.LabelsData[i]);
+            }
         }
     }
-    return tempSave.LabelsData;
+    return reList;
 }
 /**
  * 从文件中随机获取到一条消息
@@ -7819,6 +7932,7 @@ function switchAccount(sin, sup) {
             signIn();
         } else { 
             tempSave.firstAccount = false;
+            返回首页()
         }
     }
 }

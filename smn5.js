@@ -15,7 +15,8 @@ var fasle = false;
         "修复采集进入列表不动，关注频繁时提示提前跳出。",
         "优化get请求处理方式",
         "优化小红点",
-        "测试_修改请求方式",
+        "修改请求方式",
+        "在回复完对方秒回还能继续回复",
     ];
     uti = logs.pop();
 }
@@ -4717,10 +4718,13 @@ function replySendlist(sendlist) {
                 log("似乎未进入聊天界面");
             }
         }
-        
 
-        // 回复消息
-        mi6ReplyMsg();
+        do{
+            // 回复消息
+            mi6ReplyMsg();
+        // 如果上一条消息是自己发送的则跳出，不是则再继续聊天
+        }while(!上一条消息是否为自己发送的())
+        
         // 7. 返回上一级
         for (let i = 0; i < 5; i++) {
             back();
@@ -4755,6 +4759,9 @@ function 上一条消息是否为自己发送的() {
             if(新消息列表[0].status) {
                 // 如果是自己发送的则返回 true
                 return true;
+            }else {
+                // ------- 可以顺便处理 -------
+                // log("处理发送失败", resend(), feedback());
             }
         }
     }
@@ -4768,9 +4775,10 @@ function mi6ReplyMsg() {
     if(!text("Send a message...").findOne(1000)) {
         return false;
     }
-    
+    // 如果上一条消息是自己发送的则跳出
     if(上一条消息是否为自己发送的()) {
-
+        log("最新消息是自己发送的，取消本次的消息发送")
+        return false;
     }
 
     // 获取到对方名字并去查粉丝数据
