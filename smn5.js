@@ -5359,12 +5359,8 @@ function 消息处理(fans, newMsgList) {
         r = tempSave.RequiredLabels[i];
         // 由于粉丝的标签是字符串，所以继续使用标签暂存对象来进行判断
         if(!fansLabel[r.labelName]) {
-            log("正在获取要发送的消息");
-            
             let appendMsg = r.ask[random(0, r.ask.length-1)];
-            log(appendMsg)
-            appendMsg = 0 < appendMsg.length ? appendMsg[random(0, appendMsg.length-1)].body : null;
-
+            console.verbose(appendMsg);
             if(appendMsg) {
                 console.verbose(reMsg," ==之前== ",appendMsg)
                 reMsg +=  appendMsg;
