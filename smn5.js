@@ -19,6 +19,7 @@ var fasle = false;
         "在回复完对方秒回还能继续回复",
         "修复在发送消息失败时一直重新发送",
         "回复消息实时从后台获取",
+        "修复卡死在获取消息",
     ];
     uti = logs.pop();
 }
@@ -4720,12 +4721,13 @@ function replySendlist(sendlist) {
                 log("似乎未进入聊天界面");
             }
         }
-
+        let whileTag = true;
         do{
             // 回复消息
             mi6ReplyMsg();
         // 如果上一条消息是自己发送的则跳出，不是则再继续聊天
-        }while(!上一条消息是否为自己发送的(true))
+        whileTag = 上一条消息是否为自己发送的(true);
+        }while(!whileTag && whileTag != null)
         
         // 7. 返回上一级
         for (let i = 0; i < 5; i++) {
@@ -4756,6 +4758,7 @@ function replySendlist(sendlist) {
 /**
  * 
  * @param {Boolean} tag 不检查是否发送成功的标记
+ * @returns null 未获取到， undefine 不是自己， true 是自己
  */
 function 上一条消息是否为自己发送的(tag) {
     let 新消息列表 = 获取消息();
@@ -4769,6 +4772,8 @@ function 上一条消息是否为自己发送的(tag) {
                 // ------- 可以顺便处理 -------
                 // log("处理发送失败", resend(), feedback());
             }
+        } else if(!新消息列表[0].sender){
+            return null;
         }
     }
 }
@@ -5255,6 +5260,7 @@ function 消息处理(fans, newMsgList) {
 
     log("=== 已存标签 ===")
     log(fansLabel)
+    log(fans)
 
     // 触发词优先回复
     let nowMsg=[];
