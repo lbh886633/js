@@ -361,7 +361,7 @@ ui.layout(
 
                                 <linear padding="2 0 0 0">
                                     <text textColor="black" text="指定关注数量: " />
-                                    <input lines="1" id="focusUserNumber" w="auto" text="200"/>
+                                    <input lines="1" id="focusUserNumber" w="auto" text="100"/>
                                 </linear>
                                 <linear padding="2 0 0 0">
                                     <checkbox id="setServerUrl" text="" />
