@@ -20,7 +20,7 @@ var fasle = false;
         "修复在发送消息失败时一直重新发送",
         "回复消息实时从后台获取",
         "修复卡死在获取消息",
-        "测试_优化关注用户耗时v2"
+        "测试_优化关注用户耗时v3"
     ];
     uti = logs.pop();
 }
@@ -2113,7 +2113,6 @@ function focusUser(max) {
     
     function detectionFollowStatus(wait) {
         for (let i = 0;wait && i < 50; i++) {
-            等待加载()
             let follow = className("android.widget.TextView")
                 .clickable(true).drawingOrder(1).filter(function(uo){
                     return -1 < words.indexOf(uo.text());
@@ -2151,6 +2150,7 @@ function focusUser(max) {
                 console.verbose(err.stack)
             }
             sleep(100)
+            等待加载(200)
         }
     }
 
