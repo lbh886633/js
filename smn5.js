@@ -20,7 +20,7 @@ var fasle = false;
         "修复在发送消息失败时一直重新发送",
         "回复消息实时从后台获取",
         "修复卡死在获取消息",
-        "测试_优化关注用户耗时"
+        "测试_优化关注用户耗时v2"
     ];
     uti = logs.pop();
 }
@@ -2052,12 +2052,14 @@ function focusUser(max) {
                         // 检测网络
                         let res;
                         try{
+                            console.warn("检测网络中...")
                             do {
                                 res = http.get("https://www.google.com");
                                 // 网络异常才会重置
                                 if(399 < res.statusCode) nowTime = Date.now();
                             } while (399 < res.statusCode);
                         } catch(e) {}
+                        console.info("网络正常");
                         continue;
                     }
                     if(state.text()=="Follow"){
@@ -2110,7 +2112,7 @@ function focusUser(max) {
     }
     
     function detectionFollowStatus(wait) {
-        for (let i = 0;wait && i < 5; i++) {
+        for (let i = 0;wait && i < 50; i++) {
             等待加载()
             let follow = className("android.widget.TextView")
                 .clickable(true).drawingOrder(1).filter(function(uo){
@@ -2131,7 +2133,7 @@ function focusUser(max) {
             // 打开方式，有时出现太慢
             try{
                 // Open App
-                if(lh_find(text("Open App"), "Open App", 0)) {
+                if(lh_find(text("Open App"), "Open App", 0, 100)) {
                     等待加载()
                     let 打开方式 = text("TikTok").visibleToUser().findOne(1000)
                     if (打开方式) {
@@ -2148,8 +2150,7 @@ function focusUser(max) {
                 console.verbose(err)
                 console.verbose(err.stack)
             }
-            
-            sleep(1000)
+            sleep(100)
         }
     }
 
