@@ -20,7 +20,8 @@ var fasle = false;
         "修复在发送消息失败时一直重新发送",
         "回复消息实时从后台获取",
         "修复卡死在获取消息",
-        "测试_优化关注用户耗时v3"
+        "加入发送消息连续失败3次就跳过当前账号",
+        "优化关注用户速度",
     ];
     uti = logs.pop();
 }
@@ -193,6 +194,15 @@ var Fans = {
     list: null,
     temp: null
 };
+// 发送消息异常
+let sendMessagesExceptionNumber = 0;
+let sendMessagesExceptionNumberMax = 3;
+function smenReset(){
+    sendMessagesExceptionNumber = 0;
+}
+function smenDetection(){
+    if(sendMessagesExceptionNumberMax <= sendMessagesExceptionNumber) throw "消息发送异常超过" + sendMessagesExceptionNumber + "或等于" + sendMessagesExceptionNumberMax + "次";;
+}
 // 采集粉丝信息时使用
 var fansNameList = [], fansList = [], countGetFansNum = 0, getFansNum = 0;
 var modelIdList = ["loginmodel", "updatemodel", "getmodel"];
@@ -445,6 +455,10 @@ ui.layout(
                             <linear padding="5 0 0 0">
                                 <text textColor="black" text="停留时间: " />
                                 <input lines="1" id="stopTime" w="*" text="1" inputType="number|numberDecimal"/>
+                            </linear>
+                            <linear padding="5 0 0 0">
+                                <text textColor="black" text="采集打招呼个数: " />
+                                <input lines="1" id="fanslistnumber" w="*" text="20" inputType="number|numberDecimal"/>
                             </linear>
                             <vertical id="getmodel">
                                 <linear padding="5 0 0 0">
@@ -804,7 +818,7 @@ function 主程序() {
     }
 
     if(ui.switchVersion.checked){
-        log("切换版本");
+        log("切换ss版本");
         appPackage = "com.ss.android.ugc.trill";
     }
 
@@ -835,13 +849,14 @@ function 主程序() {
     tempSave.daily = ui.daily.checked;
 
     let whileNumber = 0;
-
     while(true) {
         if(ui.switchaccount.checked){
             // 账号列表可以从本地文件读取
             if(!accountList) accountList = [];
             switchAccount()
         }
+        smenReset();
+        // 如果 发送消息异常次数小于3次则继续运行
         try{
             if(runTikTok()) {
                 log("账号正常，还原成功")
@@ -2062,6 +2077,7 @@ function focusUser(max) {
                         console.info("网络正常");
                         continue;
                     }
+                    
                     if(state.text()=="Follow"){
                         // 点击
                         if(state.click()) {
@@ -3381,7 +3397,9 @@ function getFansList(fansNameList, fansList, all) {
                 }).findOne(3000)
     }
 
-    while(true){
+    // while(true){ // 无限采集
+    let saveNumberMax = saveNumber + ui.fanslistnumber.text();
+    while(saveNumber < saveNumberMax) {
         sleep(200)
         等待加载(100, 500);
         // 获取粉丝列表父控件
@@ -3475,6 +3493,7 @@ function getFansList(fansNameList, fansList, all) {
             } catch (err) {
                 console.error("异常信息：", err)
                 console.log("再次尝试返回粉丝列表")
+                smenDetection()
                 // 返回粉丝列表
                 for (var i = 0; i < 5; i++) {
                     sleep(1000)
@@ -3500,6 +3519,7 @@ function getFansList(fansNameList, fansList, all) {
             }
         }
 
+        saveNumber = fansNameList.length;
         console.info("保存数量：", score,"当前进展：", getFansNum, "总进展：", countGetFansNum, 
                     "当前账号粉丝已保存：", saveNumber / fansTotal*100,"%")
         if(score == 0) {
@@ -3558,7 +3578,7 @@ function getFansList(fansNameList, fansList, all) {
         }
         log("滑动", scrollDown)
     }
-    log("遍历结束");
+    log(saveNumber < saveNumberMax ? "遍历结束" : ("遍历目标"+ui.fanslistnumber.text()+"已达到"));
     return fansNameList;
 
 }
@@ -3933,6 +3953,8 @@ function mi6回复消息() {
                             // 等待加载列表
                             sleep(500);
                             // 获取当前界面的红色气泡
+                            //TODO 可能会造成inbox 界面是小红点，点击进去之后进行消息发送一次，返回值假设是 1（有人发送了一条消息过来），
+                            //TODO 然后 newMsgCount != smallRedPointTag 条件成立，导致直接返回，又是小红点，又点进去，一直循环到没有小红点
                             let sendList = mi6GetNewMsgList();
                             if(sendList.length > 0){
                                 newMsgCount -= replySendlist(sendList);
@@ -3962,6 +3984,7 @@ function mi6回复消息() {
                     }
                 }catch(e){
                     console.log(e)
+                    smenDetection()
                 }
                 // 重置时间
                 endTime = Date.now();
@@ -4334,6 +4357,7 @@ function sayHello(f, msg){
         f.sayHello++;
         if(!f.reservedA) f.reservedA = "";
         if(re.status){
+            smenReset()
             f.reservedA += "打招呼成功。";
             // 4、将数据保存到 已打招呼.txt中
             // 发送完之后保存到文件中
@@ -4349,6 +4373,9 @@ function sayHello(f, msg){
             f.sayHello = re.msg;
             f.sayHelloException = re.exc;
             files.append(路径.文件夹.私信 + accountInfo.envi + "_打招呼失败.txt", f);
+            // 失败计数，在计数完成之后进行检测
+            sendMessagesExceptionNumber++;
+            smenDetection()
         }
         // 将本次打招呼信息提交到服务器
         // 保存已打招呼的粉丝信息
@@ -4894,10 +4921,11 @@ function mi6ReplyMsg() {
 
     // 6. 进行消息处理，返回false则不回复消息
     let 回消息 = 消息处理(fans,新消息);
+    let sm;
     if(回消息){
         // 输入消息并发送
         log("回复消息")
-        let sm = sendMsg(回消息);
+        sm = sendMsg(回消息);
         总消息.push(sm);
         新消息.push(sm);
     }
@@ -4920,6 +4948,13 @@ function mi6ReplyMsg() {
             }
         }
     })
+
+    if(sm && !sm.status) {
+        // 失败计数，在计数完成之后进行检测
+        sendMessagesExceptionNumber++;
+        smenDetection();
+    }
+
     // 聊天记录和标签都是重新查的,所以不需要再重新保存粉丝信息
     // 将粉丝信息进行保存
     // fans.messages = [];
@@ -7931,7 +7966,7 @@ function openUrlAndSleep3s(url,s) {
     // 在打开链接之后等待加载出来用户信息界面
     let words = ["Follow","Message","Requested"];
     function dfs(wait) {
-        for (let i = 0;wait && i < 50; i++) {
+        for (let i = 0; wait && i < 50; i++) {
             // 等待加载()
             let follow = className("android.widget.TextView")
                 .clickable(true).drawingOrder(1).filter(function(uo){
