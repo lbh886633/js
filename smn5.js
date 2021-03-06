@@ -20,6 +20,7 @@ var fasle = false;
         "修复在发送消息失败时一直重新发送",
         "回复消息实时从后台获取",
         "修复卡死在获取消息",
+        "测试_优化关注用户耗时"
     ];
     uti = logs.pop();
 }
@@ -7929,7 +7930,7 @@ function openUrlAndSleep3s(url,s) {
     // 在打开链接之后等待加载出来用户信息界面
     let words = ["Follow","Message","Requested"];
     function dfs(wait) {
-        for (let i = 0;wait && i < 5; i++) {
+        for (let i = 0;wait && i < 50; i++) {
             // 等待加载()
             let follow = className("android.widget.TextView")
                 .clickable(true).drawingOrder(1).filter(function(uo){
@@ -7949,7 +7950,7 @@ function openUrlAndSleep3s(url,s) {
             // 打开方式
             try{
                 // Open App
-                if(lh_find(text("Open App"), "Open App", 0)) {
+                if(lh_find(text("Open App"), "Open App", 0, 250)) {
                     等待加载()
                     let 打开方式 = text("TikTok").visibleToUser().findOne(1000)
                     if (打开方式) {
@@ -7966,12 +7967,12 @@ function openUrlAndSleep3s(url,s) {
                 console.verbose(err)
                 console.verbose(err.stack)
             }
-            sleep(1000)
+            sleep(100)
         }
     // 声明完后调用
     };
     dfs(true);
-    sleep(1000)
+    // sleep(1000)
 }
 
 function autoConfirm(num, choose, title, content, callback) {
