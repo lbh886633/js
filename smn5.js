@@ -5,23 +5,8 @@ var uti;
 var fasle = false;
 {
     let logs = [
-        "增加打开的链接日志显示",
-        "优化打招呼与退出账号",
-        "去除重新打招呼",
-        "处理了在向后台发起请求后异常的问题",
-        "修复了第一个账号仍然会进行登录的问题",
-        "修复会一直退出账号的问题，新增关注失败归还账号",
-        "修复对携带问题的解析失败",
-        "修复采集进入列表不动，关注频繁时提示提前跳出。",
-        "优化get请求处理方式",
-        "优化小红点",
-        "修改请求方式",
-        "在回复完对方秒回还能继续回复",
-        "修复在发送消息失败时一直重新发送",
-        "回复消息实时从后台获取",
-        "修复卡死在获取消息",
-        "加入发送消息连续失败3次就跳过当前账号",
         "优化关注用户速度",
+        "优化",
     ];
     uti = logs.pop();
 }
@@ -321,10 +306,10 @@ ui.layout(
                             
 
                             <vertical id="modelmenu" bg="#404EC9A2">
-                                <linear padding="5 0 0 0">
-                                    <text textColor="black" textSize="20" text="模式设置" />
+                                <linear padding="5 0 0 0" >
+                                    <text textColor="black" textSize="20" text="模式选择" />
                                 </linear>
-                                <radiogroup orientation="horizontal" gravity="center" >
+                                <radiogroup orientation="horizontal">
                                     <radio id="mi6_null" checked="true" text="空" />
                                     <radio id="mi6_reg" text="注册" />
                                     <radio id="mi6_dat" text="资料" />
@@ -333,15 +318,19 @@ ui.layout(
                                     <radio id="mi6_fan" text="粉丝" />
                                     <radio id="mi6_rep"  text="回复" />
                                 </radiogroup>
-                                <radiogroup orientation="horizontal" gravity="center" >
+                                <radiogroup orientation="horizontal">
                                     <radio id="mi6_null" checked="true" text="空" />
                                     <radio id="mi6_task" text="任务" />
                                     <radio id="getUserList" text="采集用户" />
                                     <radio id="focusUser" text="关注用户" />
                                     <radio id="detectionException" text="检测异常" />
-                                    <radio id="functionTest" text="测" />
                                 </radiogroup>
-                                
+                                {/* 
+                                <radiogroup orientation="horizontal" >
+                                    <radio id="mi6_null" checked="true" text="空" />
+                                    <radio id="functionTest" text="测试函数" />
+                                </radiogroup>
+                                 */}
                                 <radiogroup orientation="horizontal" h="0">
                                     <radio id="ptxz" text="登号" />
                                     <radio id="ptxz1" text="采集" />
@@ -355,17 +344,41 @@ ui.layout(
                             <linear>
                                     <checkbox id="switchVersion" text="长版本号" />
                                     <checkbox id="switchVersionzl" text="短版本号" />
-                                    <checkbox id="readLocalAccountRecord" text="账号进度" />
-                                    <checkbox id="createAccount" text="生成邮箱" />
-                            </linear>
-                            <linear>
+                                    <checkbox id="createAccount" text="生成邮箱" marginLeft="18sp"/>
                                     <checkbox id="daily" text="日常模式" />
                             </linear>
-
 
                             <linear padding="5 0 0 0" margin="40dp">
                                 <button id="ok" w="*" h="auto" layout_gravity="bottom" style="Widget.AppCompat.Button.Colored" text="启动" />
                             </linear>
+
+                            <vertical id="loginmodel">
+                                
+                                <linear>
+                                    <checkbox id="switchaccount" text="登录账号" />
+                                    <checkbox id="readLocalAccountRecord" text="账号进度" />
+                                </linear>
+
+                                <linear padding="2 0 0 0">
+                                    <text textColor="black" text="指定关注数量: " />
+                                    <input lines="1" id="focusUserNumber" w="auto" text="200"/>
+                                </linear>
+                                <linear padding="2 0 0 0">
+                                    <checkbox id="setServerUrl" text="" />
+                                    <text textColor="black" text="指定服务器地址: " />
+                                    <input lines="1" id="serverUrl" w="*" lines="2" text="{{server.serverUrl}}"/>
+                                </linear>
+                                <linear padding="2 0 0 0">
+                                    <text textColor="black" text="停留时间: " />
+                                    <input lines="1" id="stopTime" w="*" text="1" inputType="number|numberDecimal"/>
+                                </linear>
+                                <linear padding="2 0 0 0">
+                                    <text textColor="black" text="采集打招呼个数: " />
+                                    <input lines="1" id="fanslistnumber" w="*" text="10" inputType="number|numberDecimal"/>
+                                </linear>
+                            </vertical>
+
+                            <text h="30sp" lines="1" textColor="#007ACC">————————————————————————————————————————</text>
 
                             <vertical id="loginmodel">
                                 <linear padding="5 0 0 0">
@@ -439,27 +452,7 @@ ui.layout(
                                     <checkbox id="continue" checked="true" text="现在继续" />
                                     <checkbox id="nofor" checked="true" text="关闭循环" />
                                 </linear>
-                                <linear>
-                                    <checkbox id="switchaccount" checked="true" text="登录账号" />
-                                </linear>
                             </vertical>
-                            <linear padding="5 0 0 0">
-                                <text textColor="black" text="指定关注数量: " />
-                                <input lines="1" id="focusUserNumber" w="auto" text="200"/>
-                            </linear>
-                            <linear padding="5 0 0 0">
-                                <checkbox id="setServerUrl" text="" />
-                                <text textColor="black" text="指定服务器地址: " />
-                                <input lines="1" id="serverUrl" w="*" lines="2" text="{{server.serverUrl}}"/>
-                            </linear>
-                            <linear padding="5 0 0 0">
-                                <text textColor="black" text="停留时间: " />
-                                <input lines="1" id="stopTime" w="*" text="1" inputType="number|numberDecimal"/>
-                            </linear>
-                            <linear padding="5 0 0 0">
-                                <text textColor="black" text="采集打招呼个数: " />
-                                <input lines="1" id="fanslistnumber" w="*" text="20" inputType="number|numberDecimal"/>
-                            </linear>
                             <vertical id="getmodel">
                                 <linear padding="5 0 0 0">
                                     <text textColor="black" textSize="20" text="采集设置" />
@@ -1608,7 +1601,7 @@ function 随机滑动() {
 
 }
 
-function lh_find(obj, msg, dj, time) {
+function lh_find(obj, msg, dj, time, closeLog) {
     sleep(random(100, 150))
     time = time || 2500
     var 结果 = obj.findOne(time)
@@ -1635,7 +1628,7 @@ function lh_find(obj, msg, dj, time) {
         }
     } else {
         if (msg) {
-            console.log("没找到 " + msg)
+            if(!closeLog) console.log("没找到 " + msg)
         } else {
             // console.log("没找到 ")
         }
@@ -2148,7 +2141,7 @@ function focusUser(max) {
             // 打开方式，有时出现太慢
             try{
                 // Open App
-                if(lh_find(text("Open App"), "Open App", 0, 100)) {
+                if(lh_find(text("Open App"), "Open App", 0, 100, true)) {
                     等待加载()
                     let 打开方式 = text("TikTok").visibleToUser().findOne(1000)
                     if (打开方式) {
@@ -3450,7 +3443,7 @@ function getFansList(fansNameList, fansList, all) {
                         closeTag = 0;
 
                         // 获取粉丝信息
-                        let fans = getFansInfo(username);
+                        let fans = getFansInfo(username,null,null,true);
 
                         //  发送私信
                         if(ui.getsay.checked) {
@@ -3461,7 +3454,11 @@ function getFansList(fansNameList, fansList, all) {
                             let newMsg = (tempSave.getSayMessage||"Hi~");
                             let re = sayHello(fans, newMsg);
                             if(re){
-                                console.info("消息发送状态", re.status);
+                                console.info("消息发送成功", re.status);
+                                threads.start(function(){
+                                    log("正在上传粉丝信息");
+                                    save(fans);
+                                })
                             } else {
                                 log("发送失败")
                             }
@@ -3584,7 +3581,7 @@ function getFansList(fansNameList, fansList, all) {
 }
 
 // 获取信息的函数，需要在用户信息的界面
-function getFansInfo(usernameP,mainTag, saveUri) {
+function getFansInfo(usernameP,mainTag, saveUri, noSaveTag) {
     function getNum(str){
         let uo = text(str).findOne(1000);
         if(uo) {
@@ -3744,17 +3741,20 @@ function getFansInfo(usernameP,mainTag, saveUri) {
                 video: video
             }
         }
-        else return save({
-            name: name,
-            username: username,
-            focusNumber: focusNumber,
-            fansNumber: fansNumber,
-            likeNumber: likeNumber,
-            BI: BI,
-            urlExists: urlExists,
-            url: url,
-            uri: uri
-        },false,saveUri);
+        else {
+            let fanObj = {
+                name: name,
+                username: username,
+                focusNumber: focusNumber,
+                fansNumber: fansNumber,
+                likeNumber: likeNumber,
+                BI: BI,
+                urlExists: urlExists,
+                url: url,
+                uri: uri
+            }
+            return noSaveTag ?  fanObj : save(fanObj,false,saveUri);
+        }
         } catch (e) {
         console.verbose("采集异常：", e)
     }
@@ -3829,6 +3829,7 @@ function save(obj,savaToFile, saveUri) {
     }
     fansNameList.push(obj.username);
     fansList.push(obj);
+{
 /*  fans = { name: 'Fernanda Marques',
         username: 'feer_marquexxxxx',
         focusNumber: '402',
@@ -3855,24 +3856,24 @@ function save(obj,savaToFile, saveUri) {
     }
 
 */
-// 保存到服务器，采集时会导致账号为null从而导致上传异常
-let upFans = {
-    username: obj.username,
-    isExceptoion: 0,
-    isInvalid: 0,
-    url: obj.url,
-    name: obj.name,
-    focus: server.numberToString(obj.focusNumber),
-    fans: server.numberToString(obj.fansNumber),
-    likes: server.numberToString(obj.likeNumber),
-    accountUsername: accountInfo.username,
-    device: accountInfo.enviName,
-    reservedB: obj.BI,
 }
+    // 保存到服务器，采集时会导致账号为null从而导致上传异常
+    let upFans = {
+        username: obj.username,
+        isExceptoion: 0,
+        isInvalid: 0,
+        url: obj.url,
+        name: obj.name,
+        focus: server.numberToString(obj.focusNumber),
+        fans: server.numberToString(obj.fansNumber),
+        likes: server.numberToString(obj.likeNumber),
+        accountUsername: accountInfo.username,
+        device: accountInfo.enviName,
+        reservedB: obj.BI,
+    }
     server.add(saveUri || "fans", server.excludeNull(upFans));
     return obj;
 }
-
 
 function mi6回复消息() {
     
@@ -7986,7 +7987,7 @@ function openUrlAndSleep3s(url,s) {
             // 打开方式
             try{
                 // Open App
-                if(lh_find(text("Open App"), "Open App", 0, 250)) {
+                if(lh_find(text("Open App"), "Open App", 0, 250, true)) {
                     等待加载()
                     let 打开方式 = text("TikTok").visibleToUser().findOne(1000)
                     if (打开方式) {
