@@ -7,6 +7,7 @@ var fasle = false;
     let logs = [
         "优化关注用户速度",
         "优化",
+        "修复",
     ];
     uti = logs.pop();
 }
@@ -325,12 +326,11 @@ ui.layout(
                                     <radio id="focusUser" text="关注用户" />
                                     <radio id="detectionException" text="检测异常" />
                                 </radiogroup>
-                                {/* 
-                                <radiogroup orientation="horizontal" >
+                                {/* 测试时使用 */}
+                                <radiogroup orientation="horizontal" h="0">
                                     <radio id="mi6_null" checked="true" text="空" />
                                     <radio id="functionTest" text="测试函数" />
                                 </radiogroup>
-                                 */}
                                 <radiogroup orientation="horizontal" h="0">
                                     <radio id="ptxz" text="登号" />
                                     <radio id="ptxz1" text="采集" />
