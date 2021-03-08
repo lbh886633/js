@@ -1371,9 +1371,9 @@ function 打开抖音() {
             // 检测是否打开抖音
             if (packageName(appPackage).findOne(2000)){
                 // 连续检测5次弹窗，如果已经到了主页，出现Me控件则跳出
-                for (let j = 0; j < 5; j++) {
+                for (let j = 0; j < 3; j++) {
                     // 检测弹窗
-                    popupDetection();
+                    popupDetection(1000);
                     sleep(500)
                     if(text("Me").findOnce()){
                        break; 
@@ -6065,7 +6065,9 @@ function mi6注册模式() {
                 console.hide()
                 log("开始滑动");
                 for (var ii = 1; ii < 3; ii++) {
-                    var 年 = depth(8).drawingOrder((ii + 1)).classNameEndsWith("view.View").findOne(1000)
+                    var 年 = filter(function(uo){
+                            return uo.depth() == 8 || uo.depth() == 9;
+                        }).drawingOrder((ii + 1)).classNameEndsWith("view.View").findOne(1000)
                     if (年) {
                         var 坐标 = 年.bounds()
                         for (var i = 0; i < random(3, 4); i++) {
