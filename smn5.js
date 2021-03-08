@@ -8,7 +8,7 @@ var fasle = false;
         "优化关注用户速度",
         "优化",
         "修复",
-        "测试_优化账号注册",
+        "优化账号注册",
     ];
     uti = logs.pop();
 }
@@ -6150,9 +6150,10 @@ function mi6注册模式() {
                                         if (等待) {
                                             console.verbose("等待")
                                         } else {
+                                            sleep(500);
                                             break;
                                         }
-                                        sleep(1500)
+                                        sleep(1500);
                                     }
 
                                     var 频繁 = textContains("You are visiting our service too frequently").findOne(1000)
@@ -6172,7 +6173,7 @@ function mi6注册模式() {
                                         log("离开验证码界面")
                                     }
 
-                                    if (lh_find(text("Skip").clickable(true), "skip", 0, 1000)) {
+                                    if (lh_find(text("Skip").clickable(true), "skip", 0)) {
                                         saveReg(随机账号, ui.szmm.text());
                                         log("注册成功了")
                                         return true
