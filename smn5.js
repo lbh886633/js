@@ -8,7 +8,7 @@ var fasle = false;
         "优化关注用户速度",
         "优化",
         "修复",
-        "测试_优化账号注册v2",
+        "测试_优化账号注册v3",
     ];
     uti = logs.pop();
 }
@@ -1379,8 +1379,8 @@ function 打开抖音() {
                        break; 
                     }
                     
-                    log("Use phone or email...")
                     if(textContains("Use phone or email").findOne(100)) {
+                        log("Use phone or email ...")
                         return true;
                     }
                 }
@@ -2032,7 +2032,7 @@ function 返回首页(dayleTime) {
         }
     }
     // 点击 “Me” 
-    lh_find(text("Me"),"个人信息", 0, 3000);
+    lh_find(text("Me"),"个人信息", 0, 1000);
     // text("Me").findOne(2000).parent().click()
 }
 
@@ -5985,7 +5985,7 @@ function mi6注册模式() {
     } */
     // 注册
     for (let index = 0; index < 5; index++) {
-        返回首页(1000);
+        返回首页(300);
         if(false && !lh_find(text("Sign up").clickable(true), "Sign up", 0)){
             try{
                 for (; i < 3;) {
