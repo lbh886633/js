@@ -8,7 +8,7 @@ var fasle = false;
         "优化关注用户速度",
         "优化",
         "修复",
-        "测试_优化账号注册v1",
+        "测试_优化账号注册v2",
     ];
     uti = logs.pop();
 }
@@ -1374,9 +1374,14 @@ function 打开抖音() {
                 for (let j = 0; j < 5; j++) {
                     // 检测弹窗
                     popupDetection();
-                    sleep(600)
+                    sleep(500)
                     if(text("Me").findOnce()){
                        break; 
+                    }
+                    
+                    log("Use phone or email...")
+                    if(textContains("Use phone or email").findOne(100)) {
+                        return true;
                     }
                 }
 
@@ -1389,9 +1394,6 @@ function 打开抖音() {
                 if(text("Edit profile").findOnce()){
                     log("已经存在账号")
                     return false;
-                }
-                if(textContains("Use phone").findOne(1000)) {
-                    return true;
                 }
                 // log提示语句
                 console.verbose("等待" + appName + "启动中..." + i);
