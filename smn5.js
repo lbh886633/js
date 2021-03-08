@@ -8,7 +8,7 @@ var fasle = false;
         "优化关注用户速度",
         "优化",
         "修复",
-        "测试_v4_优化账号注册",
+        "测试_v5_优化账号注册",
     ];
     uti = logs.pop();
 }
@@ -6110,7 +6110,7 @@ function mi6注册模式() {
                             if (注册查看滑块()) {
                                 if (注册打码()) {
                                 } else {
-                                    log("注册失败！")
+                                    log("打码失败！")
                                 }
                             }
                         })
@@ -6533,7 +6533,7 @@ try{
             return true
         }
         //var 滑块范围 = indexInParent(2).depth(6).classNameEndsWith("view.View").findOne(2000)
-        var 滑块范围 = indexInParent(1).depth(8).classNameEndsWith("view.View").findOne(2000)
+        var 滑块范围 = indexInParent(0).depth(7).classNameEndsWith("view.View").findOne(2000);
 
         if (滑块范围) {
             var 坐标 = 滑块范围.bounds()
