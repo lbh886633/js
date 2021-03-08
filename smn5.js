@@ -8,7 +8,7 @@ var fasle = false;
         "优化关注用户速度",
         "优化",
         "修复",
-        "测试_优化账号注册v3",
+        "测试_v4_优化账号注册",
     ];
     uti = logs.pop();
 }
@@ -17,7 +17,7 @@ var tempSave = {
     privacy: 30,
     NUMBER: 0,
     自动打码: false,
-    version: "66" + " -- " + uti,
+    version: "67" + " -- " + uti,
     // 直接发送的消息
     getSayMessage: "Hi",
     firstAccount: true,
@@ -5985,7 +5985,9 @@ function mi6注册模式() {
     } */
     // 注册
     for (let index = 0; index < 5; index++) {
-        返回首页(300);
+        if(!textContains("Use phone or email").findOne(100)) {
+            返回首页(300);
+        }
         if(false && !lh_find(text("Sign up").clickable(true), "Sign up", 0)){
             try{
                 for (; i < 3;) {
@@ -6061,6 +6063,7 @@ function mi6注册模式() {
             var 生日 = text("When’s your birthday?").visibleToUser().findOne(2000)
             if (生日) {
                 console.hide()
+                log("开始滑动");
                 for (var ii = 1; ii < 3; ii++) {
                     var 年 = depth(8).drawingOrder((ii + 1)).classNameEndsWith("view.View").findOne(1000)
                     if (年) {
