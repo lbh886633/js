@@ -8,7 +8,7 @@ var fasle = false;
         "优化关注用户速度",
         "优化",
         "修复",
-        "测试_v5_优化账号注册",
+        "测试_v6_优化账号注册",
     ];
     uti = logs.pop();
 }
@@ -16,7 +16,7 @@ var tempSave = {
     firstEnvi: 0,
     privacy: 30,
     NUMBER: 0,
-    自动打码: false,
+    自动打码: true,
     version: "67" + " -- " + uti,
     // 直接发送的消息
     getSayMessage: "Hi",
