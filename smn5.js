@@ -8,7 +8,7 @@ var fasle = false;
         "优化关注用户速度",
         "优化",
         "修复",
-        "测试_v6_优化账号注册",
+        "测试_优化账号注册",
     ];
     uti = logs.pop();
 }
@@ -17,7 +17,7 @@ var tempSave = {
     privacy: 30,
     NUMBER: 0,
     自动打码: true,
-    version: "67" + " -- " + uti,
+    version: "68" + " -- " + uti,
     // 直接发送的消息
     getSayMessage: "Hi",
     firstAccount: true,
@@ -846,6 +846,7 @@ function 主程序() {
         tempSave.continue = true;
         while (tempSave.continue) {
             mi6注册模式();
+            {/* 
             if(tempSave.continue) {
                 // 在执行完之后如果还为true则等待继续
                 let cf = floaty.rawWindow(<frame><button id="but">继续注册</button></frame>)
@@ -859,6 +860,7 @@ function 主程序() {
                     sleep(1000);
                 }
             }
+             */}
         }
         toastLog("注册结束");
         return false;
@@ -6087,12 +6089,14 @@ function mi6注册模式() {
                 随机账号 = 取注册()
                 log(随机账号 + " " + setText(随机账号))
                 sleep(500)
-                if (lh_find(depth(11).text("Next"), "Next")) {
+                if (lh_find(text("Next"), "Next")) {
                     // sleep(4000, 5000)
                     log("暂未处理异常检测，例如频繁")
                     while (1) {
                         // 加入频繁检测'
-                        var 等待 = depth(11).drawingOrder(2).classNameEndsWith("view.View").visibleToUser().findOne(500)
+                        var 等待 = 
+                            // depth(11).  // 如果出现异常再重新打开
+                        drawingOrder(2).classNameEndsWith("view.View").visibleToUser().findOne(500)
                         if (等待) {
                             console.verbose("等待")
                         } else {
