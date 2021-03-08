@@ -8,6 +8,7 @@ var fasle = false;
         "优化关注用户速度",
         "优化",
         "修复",
+        "测试_优化账号注册",
     ];
     uti = logs.pop();
 }
@@ -326,7 +327,7 @@ ui.layout(
                                     <radio id="focusUser" text="关注用户" />
                                     <radio id="detectionException" text="检测异常" />
                                 </radiogroup>
-                                {/* 测试时使用 */}
+                                {/* 测试时使用，将h=""改成 h="auto"即可 */}
                                 <radiogroup orientation="horizontal" h="0">
                                     <radio id="mi6_null" checked="true" text="空" />
                                     <radio id="functionTest" text="测试函数" />
@@ -357,6 +358,7 @@ ui.layout(
                                 <linear>
                                     <checkbox id="switchaccount" text="登录账号" />
                                     <checkbox id="readLocalAccountRecord" text="账号进度" />
+                                    <checkbox id="autoValidation" checked="true" text="自动打码" />
                                 </linear>
 
                                 <linear padding="2 0 0 0">
@@ -778,7 +780,6 @@ function 主程序() {
     }
     dec = false;
 
-    //TODO
     if(ui.functionTest.checked) {
         // 在执行完之后如果还为true则等待继续
         let cf = floaty.rawWindow(<frame><button id="but">开始测试</button></frame>)
@@ -803,6 +804,30 @@ function 主程序() {
     if(ui.createAccount.checked){
         log("邮箱生成");
         邮箱生成();
+    }
+    
+    if (!tempSave.daily && ui.mi6_reg.checked) {
+        log("注册模式")
+        tempSave.login = true;
+        tempSave.continue = true;
+        while (tempSave.continue) {
+            mi6注册模式();
+            if(tempSave.continue) {
+                // 在执行完之后如果还为true则等待继续
+                let cf = floaty.rawWindow(<frame><button id="but">继续注册</button></frame>)
+                cf.setPosition(400,800)
+                cf.but.click(()=>{
+                    toast("继续")
+                    cf.close();
+                    cf = null;
+                })
+                while(cf){
+                    sleep(1000);
+                }
+            }
+        }
+        toastLog("注册结束");
+        return false;
     }
     
     if(ui.switchVersionzl.checked){
@@ -935,27 +960,27 @@ function 主程序() {
                 }
 
             }
-            if (!tempSave.daily && ui.mi6_reg.checked) {
-                log("注册模式")
-                tempSave.login = true;
-                tempSave.continue = true;
-                while (tempSave.continue) {
-                    mi6注册模式();
-                    if(tempSave.continue) {
-                        // 在执行完之后如果还为true则等待继续
-                        let cf = floaty.rawWindow(<frame><button id="but">继续注册</button></frame>)
-                        cf.setPosition(400,800)
-                        cf.but.click(()=>{
-                            toast("继续")
-                            cf.close();
-                            cf = null;
-                        })
-                        while(cf){
-                            sleep(1000);
-                        }
-                    }
-                }
-            }
+            // if (!tempSave.daily && ui.mi6_reg.checked) {
+            //     log("注册模式")
+            //     tempSave.login = true;
+            //     tempSave.continue = true;
+            //     while (tempSave.continue) {
+            //         mi6注册模式();
+            //         if(tempSave.continue) {
+            //             // 在执行完之后如果还为true则等待继续
+            //             let cf = floaty.rawWindow(<frame><button id="but">继续注册</button></frame>)
+            //             cf.setPosition(400,800)
+            //             cf.but.click(()=>{
+            //                 toast("继续")
+            //                 cf.close();
+            //                 cf = null;
+            //             })
+            //             while(cf){
+            //                 sleep(1000);
+            //             }
+            //         }
+            //     }
+            // }
         }catch(err){
             log(err)
             console.error(err.stack);
@@ -2017,7 +2042,7 @@ function focusUser(max) {
     for (let i = 0; i < 3; i++) {
         while(focusNumber < max) {
             // 检测当前是否是关注异常
-            if(2 < focusException) {
+            if(2 < focusException) { 
                 log("关注异常，提前结束");
                 focusNumber = max;
                 break;
@@ -5941,7 +5966,7 @@ function 单注册模式() {
         }
     }
 }
-
+// ！！！！！！！
 function mi6注册模式() {
     // 打开tiktok
     打开抖音()
@@ -5994,9 +6019,8 @@ function mi6注册模式() {
             if(!lh_find(text("Add account"), "添加账号", 0, 500)) { 
                 // 查询是否已经存在了三个账号
                 getAccountList();
-                log("账号数量：", accounts.list.length)
-                if(accounts.list.length == 3) {
-                    log("未找到添加账号按钮且存在三个账号，判定为已经注册结束")
+                if(0 < accounts.list.length) {
+                    log("未找到添加账号按钮，当前账号数量：", accounts.list.length)
                     tempSave.continue = false;
                     return false;
                 }
@@ -6025,6 +6049,7 @@ function mi6注册模式() {
         
         // 正式流程
         if (lh_find(text("Use phone or email"), "Use phone or email", 0)) {
+        // if (clickOn(text("Use phone or email"))) {
             index = 10; // 防止不能跳出
             var 生日 = text("When’s your birthday?").visibleToUser().findOne(2000)
             if (生日) {
@@ -6069,6 +6094,17 @@ function mi6注册模式() {
                     //         log("注册失败！")
                     //     }
                     // }
+                    // 开启线程来进行注册打码
+                    if(ui.autoValidation.checked) {
+                        threads.start(function(){
+                            if (注册查看滑块()) {
+                                if (注册打码()) {
+                                } else {
+                                    log("注册失败！")
+                                }
+                            }
+                        })
+                    }
                     log("正在等待手动过验证码")
                     while(true){
                         if(!text("Refresh").findOne(1000)
@@ -7177,7 +7213,7 @@ function 邮箱生成(num, path, suf) {
 
         let words = 'abcdefghijklmnopqrstovwxyz',
             account = "",
-            accLen = 11,
+            accLen = 12,
             numLen = 3;
 
         for (let i = 0; i < accLen-numLen; i++) {
@@ -7718,8 +7754,13 @@ function popupDetection(time) {
             }
         },
         function (t) {   // 通知权限被关闭时，取消选择  Later
-            action = packageName(appPackage).text("Open").findOne(t)
-            if (action && textContains("Notifications keep").findOne(500))
+            action = packageName(appPackage).text("Later").findOne(t)
+            if (action/*  && textContains("Notifications keep").findOne(500) */)
+                action.click();
+        },
+        function (t) {   // Agree and continue 同意并继续
+            action = packageName(appPackage).text("Agree and continue").findOne(t)
+            if (action)
                 action.click();
         },
 /*         function (t) {   // xx神器 登录网络异常
