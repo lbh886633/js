@@ -8,7 +8,7 @@ var fasle = false;
         "优化关注用户速度",
         "优化",
         "修复",
-        "测试_优化账号注册",
+        "测试_优化账号注册v1",
     ];
     uti = logs.pop();
 }
@@ -774,7 +774,7 @@ function 主程序() {
     })
     console.show()
     console.setPosition(10,0)
-    if (!requestScreenCapture()) {
+    if (!requestScreenCapture()) {            
         toast("请求截图失败");
         exit();
     }
@@ -805,30 +805,7 @@ function 主程序() {
         log("邮箱生成");
         邮箱生成();
     }
-    
-    if (!tempSave.daily && ui.mi6_reg.checked) {
-        log("注册模式")
-        tempSave.login = true;
-        tempSave.continue = true;
-        while (tempSave.continue) {
-            mi6注册模式();
-            if(tempSave.continue) {
-                // 在执行完之后如果还为true则等待继续
-                let cf = floaty.rawWindow(<frame><button id="but">继续注册</button></frame>)
-                cf.setPosition(400,800)
-                cf.but.click(()=>{
-                    toast("继续")
-                    cf.close();
-                    cf = null;
-                })
-                while(cf){
-                    sleep(1000);
-                }
-            }
-        }
-        toastLog("注册结束");
-        return false;
-    }
+
     
     if(ui.switchVersionzl.checked){
         log("切换zl版本");
@@ -862,7 +839,32 @@ function 主程序() {
         console.info("采集用户模式结束");
         exit()
     }
-    
+        
+    if (!tempSave.daily && ui.mi6_reg.checked) {
+        log("注册模式")
+        tempSave.login = true;
+        tempSave.continue = true;
+        while (tempSave.continue) {
+            mi6注册模式();
+            if(tempSave.continue) {
+                // 在执行完之后如果还为true则等待继续
+                let cf = floaty.rawWindow(<frame><button id="but">继续注册</button></frame>)
+                cf.setPosition(400,800)
+                cf.but.click(()=>{
+                    toast("继续")
+                    cf.close();
+                    cf = null;
+                })
+                while(cf){
+                    sleep(1000);
+                }
+            }
+        }
+        toastLog("注册结束");
+        return false;
+    }
+
+
     // 日常模式，关注、采集粉丝、回复消息
     tempSave.daily = ui.daily.checked;
 
@@ -1387,6 +1389,9 @@ function 打开抖音() {
                 if(text("Edit profile").findOnce()){
                     log("已经存在账号")
                     return false;
+                }
+                if(textContains("Use phone").findOne(1000)) {
+                    return true;
                 }
                 // log提示语句
                 console.verbose("等待" + appName + "启动中..." + i);
