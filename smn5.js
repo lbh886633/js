@@ -9,7 +9,7 @@ var fasle = false;
         "优化",
         "修复",
         "优化账号注册",
-        "测试_v8",
+        "测试_优化打码",
     ];
     uti = logs.pop();
 }
@@ -791,38 +791,13 @@ function 主程序() {
             cf.close()
             cf = null
         })
+        // launch(appPackage)
         while(cf){
             sleep(300);
         }
 
         try{
-            log("获取滑块范围")
-            var 滑块范围 = depth(8).classNameEndsWith("view.View").filter(function(uo){return uo.indexInParent()==0 || uo.indexInParent()==1;}).findOne(2000)
-            log("滑块范围", 滑块范围)
-            if (滑块范围) {
-                log("计算坐标")
-                var 坐标 = 滑块范围.bounds()
-                var clip = images.clip(captureScreen(), 坐标.left, 坐标.top, 坐标.right - 坐标.left, 坐标.bottom - 坐标.top);
-                log("截图打码")
-                var 返回 = 联众打码("lbh886633", "Libinhao886633", clip)
-                log("结果：", 返回);
-                if (返回) {
-                    if(返回!="end"){
-                        返回 = Number(返回.split(",")[0]) + 坐标.left - 20
-                        log(返回)
-                        var 起点 = classNameEndsWith("Image").filter(function(uo){return uo.depth()==12 || uo.depth()==12;}).findOne(1000);
-                    }
-                    if (起点) {
-                        if(起点!="end"){
-                            log("正在滑动")
-                            var 起点坐标 = 起点.bounds()
-                            log("起点坐标",起点坐标)
-                            log("最终移动坐标",起点坐标.centerX(), 起点坐标.centerY(), 返回 , ":", 返回 + (起点坐标.right - 起点坐标.left), 起点坐标.centerY())
-                            swipe(起点坐标.centerX(), 起点坐标.centerY(), 返回 , 起点坐标.centerY(), 1000)
-                            // swipe(起点坐标.centerX(), 起点坐标.centerY(), 返回 + (起点坐标.right - 起点坐标.left), 起点坐标.centerY(), 1000)
-                            sleep(5000)
-                        }
-                    }}}
+            log("测试函数")
         }catch(e){
             log(e)
         }
@@ -6589,7 +6564,8 @@ try{
                     if(起点!="end"){
                         log("正在滑动——注册")
                         var 起点坐标 = 起点.parent().parent().bounds()
-                        swipe(起点坐标.centerX(), 起点坐标.centerY(), 返回 + (起点坐标.centerX() - 起点坐标.left), 起点坐标.centerY(), 1000)
+                        // swipe(起点坐标.centerX(), 起点坐标.centerY(), 返回 + (起点坐标.centerX() - 起点坐标.left), 起点坐标.centerY(), 1000)
+                        swipe(起点坐标.centerX(), 起点坐标.centerY(), 返回 /* + (起点坐标.right - 起点坐标.left) */, 起点坐标.centerY(), 1000)
                         sleep(6000)
                     }
                     var 还在 = desc("Refresh").findOne(1500)
