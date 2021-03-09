@@ -9,7 +9,7 @@ var fasle = false;
         "优化",
         "修复",
         "优化账号注册",
-        "测试_滑块无法滑动问题",
+        "测试_查看参数",
     ];
     uti = logs.pop();
 }
@@ -18,7 +18,7 @@ var tempSave = {
     privacy: 30,
     NUMBER: 0,
     自动打码: true,
-    version: "68" + " -- " + uti,
+    version: "69" + " -- " + uti,
     // 直接发送的消息
     getSayMessage: "Hi",
     firstAccount: true,
@@ -329,7 +329,7 @@ ui.layout(
                                     <radio id="detectionException" text="检测异常" />
                                 </radiogroup>
                                 {/* 测试时使用，将h=""改成 h="auto"即可 */}
-                                <radiogroup orientation="horizontal" h="0">
+                                <radiogroup orientation="horizontal" h="auto">
                                     <radio id="mi6_null" checked="true" text="空" />
                                     <radio id="functionTest" text="测试函数" />
                                 </radiogroup>
@@ -796,7 +796,31 @@ function 主程序() {
         }
 
         try{
-            上一条消息是否为自己发送的();
+            var 滑块范围 = indexInParent(1).depth(8).classNameEndsWith("view.View").findOne(2000)
+            if (滑块范围) {
+                var 坐标 = 滑块范围.bounds()
+                var clip = images.clip(captureScreen(), 坐标.left, 坐标.top, 坐标.right - 坐标.left, 坐标.bottom - 坐标.top);
+                log("截图打码")
+                var 返回 = 联众打码("lbh886633", "Libinhao886633", clip)
+                log("结果：", 返回);
+                if (返回) {
+                    if(返回!="end"){
+                        返回 = Number(返回.split(",")[0]) + 坐标.left - 20
+                        log(返回)
+                        var 起点 = depth(12).classNameEndsWith("Image").findOne(1000);
+                    }
+                    if (起点) {
+                        if(起点!="end"){
+                            log("正在滑动")
+                            var 起点坐标 = 起点.bounds()
+                            log("起点坐标",起点坐标)
+                            log("最终移动坐标",起点坐标.centerX(), 起点坐标.centerY(), 返回 , ":", 返回 + (起点坐标.right - 起点坐标.left), 起点坐标.centerY())
+                            swipe(起点坐标.centerX(), 起点坐标.centerY(), 返回 , 起点坐标.centerY(), 1000)
+                            // swipe(起点坐标.centerX(), 起点坐标.centerY(), 返回 + (起点坐标.right - 起点坐标.left), 起点坐标.centerY(), 1000)
+                            sleep(5000)
+                        }
+                    }}}
+
         }catch(e){
             log(e)
         }
