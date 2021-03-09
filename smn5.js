@@ -9,7 +9,7 @@ var fasle = false;
         "优化",
         "修复",
         "优化账号注册",
-        "测试_v5",
+        "测试_v6",
     ];
     uti = logs.pop();
 }
@@ -797,7 +797,7 @@ function 主程序() {
 
         try{
             log("获取滑块范围")
-            var 滑块范围 = indexInParent(1).depth(8).classNameEndsWith("view.View").findOne(2000)
+            var 滑块范围 = depth(8).classNameEndsWith("view.View").findOne(2000)
             log("滑块范围", 滑块范围)
             if (滑块范围) {
                 log("计算坐标")
@@ -1573,7 +1573,8 @@ function 打码() {
         log("直接登录成功了")
         return true
     }
-    var 滑块范围 = indexInParent(1).depth(8).classNameEndsWith("view.View").findOne(2000)
+    // var 滑块范围 = indexInParent(1).depth(8).classNameEndsWith("view.View").findOne(2000)
+    var 滑块范围 = depth(8).classNameEndsWith("view.View").findOne(2000)
     if (滑块范围) {
         var 坐标 = 滑块范围.bounds()
         var clip = images.clip(captureScreen(), 坐标.left, 坐标.top, 坐标.right - 坐标.left, 坐标.bottom - 坐标.top);
