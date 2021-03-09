@@ -9,7 +9,7 @@ var fasle = false;
         "优化",
         "修复",
         "优化账号注册",
-        "测试_v7",
+        "测试_v8",
     ];
     uti = logs.pop();
 }
@@ -797,7 +797,7 @@ function 主程序() {
 
         try{
             log("获取滑块范围")
-            var 滑块范围 = depth(8).classNameEndsWith("view.View").filter(function(uo){return uo.indexInParent()==1 || uo.indexInParent()==2;}).findOne(2000)
+            var 滑块范围 = depth(8).classNameEndsWith("view.View").filter(function(uo){return uo.indexInParent()==0 || uo.indexInParent()==1;}).findOne(2000)
             log("滑块范围", 滑块范围)
             if (滑块范围) {
                 log("计算坐标")
