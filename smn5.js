@@ -9,7 +9,7 @@ var fasle = false;
         "优化",
         "修复",
         "优化账号注册",
-        "测试_v6",
+        "测试_v7",
     ];
     uti = logs.pop();
 }
@@ -797,7 +797,7 @@ function 主程序() {
 
         try{
             log("获取滑块范围")
-            var 滑块范围 = depth(8).classNameEndsWith("view.View").findOne(2000)
+            var 滑块范围 = depth(8).classNameEndsWith("view.View").filter(function(uo){return uo.indexInParent()==1 || uo.indexInParent()==2;}).findOne(2000)
             log("滑块范围", 滑块范围)
             if (滑块范围) {
                 log("计算坐标")
@@ -810,7 +810,7 @@ function 主程序() {
                     if(返回!="end"){
                         返回 = Number(返回.split(",")[0]) + 坐标.left - 20
                         log(返回)
-                        var 起点 = depth(12).classNameEndsWith("Image").findOne(1000);
+                        var 起点 = classNameEndsWith("Image").filter(function(uo){return uo.depth()==12 || uo.depth()==12;}).findOne(1000);
                     }
                     if (起点) {
                         if(起点!="end"){
@@ -1574,7 +1574,7 @@ function 打码() {
         return true
     }
     // var 滑块范围 = indexInParent(1).depth(8).classNameEndsWith("view.View").findOne(2000)
-    var 滑块范围 = depth(8).classNameEndsWith("view.View").findOne(2000)
+    var 滑块范围 = depth(8).classNameEndsWith("view.View").filter(function(uo){return uo.indexInParent()==0 || uo.indexInParent()==1;}).findOne(2000)
     if (滑块范围) {
         var 坐标 = 滑块范围.bounds()
         var clip = images.clip(captureScreen(), 坐标.left, 坐标.top, 坐标.right - 坐标.left, 坐标.bottom - 坐标.top);
@@ -6571,7 +6571,7 @@ try{
             return true
         }
         //var 滑块范围 = indexInParent(2).depth(6).classNameEndsWith("view.View").findOne(2000)
-        var 滑块范围 = indexInParent(0).depth(7).classNameEndsWith("view.View").findOne(2000);
+    var 滑块范围 = depth(8).classNameEndsWith("view.View").filter(function(uo){return uo.indexInParent()==0 || uo.indexInParent()==1;}).findOne(2000)
 
         if (滑块范围) {
             var 坐标 = 滑块范围.bounds()
