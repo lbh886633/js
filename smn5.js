@@ -820,10 +820,11 @@ function 主程序() {
                             sleep(5000)
                         }
                     }}}
-
         }catch(e){
             log(e)
         }
+        console.info("测试结束");
+        return false;
     }
 
     if(ui.createAccount.checked){
