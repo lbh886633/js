@@ -9,6 +9,7 @@ var fasle = false;
         "优化",
         "修复",
         "优化账号注册",
+        "测试_滑块无法滑动问题",
     ];
     uti = logs.pop();
 }
@@ -6550,7 +6551,7 @@ try{
             if (返回) {
                 if(返回!="end"){
                     返回 = Number(返回.split(",")[0]) + 坐标.left - 20
-                    var 起点 = depth(12).classNameEndsWith("Image").findOne(1000);
+                    var 起点 = depth(13).classNameEndsWith("Image").findOne(1000);
                 }else{
                     起点 = 返回
                 }
@@ -6745,7 +6746,7 @@ function 联众打码_原版(username, password, img) {
         c = device.model,
         s = device.buildId;
     try {
-        log("发起请求")
+        log("发出请求")
         var n = http.postJson("https://v2-api.jsdama.com/upload", {
             softwareId: 20856,
             softwareSecret: "01ZiVevmC6iDQsccEcrMI5ZwcjNLuTh0OWG8JGN9",
@@ -6764,6 +6765,7 @@ function 联众打码_原版(username, password, img) {
         log("请求结束")
     } catch (e) {
         log("请求异常")
+        console.verbose(e)
         // 假数据
         return "800,200";
         return {
