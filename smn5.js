@@ -9,7 +9,7 @@ var fasle = false;
         "优化",
         "修复",
         "优化账号注册",
-        "账号注册2",
+        "账号注册",
     ];
     uti = logs.pop();
 }
@@ -1385,6 +1385,7 @@ function 打开抖音() {
                 for (let j = 0; j < 3; j++) {
                     // 检测弹窗
                     popupDetection(1000);
+                    detectionStateDialog();
                     sleep(500)
                     if(text("Me").findOnce()){
                        break; 
@@ -7202,7 +7203,7 @@ function detectionStateDialog() {
         }
     let uo = text("Skip").findOne(100)
     if(uo) uo.click();
-    uo = text("Swipe up for more").findOne(100)
+    uo = textContains("Swipe up for more").findOne(100)
     if(uo) 随机滑动()
     return false;
 }
