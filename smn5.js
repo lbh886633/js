@@ -9,7 +9,6 @@ var fasle = false;
         "优化",
         "修复",
         "优化账号注册",
-        "测试_注册",
     ];
     uti = logs.pop();
 }
@@ -6589,7 +6588,9 @@ try{
                                 break
                             }
                         }
-                    } else if(!tag) {
+                    } else {
+                        // 不需要继续流程，提前退出
+                        if(tag) return true;
                         var 设置密码 = text("Create password").visibleToUser().findOne(2000)
                         if (设置密码) {
                             log("设置密码 " + setText(ui.szmm.text()))
