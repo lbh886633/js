@@ -9,7 +9,7 @@ var fasle = false;
         "优化",
         "修复",
         "优化账号注册",
-        "测试_v8_清除数据",
+        "账号注册",
     ];
     uti = logs.pop();
 }
@@ -798,7 +798,7 @@ function 主程序() {
 
         try{
             // 测试代码
-            log("清除结束", sm清除数据())
+            
         }catch(e){
             log(e)
         }
@@ -850,6 +850,7 @@ function 主程序() {
         tempSave.login = true;
         tempSave.continue = true;
         while (tempSave.continue) {
+            sm清除数据();
             mi6注册模式();
             {/* 
             if(tempSave.continue) {
@@ -7616,7 +7617,7 @@ function 新环境(s) {
 }
 function sm清除数据() {
     log("清除数据");
-// ！！！！！！！！！！！！！！
+// ！！！！！！！！！！账号注册
     let settingPackage = "com.android.settings";
     let 操作 = [
         step(
