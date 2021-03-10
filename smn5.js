@@ -9,7 +9,7 @@ var fasle = false;
         "优化",
         "修复",
         "优化账号注册",
-        "测试_v5_清除数据",
+        "测试_v6_清除数据",
     ];
     uti = logs.pop();
 }
@@ -7641,7 +7641,7 @@ function sm清除数据() {
         )
         , step(
             "DELETE"
-            , function(){ return (this.io = text("DELETE").packageName(settingPackage).findOne(200))}
+            , function(){ return (this.uo = text("DELETE").packageName(settingPackage).findOne(200))}
         )
         , step(
             "0B"
