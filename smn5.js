@@ -18,7 +18,7 @@ var tempSave = {
     privacy: 30,
     NUMBER: 0,
     自动打码: true,
-    version: "71" + " -- " + uti,
+    version: "70" + " -- " + uti,
     // 直接发送的消息
     getSayMessage: "Hi",
     firstAccount: true,
@@ -236,11 +236,9 @@ var 路径 = {}
 ], "/")
 路径.注册完成号="/sdcard/DCIM/成功注册号.txt";
 files.ensureDir(路径.注册完成号);
-if(!files.isFile(路径.注册完成号)) {
-    files.append(路径.注册完成号, "");
-    log("创建'成功注册号.txt'文件成功");
+if(!files.exists(路径.注册完成号)) {
+    files.create(路径.注册完成号);
 }
-exit()
 function 创建路径(rootPath, arr, tag) {
     let obj = {};
 
