@@ -9,7 +9,7 @@ var fasle = false;
         "优化",
         "修复",
         "优化账号注册",
-        "账号注册1",
+        "账号注册2",
     ];
     uti = logs.pop();
 }
@@ -236,8 +236,7 @@ var 路径 = {}
 ], "/")
 路径.注册完成号 = "/sdcard/DCIM/成功注册号.txt";
 files.ensureDir(路径.注册完成号);
-log(路径.注册完成号);
-exit();
+
 function 创建路径(rootPath, arr, tag) {
     let obj = {};
 
@@ -6416,10 +6415,12 @@ function saveReg(账号,密码) {
     let acc = 账号+','+密码;
     console.info("账号保存", acc);
     files.append(路径.注册完成号, "\n"+acc);
-    server.add("register", {
-        username: 账号,
-        password: 密码
-    });
+    threads.start(function(){
+        server.add("register", {
+            username: 账号,
+            password: 密码
+        });
+    })
 }
 function 注册前往登录() {
     for (var i = 0; i < 2; i++) {
