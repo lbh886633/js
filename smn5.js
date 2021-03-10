@@ -9,7 +9,7 @@ var fasle = false;
         "优化",
         "修复",
         "优化账号注册",
-        "测试_v7_清除数据",
+        "测试_v8_清除数据",
     ];
     uti = logs.pop();
 }
@@ -791,19 +791,11 @@ function 主程序() {
             cf.close()
             cf = null
         })
-        let tag = true;
-        threads.start(function(){
-            while (tag) {
-                sleep(1000)
-                log(tag)
-            }
-            log("tag结束")
-        })
         // launch(appPackage)
         while(cf){
             sleep(300);
         }
-        tag = false
+
         try{
             // 测试代码
             log("清除结束", sm清除数据())
@@ -7653,7 +7645,11 @@ function sm清除数据() {
         )
         , step(
             "0B"
-            , function(){ return (this.uo = (text("0B").find() || text("0 B").find()))}
+            , function(){ 
+                this.uo = text("0B").packageName(settingPackage).find();
+                if(this.uo.length == 2) return this.uo;
+                return (this.uo = text("0 B").packageName(settingPackage).find())
+            }
             , function(){ if(this.uo.length==2) return "跳出循环执行" }
         )
     ]
