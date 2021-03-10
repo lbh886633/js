@@ -9,7 +9,7 @@ var fasle = false;
         "优化",
         "修复",
         "优化账号注册",
-        "测试_优化打码",
+        "测试_优化打码v1",
     ];
     uti = logs.pop();
 }
@@ -328,7 +328,7 @@ ui.layout(
                                     <radio id="focusUser" text="关注用户" />
                                     <radio id="detectionException" text="检测异常" />
                                 </radiogroup>
-                                {/* 测试时使用，将h=""改成 h="auto"即可 */}
+                                {/* 测试时使用，将h="0"改成 h="auto"即可 */}
                                 <radiogroup orientation="horizontal" h="0">
                                     <radio id="mi6_null" checked="true" text="空" />
                                     <radio id="functionTest" text="测试函数" />
@@ -804,7 +804,6 @@ function 主程序() {
         console.info("测试结束");
         return false;
     }
-    console.error("-----------------")
 
     if(ui.createAccount.checked){
         log("邮箱生成");
@@ -6565,7 +6564,7 @@ try{
                         log("正在滑动——注册")
                         var 起点坐标 = 起点.parent().parent().bounds()
                         // swipe(起点坐标.centerX(), 起点坐标.centerY(), 返回 + (起点坐标.centerX() - 起点坐标.left), 起点坐标.centerY(), 1000)
-                        swipe(起点坐标.centerX(), 起点坐标.centerY(), 返回 /* + (起点坐标.right - 起点坐标.left) */, 起点坐标.centerY(), 1000)
+                        swipe(起点坐标.centerX(), 起点坐标.centerY(), 返回 + (起点坐标.right - 起点坐标.left), 起点坐标.centerY(), 1000)
                         sleep(6000)
                     }
                     var 还在 = desc("Refresh").findOne(1500)
