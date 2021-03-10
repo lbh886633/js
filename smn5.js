@@ -9,7 +9,7 @@ var fasle = false;
         "优化",
         "修复",
         "优化账号注册",
-        "测试_v1_清除数据",
+        "测试_v2_清除数据",
     ];
     uti = logs.pop();
 }
@@ -2465,7 +2465,7 @@ function step(标题,检测,执行,执行成功后) {
                 let re = clickOn(this.uo);
                 log("点击" + this.标题, re);
                 if (re) {
-                    return 执行成功后();
+                    return !执行成功后 || 执行成功后();
                 }
             } else {
                 console.warn(this.标题 + "\n不存在 this.uo 对象！")
@@ -5983,7 +5983,7 @@ function 单注册模式() {
         }
     }
 }
-// ！！！！！！！
+
 function mi6注册模式() {
     // 打开tiktok
     打开抖音()
@@ -7616,59 +7616,43 @@ function 新环境(s) {
 }
 function sm清除数据() {
     log("清除数据");
+// ！！！！！！！！！！！！！！
     let settingPackage = "com.android.settings";
-    log("打开应用详情界面");
-    do{
-        // 打开抖音应用详情页面
-        app.startActivity({
-            packageName: settingPackage,
-            className: "com.android.settings.applications.InstalledAppDetails",
-            data: "package:" + getPackageName("TikTok")
-        })
+    let 操作 = [
+        step(
+            "打开应用界面"
+            , function() { return !(packageName(settingPackage).findOne()) }
+            , function() {
+                // 打开抖音应用详情页面
+                app.startActivity({
+                    packageName: settingPackage,
+                    className: "com.android.settings.applications.InstalledAppDetails",
+                    data: "package:" + getPackageName("TikTok")
+                })
+            }
+        )
+        , step(
+            "Storage"
+            , function(){ return (this.uo = textContains("Storage").packageName(settingPackage).findOne(200)) }
+        )
+        , step(
+            "CLEAR DATA"
+            , function(){ return (this.uo = text("CLEAR DATA").packageName(settingPackage).findOne(100))}
+        )
+        , step(
+            "OK"
+            , function(){ return (this.io = text("OK").packageName(settingPackage).findOne(200))}
+        )
+        , step(
+            "0B"
+            , function(){ return (this.uo = (text("0B").find() || text("0 B").find()))}
+            , function(){ if(this.uo.length==2) return "跳出循环执行" }
+        )
+    ]
+    循环执行(操作)
 
-        if(packageName(settingPackage).exists()) {
-            back();
-        }
-    } while (!text("Data usage").packageName(settingPackage).findOne(1000)
-        && !text("流量使用情况").packageName(settingPackage).findOne(1000))
-        
-    log("清除数据中...");
-    let i=0;
-    while(++i < 20){
-        let action = [];
-        // 清除数据
-        try{
-            action = textContains("Storage").packageName(settingPackage).findOne(200)
-            if(action) action.parent().parent().click();
-            action = textContains("used in internal storage").packageName(settingPackage).findOne(200)
-            if(action) action.parent().parent().click();
-            action = textContains("内部存储空间已使用").packageName(settingPackage).findOne(200)
-            if(action) action.parent().parent().click();
-
-            action = text("CLEAR DATA").findOne(100);
-            if(action) action.click();
-            action = text("Clear storage").findOne(100);
-            if(action) action.click();
-            action = text("清除存储空间").findOne(100);
-            if(action) action.click();
-            action = text("清除数据").findOne(100);
-            if(action) action.click();
-
-            action = text("OK").findOne(200);
-            if(action) action.click();
-            action = text("确定").findOne(200);
-            if(action) action.click();
-
-            action = text("0B").find();
-            if(action.length==2) break;
-            action = text("0 B").find();
-            if(action.length==2) break;
-        } catch(err){
-            console.verbose("清除异常", err)
-        }
-    }
-    log("清除结束。 ", i);
-    return i < 20;
+    log("清除完成。 ");
+    return true;
 }
 
 function 清除数据() {
