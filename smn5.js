@@ -9,7 +9,7 @@ var fasle = false;
         "优化",
         "修复",
         "优化账号注册",
-        "账号注册",
+        "账号注册1",
     ];
     uti = logs.pop();
 }
@@ -234,9 +234,10 @@ var 路径 = {}
     { 账号: "账号" },
     { 日志: "日志" }
 ], "/")
-路径.注册完成号="/sdcard/DCIM/成功注册号.txt";
+路径.注册完成号 = "/sdcard/DCIM/成功注册号.txt";
 files.ensureDir(路径.注册完成号);
-
+log(路径.注册完成号);
+exit();
 function 创建路径(rootPath, arr, tag) {
     let obj = {};
 
@@ -847,6 +848,9 @@ function 主程序() {
         
     if (!tempSave.daily && ui.mi6_reg.checked) {
         log("注册模式")
+        if(files.read(路径.zhuce).length < 10) {
+            邮箱生成();
+        }
         tempSave.login = true;
         tempSave.continue = true;
         while (tempSave.continue) {
