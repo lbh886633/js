@@ -9,7 +9,7 @@ var fasle = false;
         "优化",
         "修复",
         "优化账号注册",
-        "测试_v2_清除数据",
+        "测试_v3_清除数据",
     ];
     uti = logs.pop();
 }
@@ -7627,7 +7627,7 @@ function sm清除数据() {
                 app.startActivity({
                     packageName: settingPackage,
                     className: "com.android.settings.applications.InstalledAppDetails",
-                    data: "package:" + getPackageName("TikTok")
+                    data: "package:" + appPackage
                 })
             }
         )
