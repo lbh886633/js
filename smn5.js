@@ -9,7 +9,7 @@ var fasle = false;
         "优化",
         "修复",
         "优化账号注册",
-        "测试_优化打码v2",
+        "测试_注册",
     ];
     uti = logs.pop();
 }
@@ -18,7 +18,7 @@ var tempSave = {
     privacy: 30,
     NUMBER: 0,
     自动打码: true,
-    version: "69" + " -- " + uti,
+    version: "70" + " -- " + uti,
     // 直接发送的消息
     getSayMessage: "Hi",
     firstAccount: true,
@@ -6120,9 +6120,9 @@ function mi6注册模式() {
                     if(ui.autoValidation.checked) {
                         threads.start(function(){
                             if (注册查看滑块()) {
-                                if (注册打码()) {
+                                if (注册打码("关闭后续")) {
                                 } else {
-                                    log("打码失败！")
+                                    console.verbose("打码失败！");
                                 }
                             }
                         })
@@ -6537,7 +6537,7 @@ function 注册查看滑块() {
 }
 
 // 标记 tag 是用于安卓7循环使用
-function 注册打码() {
+function 注册打码(tag) {
 try{
     for (var ii = 0; ii < 3; ii++) {
         if (text("Me").visibleToUser().exists()) {
@@ -6589,7 +6589,7 @@ try{
                                 break
                             }
                         }
-                    } else {
+                    } else if(!tag) {
                         var 设置密码 = text("Create password").visibleToUser().findOne(2000)
                         if (设置密码) {
                             log("设置密码 " + setText(ui.szmm.text()))
