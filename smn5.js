@@ -9,7 +9,7 @@ var fasle = false;
         "优化",
         "修复",
         "优化账号注册",
-        "测试_v3_清除数据",
+        "测试_v4_清除数据",
     ];
     uti = logs.pop();
 }
@@ -7621,7 +7621,7 @@ function sm清除数据() {
     let 操作 = [
         step(
             "打开应用界面"
-            , function() { return !(packageName(settingPackage).findOne()) }
+            , function() { return !(packageName(settingPackage).findOne(1000)) }
             , function() {
                 // 打开抖音应用详情页面
                 app.startActivity({
