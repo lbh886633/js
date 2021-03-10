@@ -9,7 +9,7 @@ var fasle = false;
         "优化",
         "修复",
         "优化账号注册",
-        "测试_v6_清除数据",
+        "测试_v7_清除数据",
     ];
     uti = logs.pop();
 }
@@ -791,14 +791,21 @@ function 主程序() {
             cf.close()
             cf = null
         })
+        let tag = true;
+        threads.start(function(){
+            while (tag) {
+                sleep(1000)
+                log(tag)
+            }
+            log("tag结束")
+        })
         // launch(appPackage)
         while(cf){
             sleep(300);
         }
-
+        tag = false
         try{
             // 测试代码
-
             log("清除结束", sm清除数据())
         }catch(e){
             log(e)
@@ -6112,14 +6119,15 @@ function mi6注册模式() {
                         }
                         sleep(1500)
                     }
+                    let 打码标记 = true;
                     // 开启线程来进行注册打码
                     if(ui.autoValidation.checked) {
                         threads.start(function(){
                             if (注册查看滑块()) {
-                                if (注册打码("关闭后续")) {
-                                } else {
+                                while (打码标记 && !注册打码("关闭后续")) {
                                     console.verbose("打码失败！");
                                 }
+                                console.verbose("打码结束");
                             }
                         })
                     }
@@ -6135,7 +6143,7 @@ function mi6注册模式() {
                         }
                         sleep(500);
                     }
-
+                    打码标记 = false;
                     function 过验证码后() {
                         var 设置密码 = text("Create password").visibleToUser().findOne(2000)
                         if (设置密码) {
