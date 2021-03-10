@@ -9,6 +9,7 @@ var fasle = false;
         "优化",
         "修复",
         "优化账号注册",
+        "测试_v1_清除数据",
     ];
     uti = logs.pop();
 }
@@ -233,7 +234,7 @@ var 路径 = {}
     { 账号: "账号" },
     { 日志: "日志" }
 ], "/")
-路径.注册完成号="/sdcard/DCIM/邮箱.txt";
+路径.注册完成号="/sdcard/DCIM/成功注册号.txt";
 files.ensureDir(路径.注册完成号);
 
 function 创建路径(rootPath, arr, tag) {
@@ -796,7 +797,9 @@ function 主程序() {
         }
 
         try{
-            log("测试函数")
+            // 测试代码
+
+            log("清除结束", sm清除数据())
         }catch(e){
             log(e)
         }
@@ -5971,11 +5974,11 @@ function 单注册模式() {
             if(打开抖音()){
                 抖音分身注册()
             } else {
-                序号 = xx("获取当前环境名称")
-                cancelDelete(序号)
-                console.error("将当前环境加入失败待删除列表：", 序号)
-                files.write(路径.失败环境, 序号)
-                是否删除 = 1
+                // 序号 = xx("获取当前环境名称")
+                // cancelDelete(序号)
+                // console.error("将当前环境加入失败待删除列表：", 序号)
+                // files.write(路径.失败环境, 序号)
+                // 是否删除 = 1
             }
         }
     }
@@ -6109,12 +6112,6 @@ function mi6注册模式() {
                         }
                         sleep(1500)
                     }
-                    // if (注册查看滑块()) {
-                    //     if (注册打码()) {
-                    //     } else {
-                    //         log("注册失败！")
-                    //     }
-                    // }
                     // 开启线程来进行注册打码
                     if(ui.autoValidation.checked) {
                         threads.start(function(){
@@ -6411,9 +6408,9 @@ function 注册7模式() {
     }
 }
 function saveReg(账号,密码) {
-    let acc = 账号+'，'+密码;
+    let acc = 账号+','+密码;
     console.info("账号保存", acc);
-    files.append(路径.注册完成号, acc);
+    files.append("\n"+路径.注册完成号, acc);
     server.add("register", {
         username: 账号,
         password: 密码
@@ -7616,6 +7613,62 @@ function 新环境(s) {
         }
         sleep(500);
     }
+}
+function sm清除数据() {
+    log("清除数据");
+    let settingPackage = "com.android.settings";
+    log("打开应用详情界面");
+    do{
+        // 打开抖音应用详情页面
+        app.startActivity({
+            packageName: settingPackage,
+            className: "com.android.settings.applications.InstalledAppDetails",
+            data: "package:" + getPackageName("TikTok")
+        })
+
+        if(packageName(settingPackage).exists()) {
+            back();
+        }
+    } while (!text("Data usage").packageName(settingPackage).findOne(1000)
+        && !text("流量使用情况").packageName(settingPackage).findOne(1000))
+        
+    log("清除数据中...");
+    let i=0;
+    while(++i < 20){
+        let action = [];
+        // 清除数据
+        try{
+            action = textContains("Storage").packageName(settingPackage).findOne(200)
+            if(action) action.parent().parent().click();
+            action = textContains("used in internal storage").packageName(settingPackage).findOne(200)
+            if(action) action.parent().parent().click();
+            action = textContains("内部存储空间已使用").packageName(settingPackage).findOne(200)
+            if(action) action.parent().parent().click();
+
+            action = text("CLEAR DATA").findOne(100);
+            if(action) action.click();
+            action = text("Clear storage").findOne(100);
+            if(action) action.click();
+            action = text("清除存储空间").findOne(100);
+            if(action) action.click();
+            action = text("清除数据").findOne(100);
+            if(action) action.click();
+
+            action = text("OK").findOne(200);
+            if(action) action.click();
+            action = text("确定").findOne(200);
+            if(action) action.click();
+
+            action = text("0B").find();
+            if(action.length==2) break;
+            action = text("0 B").find();
+            if(action.length==2) break;
+        } catch(err){
+            console.verbose("清除异常", err)
+        }
+    }
+    log("清除结束。 ", i);
+    return i < 20;
 }
 
 function 清除数据() {
