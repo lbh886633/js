@@ -9,7 +9,7 @@ var fasle = false;
         "优化",
         "修复",
         "优化账号注册",
-        "测试_优化打码v1",
+        "测试_优化打码v2",
     ];
     uti = logs.pop();
 }
@@ -1558,13 +1558,14 @@ function 打码() {
             if(返回!="end"){
                 返回 = Number(返回.split(",")[0]) + 坐标.left - 20
                 log(返回)
-                var 起点 = depth(12).classNameEndsWith("Image").findOne(1000);
+                var 起点 = depth(13).classNameEndsWith("Image").findOne(1000);
+
             }
             if (起点) {
                 if(起点!="end"){
                     log("正在滑动")
                     var 起点坐标 = 起点.bounds()
-                    swipe(起点坐标.centerX(), 起点坐标.centerY(), 返回 + (起点坐标.right - 起点坐标.left), 起点坐标.centerY(), 1000)
+                    swipe(起点坐标.centerX(), 起点坐标.centerY(), 返回 + (起点坐标.centerX() - 起点坐标.left), 起点坐标.centerY(), 1000)
                     sleep(5000)
                 }
                 var 密码错误 = textContains("account or password").enabled(true).findOne(1000)
@@ -6564,7 +6565,7 @@ try{
                         log("正在滑动——注册")
                         var 起点坐标 = 起点.parent().parent().bounds()
                         // swipe(起点坐标.centerX(), 起点坐标.centerY(), 返回 + (起点坐标.centerX() - 起点坐标.left), 起点坐标.centerY(), 1000)
-                        swipe(起点坐标.centerX(), 起点坐标.centerY(), 返回 + (起点坐标.right - 起点坐标.left), 起点坐标.centerY(), 1000)
+                        swipe(起点坐标.centerX(), 起点坐标.centerY(), 返回 + (起点坐标.centerX() - 起点坐标.left), 起点坐标.centerY(), 1000)
                         sleep(6000)
                     }
                     var 还在 = desc("Refresh").findOne(1500)
