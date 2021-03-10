@@ -18,7 +18,7 @@ var tempSave = {
     privacy: 30,
     NUMBER: 0,
     自动打码: true,
-    version: "70" + " -- " + uti,
+    version: "71" + " -- " + uti,
     // 直接发送的消息
     getSayMessage: "Hi",
     firstAccount: true,
@@ -236,7 +236,11 @@ var 路径 = {}
 ], "/")
 路径.注册完成号="/sdcard/DCIM/成功注册号.txt";
 files.ensureDir(路径.注册完成号);
-
+if(!files.isFile(路径.注册完成号)) {
+    files.append(路径.注册完成号, "");
+    log("创建'成功注册号.txt'文件成功");
+}
+exit()
 function 创建路径(rootPath, arr, tag) {
     let obj = {};
 
@@ -851,7 +855,7 @@ function 主程序() {
         tempSave.continue = true;
         while (tempSave.continue) {
             sm清除数据();
-            mi6注册模式();
+            mi6注册模式("关闭账号检测");
             {/* 
             if(tempSave.continue) {
                 // 在执行完之后如果还为true则等待继续
@@ -5984,7 +5988,7 @@ function 单注册模式() {
     }
 }
 
-function mi6注册模式() {
+function mi6注册模式(closeAccountDetection) {
     // 打开tiktok
     打开抖音()
     // 进入账号界面
@@ -6035,7 +6039,7 @@ function mi6注册模式() {
         for (let i = 0; i < 5; i++) {
             lh_find(text("Sign up").clickable(true), "Sign up", 0, 300)
             lh_find(id("title"), "顶部账号栏", 0, 200)
-            if(!lh_find(text("Add account"), "添加账号", 0, 500)) { 
+            if(!closeAccountDetection && !lh_find(text("Add account"), "添加账号", 0, 500)) { 
                 // 查询是否已经存在了三个账号
                 getAccountList();
                 if(0 < accounts.list.length) {
