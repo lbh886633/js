@@ -10,6 +10,7 @@ var fasle = false;
         "修复",
         "优化账号注册",
         "账号注册",
+        "(临时)注册验证码等待",
     ];
     uti = logs.pop();
 }
@@ -6173,7 +6174,7 @@ function mi6注册模式(closeAccountDetection) {
                                     var 需要验证 = textContains("Enter 6-digit code").visibleToUser().findOne(1000)
                                     if (需要验证) {
                                         wait--;
-                                        log("需要验证邮箱6位验证码，等待输入验证码")
+                                        log("1需要验证邮箱6位验证码，等待输入验证码")
                                         while (textContains("Enter 6-digit code").visibleToUser().findOne(1000)) {
                                             sleep(3000)
                                         }
@@ -6353,8 +6354,11 @@ function 注册7模式() {
         
                                         var 需要验证 = textContains("Enter 6-digit code").visibleToUser().findOne(1000)
                                         if (需要验证) {
-                                            stopScript("需要验证邮箱6位验证码")
-                                            return false
+                                            log("2需要验证邮箱6位验证码，等待输入验证码")
+                                            while (textContains("Enter 6-digit code").visibleToUser().findOne(1000)) {
+                                                sleep(3000)
+                                            }
+                                            log("离开验证码界面")
                                         }
         
                                         //text = Login failedtext = Sign up
@@ -6375,8 +6379,11 @@ function 注册7模式() {
         
                                         var 需要验证 = textContains("Enter 6-digit code").visibleToUser().findOne(1000)
                                         if (需要验证) {
-                                            stopScript("需要验证邮箱6位验证码")
-                                            return false
+                                            log("3需要验证邮箱6位验证码，等待输入验证码")
+                                            while (textContains("Enter 6-digit code").visibleToUser().findOne(1000)) {
+                                                sleep(3000)
+                                            }
+                                            log("离开验证码界面")
                                         }
                                     }
                                 } else {
@@ -6625,8 +6632,11 @@ try{
 
                                 var 需要验证 = textContains("Enter 6-digit code").visibleToUser().findOne(1000)
                                 if (需要验证) {
-                                    stopScript("需要验证邮箱6位验证码")
-                                    return false
+                                    log("4需要验证邮箱6位验证码，等待输入验证码")
+                                    while (textContains("Enter 6-digit code").visibleToUser().findOne(1000)) {
+                                        sleep(3000)
+                                    }
+                                    log("离开验证码界面")
                                 }
 
                                 //text = Login failedtext = Sign up
@@ -6649,8 +6659,11 @@ try{
 
                                 var 需要验证 = textContains("Enter 6-digit code").visibleToUser().findOne(1000)
                                 if (需要验证) {
-                                    stopScript("需要验证邮箱6位验证码")
-                                    return false
+                                    log("5需要验证邮箱6位验证码，等待输入验证码")
+                                    while (textContains("Enter 6-digit code").visibleToUser().findOne(1000)) {
+                                        sleep(3000)
+                                    }
+                                    log("离开验证码界面")
                                 }
                             }
                         } else {
