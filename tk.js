@@ -250,7 +250,7 @@ ui.layout(
                                 </linear>
                                 <linear padding="5 0 0 0" >
                                     <text textColor="black" text="新密码: " />
-                                    <input lines="1" id="szmm" w="auto" text="lbh886633" />
+                                    <input lines="1" id="szmm" w="auto" text="pd123456" />
                                 </linear>
                             </vertical>
                             <vertical id="updatemodel">
