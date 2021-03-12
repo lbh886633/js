@@ -1,5 +1,4 @@
 "ui";
-// 2020/12/8 21:04 之前的账号没有保存
 
 var tempSave = {
     firstEnvi: 0,
