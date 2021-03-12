@@ -6,7 +6,7 @@ var tempSave = {
     privacy: 0,
     NUMBER: 0,
     自动打码: false,
-    version: "9",
+    version: "9" + "优化账号保存",
     // downloadUrl: "",
     // getSayMessage: "",
 };
@@ -3794,13 +3794,7 @@ function 注册7模式() {
                                         sleep(5000)
                                         var 成功 = text("Sign up").visibleToUser().findOne(1200)
                                         if (成功) {
-                                            let acc = 随机账号+'，'+ui.szmm.text()+'\n';
-                                            console.info("账号保存", acc);
-                                            files.append(路径.注册完成号, acc);
-                                            server.add("register", {
-                                                username: 随机账号,
-                                                password: ui.szmm.text()
-                                            });
+                                            saveReg(随机账号, ui.szmm.text())
                                             if (lh_find(text("Sign up").depth(8).visibleToUser(), "注册成功了lh", 0, 5000)) {
                                                 sleep(6000)
                                                 return true
@@ -3809,6 +3803,7 @@ function 注册7模式() {
                                         if (lh_find(text("Skip").clickable(true), "skip", 0, 5000)) {
                                             if (text("Me").visibleToUser().findOne(5000)) {
                                             }
+                                            saveReg(随机账号, ui.szmm.text())
                                             log("注册成功了")
                                             return true
                                         }
@@ -3837,7 +3832,8 @@ function 注册7模式() {
                                 }
                                 var 成功 = text("Sign up").visibleToUser().findOne(1200)
                                 if (成功) {
-                                    if (lh_find(text("Sign up").depth(8).visibleToUser(), "注册成功了lha", 0, 2000)) {
+                                        saveReg(随机账号, ui.szmm.text())
+                                        if (lh_find(text("Sign up").depth(8).visibleToUser(), "注册成功了lha", 0, 2000)) {
                                         return true
                                     }
                                 }
@@ -3853,6 +3849,18 @@ function 注册7模式() {
             // 循环结束位置
         }
     }
+}
+
+function saveReg(账号,密码) {
+    let acc = 账号+','+密码;
+    console.info("账号保存", acc);
+    files.append(路径.注册完成号, "\n"+acc);
+    threads.start(function(){
+        server.add("register", {
+            username: 账号,
+            password: 密码
+        });
+    })
 }
 
 function 注册前往登录() {
@@ -4068,14 +4076,8 @@ try{
                                 sleep(5000)
                                 var 成功 = text("Sign up").visibleToUser().findOne(1200)
                                 if (成功) {
-                                    let acc = 随机账号+'，'+ui.szmm.text()+'\n';
-                                    console.info("账号保存", acc);
-                                    files.append(路径.注册完成号, acc);
-                                    server.add("register", {
-                                        username: 随机账号,
-                                        password: ui.szmm.text()
-                                    });
-                                    if (lh_find(text("Sign up").depth(8).visibleToUser(), "注册成功了lh", 0, 5000)) {
+                                        saveReg(随机账号, ui.szmm.text())
+                                        if (lh_find(text("Sign up").depth(8).visibleToUser(), "注册成功了lh", 0, 5000)) {
                                         sleep(6000)
                                         return true
                                     }
@@ -4083,6 +4085,7 @@ try{
                                 if (lh_find(text("Skip").clickable(true), "skip", 0, 5000)) {
                                     if (text("Me").visibleToUser().findOne(5000)) {
                                     }
+                                    saveReg(随机账号, ui.szmm.text())
                                     log("注册成功了")
                                     return true
                                 }
@@ -4111,7 +4114,8 @@ try{
                         }
                         var 成功 = text("Sign up").visibleToUser().findOne(1200)
                         if (成功) {
-                            if (lh_find(text("Sign up").depth(8).visibleToUser(), "注册成功了lha", 0, 5000)) {
+                                saveReg(随机账号, ui.szmm.text())
+                                if (lh_find(text("Sign up").depth(8).visibleToUser(), "注册成功了lha", 0, 5000)) {
                                 sleep(6000)
                                 return true
                             }
