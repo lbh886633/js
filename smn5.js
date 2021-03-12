@@ -971,7 +971,7 @@ function 主程序() {
                 
                 if (ui.focusUser.checked) {
                     log("指定关注模式");
-                    focusUser(0 <  ui.focusUserNumber ? ui.focusUserNumber || 200 : 200);
+                    focusUser(0 <  ui.focusUserNumber.text() ? ui.focusUserNumber.text() || 200 : 200);
                 }
 
             }
@@ -1022,10 +1022,13 @@ function 主程序() {
                         if(text("Me").findOne(2000).parent().click()) {
                             // 获取到个人信息s
                             nowAccount = getFansInfo("个人信息", true);
-                            console.info("切换之前", lastAccount.username)
-                            console.info("当前账号", nowAccount.username)
+                            console.info("切换之前", lastAccount.username, lastAccount.name)
+                            console.info("当前账号", nowAccount.username, nowAccount.name)
                             if(lastAccount.username != nowAccount.username) {
                                 break;
+                            }else{
+                                // 切换失败，进度降低
+                                accounts.progress--;
                             }
                         } else {
                             sleep(5000)
@@ -2055,10 +2058,10 @@ function 返回首页(dayleTime) {
 ///////////////////////////
 // 关注用户
 function focusUser(max) {
-    log("关注用户")
+    max = max || 200;
+    log("关注用户", max)
     let focusNumber = 0;
     let focusException = 0;
-    max = max || 200;
     // "Edit profile" 是自己
     let words = ["Follow","Message","Requested","Edit profile"];
     // 获取链接，持有用户
@@ -7995,6 +7998,7 @@ function nextAccount() {
     }
     log("账号切换结束")
 }
+
 function getAccountList() {
     accounts.list = [];
     for (let i = 0; i < 5; i++) {
