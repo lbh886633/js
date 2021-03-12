@@ -10,7 +10,8 @@ var fasle = false;
         "修复",
         "优化账号注册",
         "账号注册",
-        "(临时)注册验证码等待",
+        "待测试_回复消息的问题在获取到标签之后去除重复，按照顺序询问(可能不按照顺序)",// getIssue    
+        "测试_优化打码",
     ];
     uti = logs.pop();
 }
@@ -19,7 +20,7 @@ var tempSave = {
     privacy: 30,
     NUMBER: 0,
     自动打码: true,
-    version: "71" + " -- " + uti,
+    version: "72" + " -- " + uti,
     // 直接发送的消息
     getSayMessage: "Hi",
     firstAccount: true,
@@ -5458,7 +5459,8 @@ function 消息处理(fans, newMsgList) {
                 if(issue) {
                     try{
                         // 问题动态获取
-                        iss = server.get("labelInfo/randomIssue?labelName=携带问题", {resouce: true}).body.string();
+                        let iss = getIssue(fansLabel);
+                        // iss = server.get("labelInfo/randomIssue?labelName=携带问题", {resouce: true}).body.string();
                         if(iss) reMsg += "\n\n\n" + iss;
                     }catch(e){
                         log("携带问题失败", e)
@@ -5567,7 +5569,34 @@ function readRequiredLabelsFile(path){
     return data
 }
 
-function getIssue(){
+function getIssue(labelNameList){
+    log("===============")
+    log(labelNameList);
+    let labelNamesExcludes = "";
+    labelNameList.forEach((e) => {
+        labelNamesExcludes += "&labelNamesExclude" + e.toString();
+    });
+    // 获取所有的问题标签
+    // let issues = server.get("labelInfo/randomIssue?labelName=携带问题", {resouce: true}).body.string();
+    let issue = server.get("labeInfo/issue?labelName=携带问题" + labelNamesExcludes, {resouce: true});
+    issue = issue.body.string();
+    log("获取到的问题数据：", issue)
+    if(1 < issue.length) {
+        try{
+            issue = JSON.parse(issue);
+            if(issue.ask) {
+                akss = issue.ask.split(",");
+                log("从数组中随机抽取一个", akss);
+                issue = akss[random(0, akss.length-1)];
+            }
+        }catch(e){
+            console.warn("问题转对象失败！")
+            console.verbose(e)
+        }
+    }
+    return issue;
+{
+    /* // 原来的是获取到全部的问题标签
     let reList = [];
     let rows = server.post("labelInfo/list?labelName=携带问题").json().rows;
     for (let i = 0; i < rows.length; i++) {
@@ -5577,6 +5606,8 @@ function getIssue(){
         }
     }
     return reList;
+    */
+}
 }
 /**
  * 从后台拿到所有的标签
@@ -6040,7 +6071,7 @@ function mi6注册模式(closeAccountDetection) {
         for (let i = 0; i < 5; i++) {
             lh_find(text("Sign up").clickable(true), "Sign up", 0, 300)
             lh_find(id("title"), "顶部账号栏", 0, 200)
-            if(!closeAccountDetection && !lh_find(text("Add account"), "添加账号", 0, 500)) { 
+            if(!lh_find(text("Add account"), "添加账号", 0, 500) && !closeAccountDetection) { 
                 // 查询是否已经存在了三个账号
                 getAccountList();
                 if(0 < accounts.list.length) {
@@ -6353,6 +6384,10 @@ function 注册7模式() {
                                         }
         
                                         var 需要验证 = textContains("Enter 6-digit code").visibleToUser().findOne(1000)
+                                        // if (需要验证) {
+                                        //     stopScript("需要验证邮箱6位验证码")
+                                        //     return false
+                                        // }
                                         if (需要验证) {
                                             log("2需要验证邮箱6位验证码，等待输入验证码")
                                             while (textContains("Enter 6-digit code").visibleToUser().findOne(1000)) {
@@ -6556,7 +6591,18 @@ try{
             return true
         }
         //var 滑块范围 = indexInParent(2).depth(6).classNameEndsWith("view.View").findOne(2000)
-    var 滑块范围 = depth(8).classNameEndsWith("view.View").filter(function(uo){return uo.indexInParent()==0 || uo.indexInParent()==1;}).findOne(2000)
+    var 滑块范围 = depth(8).packageName(appPackage).className("android.view.View")
+                .filter(function (uo) { 
+                    let rect = uo.bounds();
+                    if(
+                        (uo.indexInParent() == 0 || uo.indexInParent() == 1)
+                        && device.width * 0.5 < rect.right - rect.left
+                        && device.height * 0.4 < rect.bottom - rect.top
+                    ) {
+                        return true;
+                    }
+                    return false; 
+                }).findOne(2000)
 
         if (滑块范围) {
             var 坐标 = 滑块范围.bounds()
@@ -6566,7 +6612,7 @@ try{
             if (返回) {
                 if(返回!="end"){
                     返回 = Number(返回.split(",")[0]) + 坐标.left - 20
-                    var 起点 = depth(13).classNameEndsWith("Image").findOne(1000);
+                    var 起点 = depth(13).packageName(appPackage).className("android.widget.Image").findOne(1000);
                 }else{
                     起点 = 返回
                 }
@@ -6575,8 +6621,11 @@ try{
                         log("正在滑动——注册")
                         var 起点坐标 = 起点.parent().parent().bounds()
                         // swipe(起点坐标.centerX(), 起点坐标.centerY(), 返回 + (起点坐标.centerX() - 起点坐标.left), 起点坐标.centerY(), 1000)
-                        swipe(起点坐标.centerX(), 起点坐标.centerY(), 返回 + (起点坐标.centerX() - 起点坐标.left), 起点坐标.centerY(), 1000)
-                        sleep(6000)
+                        if(swipe(起点坐标.centerX(), 起点坐标.centerY(), 返回 + (起点坐标.centerX() - 起点坐标.left), 起点坐标.centerY(), 2000)) {
+                            sleep(500);
+                            swipe(起点坐标.centerX(), 起点坐标.centerY(), 返回 + (起点坐标.centerX() - 起点坐标.left), 起点坐标.centerY(), 1000);
+                        }
+                        sleep(5000)
                     }
                     var 还在 = desc("Refresh").findOne(1500)
                     var 还在a = text("Refresh").findOne(300)
@@ -6658,6 +6707,10 @@ try{
                                 }
 
                                 var 需要验证 = textContains("Enter 6-digit code").visibleToUser().findOne(1000)
+                                /* if (需要验证) {
+                                    stopScript("需要验证邮箱6位验证码")
+                                    return false
+                                } */
                                 if (需要验证) {
                                     log("5需要验证邮箱6位验证码，等待输入验证码")
                                     while (textContains("Enter 6-digit code").visibleToUser().findOne(1000)) {
@@ -6689,6 +6742,8 @@ try{
                     }
                 }
             }
+        } else {
+            log("没有找到需要打码的控件范围")
         }
     }
 }catch(err){
