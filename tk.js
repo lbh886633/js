@@ -5,7 +5,7 @@ var tempSave = {
     privacy: 0,
     NUMBER: 0,
     自动打码: false,
-    version: "9" + "优化账号保存",
+    version: "9" + "优化邮箱生成",
     // downloadUrl: "",
     // getSayMessage: "",
 };
@@ -4654,7 +4654,7 @@ function detectionStateDialog() {
  * 随机生成账号
  * @param {Number} num 邮箱数量 默认：1000个
  * @param {String} path 存放邮箱数据的路径 默认："/sdcard/xxsq/zhuce.txt"
- * @param {String} suf 邮箱的后缀 默认："@copyshoe.com"
+ * @param {String} suf 邮箱的后缀 默认："@bosslee888.com"
  */
 function 邮箱生成(num, path, suf) {
     if(!(path)) path = 路径.zhuce;
@@ -4671,7 +4671,7 @@ function 邮箱生成(num, path, suf) {
     })
 
     for (; i < len; i++) {
-        let account = newAccount(suf||"@copyshoe.com");
+        let account = newAccount(suf||"@bosslee888.com");
         accounts.append(account).append("\n");
     }
     // files.ensureDir(path);
