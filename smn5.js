@@ -12,6 +12,7 @@ var fasle = false;
         "账号注册",
         "待测试_回复消息的问题在获取到标签之后去除重复，按照顺序询问(可能不按照顺序)",// getIssue    
         "测试_优化打码",
+        "修复获取问题时异常，处理了注册成功后提示注册失败",
     ];
     uti = logs.pop();
 }
@@ -800,7 +801,7 @@ function 主程序() {
 
         try{
             // 测试代码
-            
+            log(获取消息())
         }catch(e){
             log(e)
         }
@@ -4134,7 +4135,6 @@ function mi6回复消息() {
 
 function 发送消息() {
     返回首页()
-    
 
     // 获取用户链接
     let fans;
@@ -4677,7 +4677,7 @@ function 获取消息(){
                     status = !(msgBox.findOne(className("android.widget.ImageView")));
                     sender = msgBox.findOne(className("com.bytedance.ies.dmt.ui.widget.DmtTextView")).desc();
                     msg = "";
-                    // log(sender, " === ",accountInfo.name)
+                    log(sender, " === ", accountInfo.name)
                     // 先赋空字符串用于避免获取失败时导致后面的分割一起失败
                     msg = (status && (sender == accountInfo.username || sender == accountInfo.name )? "" : "[消息发送失败] ")
                         + msgBox.findOne(className("android.widget.TextView")).text();
@@ -4982,7 +4982,7 @@ function mi6ReplyMsg() {
         新消息.push(sm);
     }
 
-    threads.start(function(){
+    threads.start(function() {
         console.info("即将上传聊天记录数：" + 新消息.length);
         // 将当前信息进行保存
         // 向服务器保存最新的聊天数据  只保存新的数据
@@ -4992,7 +4992,7 @@ function mi6ReplyMsg() {
                 if(typeof 新消息[i].status != "number") {
                     新消息[i].status = 新消息[i].status? 0 : 1;
                 }
-                if(!新消息[i].fansUsername) 新消息[i].fansUsername = fans.username||"-";
+                if(!新消息[i].fansUsername) 新消息[i].fansUsername = fans.name || fans.username||"-";
                 server.add("record", server.excludeNull(新消息[i]));
             } catch(e) {
                 log(e);
@@ -5573,12 +5573,13 @@ function readRequiredLabelsFile(path){
 }
 
 function getIssue(labelNameList){
-    log("===============")
-    log(labelNameList);
+    log("获取问题标签")
     let labelNamesExcludes = "";
-    labelNameList.forEach((e) => {
-        labelNamesExcludes += "&labelNamesExclude" + e.toString();
-    });
+    if(labelNameList) {
+        labelNameList.forEach((e) => {
+            labelNamesExcludes += "&labelNamesExclude" + e.toString();
+        });
+    }
     // 获取所有的问题标签
     // let issues = server.get("labelInfo/randomIssue?labelName=携带问题", {resouce: true}).body.string();
     let issue = server.get("labeInfo/issue?labelName=携带问题" + labelNamesExcludes, {resouce: true});
@@ -6423,6 +6424,20 @@ function 注册7模式() {
                                             }
                                             log("离开验证码界面")
                                         }
+                                        
+                                        if (lh_find(text("Skip").clickable(true), "skip", 0)) {
+                                            saveReg(随机账号, ui.szmm.text());
+                                            log("注册成功了")
+                                            return true
+                                        }
+
+                                        var 成功 = text("Sign up").visibleToUser().findOne(1000)
+                                        if (成功) {
+                                            if (lh_find(text("Sign up").depth(8).visibleToUser(), "注册成功了lh", 0)) {
+                                                saveReg(随机账号, ui.szmm.text());
+                                                return true
+                                            }
+                                        }
                                     }
                                 } else {
                                     log("找不到 Create password");
@@ -6720,6 +6735,20 @@ try{
                                         sleep(3000)
                                     }
                                     log("离开验证码界面")
+                                }
+                                
+                                if (lh_find(text("Skip").clickable(true), "skip", 0)) {
+                                    saveReg(随机账号, ui.szmm.text());
+                                    log("注册成功了")
+                                    return true
+                                }
+
+                                var 成功 = text("Sign up").visibleToUser().findOne(1000)
+                                if (成功) {
+                                    if (lh_find(text("Sign up").depth(8).visibleToUser(), "注册成功了lh", 0)) {
+                                        saveReg(随机账号, ui.szmm.text());
+                                        return true
+                                    }
                                 }
                             }
                         } else {
