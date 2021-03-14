@@ -13,7 +13,7 @@ var fasle = false;
         "待测试_回复消息的问题在获取到标签之后去除重复，按照顺序询问(可能不按照顺序)",// getIssue    
         "测试_优化打码",
         "修复获取问题时异常，处理了注册成功后提示注册失败",
-        "测试_获取消息3",
+        "测试_获取消息4",
     ];
     uti = logs.pop();
 }
@@ -4679,25 +4679,26 @@ function 获取消息(){
                     // status = !(msgBox.findOne(className("android.widget.ImageView")));
                     // 拿到 RelatlveLayout 下的[0]个 LinearLayout 的子节点 children() 
                     // 所以就相当于是：RelatlveLayout[LinearLayout].children() 再判断第一个是不是图片即可
-                    log("判断结果：", msgBox[0].children().length)
-                    msgBox[0].children().forEach((e)=>{
-                        log(e.className())
-                    })
                     status = true;
                     try{
-                        status = msgBox[0].children()[0].className() != "android.widget.ImageView";
+                        status = (msgBox[0].children()[0].className() != "android.widget.ImageView");
                     }catch(e){
                         // 对方发送的消息获取不到 className ，所以有className，并且为 "android.widget.ImageView"的就是发送失败 false。
                     }
                     // 找到发送人名字
                     sender = msgBox.findOne(className("com.bytedance.ies.dmt.ui.widget.DmtTextView")).desc();
                     msg = "";
-                    // TODO ！！！！！！！！！！
-                    log(sender, " === ", accountInfo.name)
-                    log(sender == accountInfo.username, sender == accountInfo.name)
-                    // 先赋空字符串用于避免获取失败时导致后面的分割一起失败
-                    msg = (status && (sender == accountInfo.username || sender == accountInfo.name )? "" : "[消息发送失败] ")
-                        + msgBox.findOne(className("android.widget.TextView")).text();
+                    // 如果是自己发送的则进行账号携带
+                    if(sender == accountInfo.username || sender == accountInfo.name) {
+                        // 将发送人换成自己的账号及名字
+                        sender = accountInfo.username+"<->"+sender == accountInfo.name;
+                        // 判断是否发送失败
+                        if(!status) {
+                            msg = "[消息发送失败] ";
+                        }
+                    }
+                    // 追加当前消息
+                    msg += msgBox.findOne(className("android.widget.TextView")).text();
                 }catch(err){
                     log("获取消息异常，异常信息：", err)
                 }
