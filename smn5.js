@@ -5006,7 +5006,7 @@ function mi6ReplyMsg() {
                 if(typeof 新消息[i].status != "number") {
                     新消息[i].status = 新消息[i].status? 0 : 1;
                 }
-                if(!新消息[i].fansUsername) 新消息[i].fansUsername = fans.name || fans.username||"-";
+                if(!新消息[i].fansUsername) 新消息[i].fansUsername = fans.username || fans.name || "-";
                 server.add("record", server.excludeNull(新消息[i]));
             } catch(e) {
                 log(e);
