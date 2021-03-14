@@ -4679,13 +4679,15 @@ function 获取消息(){
                     // status = !(msgBox.findOne(className("android.widget.ImageView")));
                     // 拿到 RelatlveLayout 下的[0]个 LinearLayout 的子节点 children() 
                     // 所以就相当于是：RelatlveLayout[LinearLayout].children() 再判断第一个是不是图片即可
-                    log("消息前的元素的类型", msgBox[0].children()[0].className())
+                    log("消息前的元素的类型")
+                    log(msgBox[0].children()[0].className())
                     log("判断结果：", msgBox[0].children()[0].className() == "android.widget.ImageView")
                     status = msgBox[0].children()[0].className() != "android.widget.ImageView";
                     sender = msgBox.findOne(className("com.bytedance.ies.dmt.ui.widget.DmtTextView")).desc();
                     msg = "";
                     // TODO ！！！！！！！！！！
                     log(sender, " === ", accountInfo.name)
+                    log(sender == accountInfo.username, sender == accountInfo.name)
                     // 先赋空字符串用于避免获取失败时导致后面的分割一起失败
                     msg = (status && (sender == accountInfo.username || sender == accountInfo.name )? "" : "[消息发送失败] ")
                         + msgBox.findOne(className("android.widget.TextView")).text();
