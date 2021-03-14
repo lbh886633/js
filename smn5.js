@@ -13,7 +13,7 @@ var fasle = false;
         "待测试_回复消息的问题在获取到标签之后去除重复，按照顺序询问(可能不按照顺序)",// getIssue    
         "测试_优化打码",
         "修复获取问题时异常，处理了注册成功后提示注册失败",
-        "测试_获取消息4",
+        "修复消息状态获取错误",
     ];
     uti = logs.pop();
 }
@@ -333,7 +333,7 @@ ui.layout(
                                     <radio id="detectionException" text="检测异常" />
                                 </radiogroup>
                                 {/* 测试时使用，将h="0"改成 h="auto"即可 */}
-                                <radiogroup orientation="horizontal" h="auto">
+                                <radiogroup orientation="horizontal" h="0">
                                     <radio id="mi6_null" checked="true" text="空" />
                                     <radio id="functionTest" text="测试函数" />
                                 </radiogroup>
@@ -801,8 +801,8 @@ function 主程序() {
         }
 
         try{
-            // 测试代码
-            log(获取消息())
+            console.info("开始测试");
+            // TODO 测试代码
         }catch(e){
             log(e)
         }
@@ -4692,13 +4692,9 @@ function 获取消息(){
                     if(sender == accountInfo.username || sender == accountInfo.name) {
                         // 将发送人换成自己的账号及名字
                         sender = accountInfo.username+"<->"+sender == accountInfo.name;
-                        // 判断是否发送失败
-                        if(!status) {
-                            msg = "[消息发送失败] ";
-                        }
                     }
-                    // 追加当前消息
-                    msg += msgBox.findOne(className("android.widget.TextView")).text();
+                    // 判断是否发送失败，并且追加当前消息
+                    msg = (status ? "" : "[消息发送失败] " )+ msgBox.findOne(className("android.widget.TextView")).text();
                 }catch(err){
                     log("获取消息异常，异常信息：", err)
                 }
