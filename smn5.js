@@ -13,6 +13,7 @@ var fasle = false;
         "待测试_回复消息的问题在获取到标签之后去除重复，按照顺序询问(可能不按照顺序)",// getIssue    
         "测试_优化打码",
         "修复获取问题时异常，处理了注册成功后提示注册失败",
+        "测试_获取消息",
     ];
     uti = logs.pop();
 }
@@ -332,7 +333,7 @@ ui.layout(
                                     <radio id="detectionException" text="检测异常" />
                                 </radiogroup>
                                 {/* 测试时使用，将h="0"改成 h="auto"即可 */}
-                                <radiogroup orientation="horizontal" h="0">
+                                <radiogroup orientation="horizontal" h="auto">
                                     <radio id="mi6_null" checked="true" text="空" />
                                     <radio id="functionTest" text="测试函数" />
                                 </radiogroup>
@@ -859,6 +860,7 @@ function 主程序() {
             sm清除数据();
             mi6注册模式("关闭账号检测");
             {/* 
+                // 注册满账号列表的模式
             if(tempSave.continue) {
                 // 在执行完之后如果还为true则等待继续
                 let cf = floaty.rawWindow(<frame><button id="but">继续注册</button></frame>)
@@ -7723,7 +7725,7 @@ function 新环境(s) {
 }
 function sm清除数据() {
     log("清除数据");
-// ！！！！！！！！！！账号注册
+
     let settingPackage = "com.android.settings";
     let 操作 = [
         step(
@@ -7740,15 +7742,18 @@ function sm清除数据() {
         )
         , step(
             "Storage"
-            , function(){ return (this.uo = textContains("Storage").packageName(settingPackage).findOne(200)) }
+            , function(){ return (this.uo = textContains("Storage").packageName(settingPackage).findOne(200) 
+                                         || textContains("存储").packageName(settingPackage).findOne(200)) }
         )
         , step(
             "CLEAR DATA"
-            , function(){ return (this.uo = text("CLEAR DATA").packageName(settingPackage).findOne(100))}
+            , function(){ return (this.uo = text("CLEAR DATA").packageName(settingPackage).findOne(100) 
+                                         || text("清除数据").packageName(settingPackage).findOne(100))}
         )
         , step(
             "DELETE"
-            , function(){ return (this.uo = text("DELETE").packageName(settingPackage).findOne(200))}
+            , function(){ return (this.uo = text("DELETE").packageName(settingPackage).findOne(200) 
+                                         || text("删除").packageName(settingPackage).findOne(200))}
         )
         , step(
             "0B"
@@ -7757,7 +7762,7 @@ function sm清除数据() {
                 if(this.uo.length == 2) return this.uo;
                 return (this.uo = text("0 B").packageName(settingPackage).find())
             }
-            , function(){ if(this.uo.length==2) return "跳出循环执行" }
+            , function(){ if(this.uo.length == 2) return "跳出循环执行" }
         )
     ]
     循环执行(操作)
