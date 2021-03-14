@@ -385,7 +385,7 @@ ui.layout(
                                 </linear>
                             </vertical>
 
-                            <text h="30sp" lines="1" textColor="#007ACC">————————————————————————————————————————</text>
+                            <text h="30sp" lines="1" textColor="#007ACC">———————————————————————————————————————————————</text>
 
                             <vertical id="loginmodel">
                                 <linear padding="5 0 0 0">
