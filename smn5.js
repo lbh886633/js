@@ -13,7 +13,7 @@ var fasle = false;
         "待测试_回复消息的问题在获取到标签之后去除重复，按照顺序询问(可能不按照顺序)",// getIssue    
         "测试_优化打码",
         "修复获取问题时异常，处理了注册成功后提示注册失败",
-        "测试_获取消息2",
+        "测试_获取消息3",
     ];
     uti = logs.pop();
 }
@@ -4679,7 +4679,10 @@ function 获取消息(){
                     // status = !(msgBox.findOne(className("android.widget.ImageView")));
                     // 拿到 RelatlveLayout 下的[0]个 LinearLayout 的子节点 children() 
                     // 所以就相当于是：RelatlveLayout[LinearLayout].children() 再判断第一个是不是图片即可
-                    log("判断结果：", msgBox[0].children()[0].className() == "android.widget.ImageView")
+                    log("判断结果：", msgBox[0].children().length)
+                    msgBox[0].children().forEach((e)=>{
+                        log(e.className())
+                    })
                     status = true;
                     try{
                         status = msgBox[0].children()[0].className() != "android.widget.ImageView";
