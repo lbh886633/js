@@ -14,6 +14,7 @@ var fasle = false;
         "测试_优化打码",
         "修复获取问题时异常，处理了注册成功后提示注册失败",
         "修复消息状态获取错误",
+        "修复发送失败三次不会切换账号问题",
     ];
     uti = logs.pop();
 }
@@ -999,13 +1000,21 @@ function 主程序() {
             //         }
             //     }
             // }
-        }catch(err){
-            log(err)
-            console.error(err.stack);
-            if(autoConfirm(10000, true,
-                "程序运行出现异常！是否重新运行？", "异常堆栈信息：" + err.stack)
-            ) {
-                continue;
+        }catch(err) {
+            try{
+                // 在采集粉丝的模式下，检测是否是发送异常
+                smenDetection()
+                log(err)
+                console.error(err.stack);
+                if(autoConfirm(10000, true,
+                    "程序运行出现异常！是否重新运行？", "异常堆栈信息：" + err.stack)
+                ) {
+                    continue;
+                }
+            }catch(e) {
+                console.info("发送失败超过3次，开始下一个账号")
+                // 其实不需要
+                smenReset();
             }
         }
         toastLog("当前账号操作结束 " + (++whileNumber));
