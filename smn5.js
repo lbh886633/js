@@ -15,6 +15,7 @@ var fasle = false;
         "修复获取问题时异常，处理了注册成功后提示注册失败",
         "修复消息状态获取错误",
         "修复发送失败三次不会切换账号问题",
+        "注册结束后立即修改资料与头像",
     ];
     uti = logs.pop();
 }
@@ -23,7 +24,7 @@ var tempSave = {
     privacy: 30,
     NUMBER: 0,
     自动打码: true,
-    version: "72" + " -- " + uti,
+    version: "73" + " -- " + uti,
     // 直接发送的消息
     getSayMessage: "Hi",
     firstAccount: true,
@@ -860,6 +861,12 @@ function 主程序() {
         while (tempSave.continue) {
             sm清除数据();
             mi6注册模式("关闭账号检测");
+            
+            log("修改资料")
+            返回首页()
+            修改资料()
+            更换头像()
+
             {/* 
                 // 注册满账号列表的模式
             if(tempSave.continue) {
