@@ -17,7 +17,7 @@ var fasle = false;
         "修复发送失败三次不会切换账号问题",
         "注册结束后立即修改资料与头像,修改资料与头像时异常捕获",
         "修复获取问题失败的问题",
-        "优化问题获取的日志",
+        "优化",
     ];
     uti = logs.pop();
 }
@@ -26,7 +26,7 @@ var tempSave = {
     privacy: 30,
     NUMBER: 0,
     自动打码: true,
-    version: "75" + " -- " + uti,
+    version: "76" + " -- " + uti,
     // 直接发送的消息
     getSayMessage: "Hi",
     firstAccount: true,
@@ -4476,7 +4476,8 @@ function sayHello(f, msg){
         }
         // 将本次打招呼信息提交到服务器
         // 保存已打招呼的粉丝信息
-        server.get("fans/sayhello?username="+f.username);
+        // @Deprecated
+        // server.get("fans/sayhello?username="+f.username);
         /*
             msg: 消息内容
             prefix: 消息前缀：
@@ -4498,7 +4499,9 @@ function sayHello(f, msg){
         re.fansUsername = f.username;
         log("保存消息")
         if(!re.fansUsername) re.fansUsername = fans.username||"-";
-        server.add("record", server.excludeNull(re));
+        threads.start(function(){
+            server.add("record", server.excludeNull(re));
+        })
         return re;
     }
 }
