@@ -15,7 +15,7 @@ var fasle = false;
         "修复获取问题时异常，处理了注册成功后提示注册失败",
         "修复消息状态获取错误",
         "修复发送失败三次不会切换账号问题",
-        "测试_5_注册结束后立即修改资料与头像",
+        "测试_6_注册结束后立即修改资料与头像",
     ];
     uti = logs.pop();
 }
@@ -45,6 +45,8 @@ var server = {
                 option = option || {};
             }
             option.number = option.number || 0;
+            // 最多重试60秒
+            option.timeout = option.timeout || Date.now() + 60*1000;
             // 3次上限
             if(option.number < 3 || err) {
                 log("重试中...", option.number)
@@ -154,7 +156,12 @@ var server = {
             log("上传出错", err)
             let re = this.again(err, option);
             if(re) {
-                return this.sendData(url, o, re)
+                if(re.timeout && re.timeout < Date.now()) {
+                    console.warn("重试超时！")
+                    return false;
+                } else {
+                    return this.sendData(url, o, re)
+                }
             }
         }
     },
@@ -3159,7 +3166,9 @@ function 更换头像() {
             标题: "照片",
             uo: null,
             检测: function() {
-                this.uo = classNameEndsWith("ImageView").depth(11).visibleToUser().clickable(true).findOne(2000)
+                this.uo = classNameEndsWith("ImageView").visibleToUser().clickable(true).filter(function(uo){
+                    return uo.depth()==11 || uo.depth()==12;   
+                }).findOne(2000)
                 return this.uo
             },
             执行: function() {
