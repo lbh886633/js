@@ -15,7 +15,7 @@ var fasle = false;
         "修复获取问题时异常，处理了注册成功后提示注册失败",
         "修复消息状态获取错误",
         "修复发送失败三次不会切换账号问题",
-        "测试_6_注册结束后立即修改资料与头像",
+        "测试_7_注册结束后立即修改资料与头像",
     ];
     uti = logs.pop();
 }
@@ -3212,10 +3212,13 @@ function 更换头像() {
             uo: null,
             检测: function() {
                 this.uo = text("ALLOW").findOne(100) || text("Allow").findOne(50) || text("允许").findOne(50);
+                log(this.uo)
                 return this.uo
             },
             执行: function() {
                 let re = this.uo.click();
+                log("第一次点击",re)
+                if(!re) re = clickOn(this.uo);
                 log("点击" + this.标题, re)
                 if (re) {
                     
