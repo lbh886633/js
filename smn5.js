@@ -17,6 +17,7 @@ var fasle = false;
         "修复发送失败三次不会切换账号问题",
         "注册结束后立即修改资料与头像,修改资料与头像时异常捕获",
         "修复获取问题失败的问题",
+        "优化问题获取的日志",
     ];
     uti = logs.pop();
 }
@@ -5641,14 +5642,14 @@ function getIssue(labelNameList){
     // 获取一个问题标签
     let issue = server.get("labelInfo/issue?labelName=携带问题" + labelNamesExcludes, {resouce: true});
     issue = issue.body.string();
-    log("获取到的问题数据：", issue)
+    console.verbose("获取到的问题数据：", issue)
     if(1 < issue.length) {
         try{
             issue = JSON.parse(issue);
             if(issue.ask) {
                 akss = issue.ask.split(",");
-                log("从数组中随机抽取一个", akss);
                 issue = akss[random(0, akss.length-1)];
+                log("随机抽取到的一个问题：", issue);
             }
         }catch(e){
             console.warn("问题转对象失败！")
