@@ -15,7 +15,7 @@ var fasle = false;
         "修复获取问题时异常，处理了注册成功后提示注册失败",
         "修复消息状态获取错误",
         "修复发送失败三次不会切换账号问题",
-        "测试_4_注册结束后立即修改资料与头像",
+        "测试_5_注册结束后立即修改资料与头像",
     ];
     uti = logs.pop();
 }
@@ -154,7 +154,7 @@ var server = {
             log("上传出错", err)
             let re = this.again(err, option);
             if(re) {
-                return this.sendData(uri, o, re)
+                return this.sendData(url, o, re)
             }
         }
     },
@@ -335,7 +335,7 @@ ui.layout(
                                     <radio id="detectionException" text="检测异常" />
                                 </radiogroup>
                                 {/* 测试时使用，将h="0"改成 h="auto"即可 */}
-                                <radiogroup orientation="horizontal" h="0">
+                                <radiogroup orientation="horizontal" h="auto">
                                     <radio id="mi6_null" checked="true" text="空" />
                                     <radio id="functionTest" text="测试函数" />
                                 </radiogroup>
@@ -805,6 +805,7 @@ function 主程序() {
         try{
             console.info("开始测试");
             // TODO 测试代码
+            更换头像()
         }catch(e){
             log(e)
         }
@@ -3138,6 +3139,10 @@ function 获取用户名(path) {
 function 更换头像() {
     返回首页()
     移动文件(路径.文件夹.头像列表, 路径.文件夹.头像, true);
+    // 刷新图库
+    media.scanFile(路径.文件夹.头像列表);
+    media.scanFile(路径.文件夹.头像);
+
     循环执行([
         {
             标题: "编辑个人档案",
