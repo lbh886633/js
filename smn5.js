@@ -16,6 +16,7 @@ var fasle = false;
         "修复消息状态获取错误",
         "修复发送失败三次不会切换账号问题",
         "注册结束后立即修改资料与头像,修改资料与头像时异常捕获",
+        "修复获取问题失败的问题",
     ];
     uti = logs.pop();
 }
@@ -5637,7 +5638,8 @@ function getIssue(labelNameList){
     }
     // 获取所有的问题标签
     // let issues = server.get("labelInfo/randomIssue?labelName=携带问题", {resouce: true}).body.string();
-    let issue = server.get("labeInfo/issue?labelName=携带问题" + labelNamesExcludes, {resouce: true});
+    // 获取一个问题标签
+    let issue = server.get("labelInfo/issue?labelName=携带问题" + labelNamesExcludes, {resouce: true});
     issue = issue.body.string();
     log("获取到的问题数据：", issue)
     if(1 < issue.length) {
