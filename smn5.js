@@ -24,7 +24,7 @@ var tempSave = {
     privacy: 30,
     NUMBER: 0,
     自动打码: true,
-    version: "73" + " -- " + uti,
+    version: "74" + " -- " + uti,
     // 直接发送的消息
     getSayMessage: "Hi",
     firstAccount: true,
@@ -3213,12 +3213,10 @@ function 更换头像() {
             uo: null,
             检测: function() {
                 this.uo = text("ALLOW").findOne(100) || text("Allow").findOne(50) || text("允许").findOne(50);
-                log(this.uo)
                 return this.uo
             },
             执行: function() {
                 let re = this.uo.click();
-                log("第一次点击",re)
                 if(!re) re = clickOn(this.uo);
                 log("点击" + this.标题, re)
                 if (re) {
