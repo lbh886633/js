@@ -15,7 +15,7 @@ var fasle = false;
         "修复获取问题时异常，处理了注册成功后提示注册失败",
         "修复消息状态获取错误",
         "修复发送失败三次不会切换账号问题",
-        "测试_7_注册结束后立即修改资料与头像",
+        "注册结束后立即修改资料与头像",
     ];
     uti = logs.pop();
 }
@@ -28,6 +28,8 @@ var tempSave = {
     // 直接发送的消息
     getSayMessage: "Hi",
     firstAccount: true,
+    // 测试环境
+    test: false,
 };
 
 var server = {
@@ -49,7 +51,7 @@ var server = {
             option.timeout = option.timeout || Date.now() + 60*1000;
             // 3次上限
             if(option.number < 3 || err) {
-                log("重试中...", option.number)
+                log("重试中...", option.number,"超时时长...", Date.now() - option.timeout)
                 return option;
             }
         }
@@ -342,7 +344,7 @@ ui.layout(
                                     <radio id="detectionException" text="检测异常" />
                                 </radiogroup>
                                 {/* 测试时使用，将h="0"改成 h="auto"即可 */}
-                                <radiogroup orientation="horizontal" h="auto">
+                                <radiogroup orientation="horizontal" h="{{tempSave.test ? 'auto' : '0'}}">
                                     <radio id="mi6_null" checked="true" text="空" />
                                     <radio id="functionTest" text="测试函数" />
                                 </radiogroup>
@@ -812,7 +814,6 @@ function 主程序() {
         try{
             console.info("开始测试");
             // TODO 测试代码
-            更换头像()
         }catch(e){
             log(e)
         }
