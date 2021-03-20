@@ -16,8 +16,7 @@ var fasle = false;
         "修复消息状态获取错误",
         "修复发送失败三次不会切换账号问题",
         "注册结束后立即修改资料与头像,修改资料与头像时异常捕获",
-        "修复获取问题失败的问题",
-        "优化",
+        "修复回复时获取不了问题",
     ];
     uti = logs.pop();
 }
@@ -5409,7 +5408,7 @@ function 消息处理(fans, newMsgList) {
 
     log("=== 已存标签 ===")
     log(fansLabel)
-    log(fans)
+    // console.verbose(fans)
 
     // 触发词优先回复
     let nowMsg=[];
@@ -5635,10 +5634,12 @@ function readRequiredLabelsFile(path){
 function getIssue(labelNameList){
     log("获取问题标签")
     let labelNamesExcludes = "";
-    if(labelNameList) {
+    try {
         labelNameList.forEach((e) => {
             labelNamesExcludes += "&labelNamesExclude" + e.toString();
         });
+    } catch(e) {
+        // 携带问题异常，可以不用管
     }
     // 获取所有的问题标签
     // let issues = server.get("labelInfo/randomIssue?labelName=携带问题", {resouce: true}).body.string();
@@ -5653,6 +5654,10 @@ function getIssue(labelNameList){
                 akss = issue.ask.split(",");
                 issue = akss[random(0, akss.length-1)];
                 log("随机抽取到的一个问题：", issue);
+            } else {
+                log(issue)
+                console.warn("没有问题数据！询问消息设置为空");
+                issue = "";
             }
         }catch(e){
             console.warn("问题转对象失败！")
