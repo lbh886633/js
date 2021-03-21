@@ -17,7 +17,7 @@ var fasle = false;
         "修复发送失败三次不会切换账号问题",
         "注册结束后立即修改资料与头像,修改资料与头像时异常捕获",
         "修复回复时获取不了问题",
-        "测试_7_回复消息"
+        "修复bug"
     ];
     uti = logs.pop();
 }
@@ -4867,13 +4867,8 @@ function replySendlist(sendlist) {
         do{
             // 回复消息
             mi6ReplyMsg();
-        // 如果上一条消息是自己发送的则跳出，不是则再继续聊天
-        whileTag = 上一条消息是否为自己发送的(true);
-
-        back()
-        console.warn("测试终止！！！！！！！！！");
-        exit()
-
+            // 如果上一条消息是自己发送的则跳出，不是则再继续聊天
+            whileTag = 上一条消息是否为自己发送的(true);
         }while(!whileTag && whileTag != null)
         
         // 7. 返回上一级
@@ -4901,7 +4896,6 @@ function replySendlist(sendlist) {
         }
     } */
 }
-//TODO
 /**
  * 
  * @param {Boolean} tag 不检查是否发送成功的标记
@@ -5374,7 +5368,7 @@ function 消息处理(fans, newMsgList) {
     // console.verbose(fans);
     // console.verbose(newMsgList);
 
-    //TODO 0. 将自己的消息排除掉
+    // 0. 将自己的消息排除掉
     console.verbose(newMsgList)
     {
         let temp = []
