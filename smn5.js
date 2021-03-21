@@ -17,7 +17,7 @@ var fasle = false;
         "修复发送失败三次不会切换账号问题",
         "注册结束后立即修改资料与头像,修改资料与头像时异常捕获",
         "修复回复时获取不了问题",
-        "测试_6_回复消息"
+        "测试_7_回复消息"
     ];
     uti = logs.pop();
 }
@@ -5435,15 +5435,12 @@ function 消息处理(fans, newMsgList) {
             // if(tag.words.indexOf("*") < 0) {    
                 // 没有全字匹配时
                 // 如果当前单词存在于标签中，则进行保存，将其转换成小写，这里的indexOf是在字符串中找
-                log(w, "是否存在", tag.words.indexOf(w))
                 if(-1 < tag.words.indexOf(w)){
-                    log(" =---↓↓↓----= ")
                     // 判断是否存在当前标签，没有就创建
                     if(!fansLabel[tag.labelName]) {
                         fansLabel[tag.labelName]=[];
                         // 第一次创建将进行消息回复
                         try{
-                            log(0 < tag.reply.length, "回复消息，消息总数量：", tag.reply.length)
                             if(0 < tag.reply.length) {
                                 // 存在触发词则保存触发词
                                 // nowMsg.push(tag.reply[random(0, tag.reply.length-1)]);
@@ -5452,7 +5449,7 @@ function 消息处理(fans, newMsgList) {
                                 // let appendMsg = server.get("labelInfo/randomIssue?labelName=" + r.labelName, {resouce: true}).body.string();
                                 // let appendMsg = server.post("labelInfo/list", {labelName: r.labelName, type: "reply"}).json().rows;
                                 let replyes = server.post("labelInfo/list", {labelName: tag.labelName, type: "reply"}).json().rows;
-                                console.verbose(replyes)
+                                // console.verbose(replyes)
                                 if(0 < replyes.length) {
                                     nowMsg.push(replyes[random(0, replyes.length-1)].body);
                                 }
@@ -5461,7 +5458,6 @@ function 消息处理(fans, newMsgList) {
                             console.info(e)
                         }
                     }
-                    log(" =---↑↑↑----= ")
                     // 判断是否已经存在当前标签,如果没有则进行保存，这里的indexOf是在数组中找
                     if(fansLabel[tag.labelName].indexOf(w) < 0) {
                         fansLabel[tag.labelName].push(w);
@@ -5495,15 +5491,15 @@ function 消息处理(fans, newMsgList) {
 
     // 要回复的消息
     let reMsg = "";
-    // ！！！！！！！！！！！！！！！！
-    log("=== 优先回复消息 ===")
-    log(nowMsg)
-    log("最新用户标签数据")
-    log(fansLabel)
-    console.info(0 < nowMsg.length)
+
+    // log("=== 优先回复消息 ===")
+    // log(nowMsg)
+    // log("最新用户标签数据")
+    // log(fansLabel)
     // 如果有标签消息则进行标签消息回复，没有则不进行回复
     if(0 < nowMsg.length) {
         reMsg = nowMsg.join("\n");
+        console.verbose("回复消息长度：", reMsg.length);
         // 直接跳出，不需要继续打招呼
         return reMsg;
     }
@@ -5515,7 +5511,6 @@ function 消息处理(fans, newMsgList) {
     }
 
     console.verbose("issue:", issue);
-    log(reMsg)
     // 查找剩余标签内容，执行相应的询问（顺序），会追加日常的询问语句
     for (let i = 0; i < tempSave.RequiredLabels.length; i++) {
         /*
