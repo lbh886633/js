@@ -17,7 +17,7 @@ var fasle = false;
         "修复发送失败三次不会切换账号问题",
         "注册结束后立即修改资料与头像,修改资料与头像时异常捕获",
         "修复回复时获取不了问题",
-        "测试_3_回复消息"
+        "测试_4_回复消息"
     ];
     uti = logs.pop();
 }
@@ -5391,7 +5391,7 @@ function 消息处理(fans, newMsgList) {
     let words = [];
     for (let m in newMsgList) {
         m = newMsgList[m];
-        if(m.sender != accountInfo.name){
+        if(m.sender != accountInfo.name && m.sender != accountInfo.username){
             // 对方的消息
             let newWords = m.msg.split(/[\s,.，。]/)
             for (let w in newWords) {
@@ -5425,11 +5425,9 @@ function 消息处理(fans, newMsgList) {
     for (let w in words) {
         // 拿到当前单词，并将当前单词转成小写
         w = words[w].toLowerCase();
-        log("单词：", w)
         // 拿到当前标签内容 包括 label（标签） words（关键字） info（信息）
         for (let tag in tempSave.RequiredLabels) {
             tag = tempSave.RequiredLabels[tag];
-            log("标签：", tag)
 
             // {labelName: "国家", words: ["usa","en"](已经处理为小写), ask: ["where are you from?"], reply: ["where are you from?"]}
 
@@ -5437,7 +5435,7 @@ function 消息处理(fans, newMsgList) {
             // if(tag.words.indexOf("*") < 0) {    
                 // 没有全字匹配时
                 // 如果当前单词存在于标签中，则进行保存，将其转换成小写，这里的indexOf是在字符串中找
-                log(tag.words.indexOf(w), tag.words)
+                log(w, "是否存在", tag.words.indexOf(w))
                 if(-1 < tag.words.indexOf(w)){
                     log(" =-------= ")
                     // 判断是否存在当前标签，没有就创建
