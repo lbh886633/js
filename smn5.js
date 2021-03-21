@@ -17,7 +17,7 @@ var fasle = false;
         "修复发送失败三次不会切换账号问题",
         "注册结束后立即修改资料与头像,修改资料与头像时异常捕获",
         "修复回复时获取不了问题",
-        "测试_5_回复消息"
+        "测试_6_回复消息"
     ];
     uti = logs.pop();
 }
@@ -5443,7 +5443,7 @@ function 消息处理(fans, newMsgList) {
                         fansLabel[tag.labelName]=[];
                         // 第一次创建将进行消息回复
                         try{
-                            log(0 < tag.reply.length, "回复消息", tag.reply)
+                            log(0 < tag.reply.length, "回复消息，消息总数量：", tag.reply.length)
                             if(0 < tag.reply.length) {
                                 // 存在触发词则保存触发词
                                 // nowMsg.push(tag.reply[random(0, tag.reply.length-1)]);
@@ -5451,7 +5451,6 @@ function 消息处理(fans, newMsgList) {
                                 // 消息动态获取
                                 // let appendMsg = server.get("labelInfo/randomIssue?labelName=" + r.labelName, {resouce: true}).body.string();
                                 // let appendMsg = server.post("labelInfo/list", {labelName: r.labelName, type: "reply"}).json().rows;
-                                log(r)
                                 let replyes = server.post("labelInfo/list", {labelName: tag.labelName, type: "reply"}).json().rows;
                                 console.verbose(replyes)
                                 if(0 < replyes.length) {
