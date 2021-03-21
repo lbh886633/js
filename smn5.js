@@ -17,7 +17,7 @@ var fasle = false;
         "修复发送失败三次不会切换账号问题",
         "注册结束后立即修改资料与头像,修改资料与头像时异常捕获",
         "修复回复时获取不了问题",
-        "测试_2_回复消息"
+        "测试_3_回复消息"
     ];
     uti = logs.pop();
 }
@@ -4870,6 +4870,7 @@ function replySendlist(sendlist) {
         // 如果上一条消息是自己发送的则跳出，不是则再继续聊天
         whileTag = 上一条消息是否为自己发送的(true);
 
+        back()
         console.warn("测试终止！！！！！！！！！");
         exit()
 
@@ -5414,7 +5415,7 @@ function 消息处理(fans, newMsgList) {
 
     log("=== 已存标签 ===")
     log(fansLabel)
-    console.verbose(fans)
+    // console.verbose(fans)
 
     // 触发词优先回复
     let nowMsg=[];
@@ -5423,10 +5424,12 @@ function 消息处理(fans, newMsgList) {
     // 使用单词去匹配词库并保存
     for (let w in words) {
         // 拿到当前单词，并将当前单词转成小写
-        w = words[w].toLowerCase();   
+        w = words[w].toLowerCase();
+        log("单词：", w)
         // 拿到当前标签内容 包括 label（标签） words（关键字） info（信息）
         for (let tag in tempSave.RequiredLabels) {
             tag = tempSave.RequiredLabels[tag];
+            log("标签：", tag)
 
             // {labelName: "国家", words: ["usa","en"](已经处理为小写), ask: ["where are you from?"], reply: ["where are you from?"]}
 
@@ -5434,6 +5437,7 @@ function 消息处理(fans, newMsgList) {
             // if(tag.words.indexOf("*") < 0) {    
                 // 没有全字匹配时
                 // 如果当前单词存在于标签中，则进行保存，将其转换成小写，这里的indexOf是在字符串中找
+                log(tag.words.indexOf(w), tag.words)
                 if(-1 < tag.words.indexOf(w)){
                     log(" =-------= ")
                     // 判断是否存在当前标签，没有就创建
@@ -5526,7 +5530,9 @@ function 消息处理(fans, newMsgList) {
         */
         r = tempSave.RequiredLabels[i];
         // 由于粉丝的标签是字符串，所以继续使用标签暂存对象来进行判断
-        if(r.labelName != "携带问题" && !fansLabel[r.labelName]) {
+        // if(r.labelName != "携带问题" && !fansLabel[r.labelName]) {
+        // 开头不能是 "携带问题"
+        if("携带问题".length < r.labelName.indexOf("携带问题")  && !fansLabel[r.labelName]) {
             let appendMsg = r.ask[random(0, r.ask.length-1)];
             console.verbose(appendMsg);
             if(appendMsg) {
