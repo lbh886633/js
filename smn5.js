@@ -17,7 +17,7 @@ var fasle = false;
         "修复发送失败三次不会切换账号问题",
         "注册结束后立即修改资料与头像,修改资料与头像时异常捕获",
         "修复回复时获取不了问题",
-        "测试_回复消息"
+        "测试_1_回复消息"
     ];
     uti = logs.pop();
 }
@@ -5487,12 +5487,12 @@ function 消息处理(fans, newMsgList) {
 
     // 要回复的消息
     let reMsg = "";
-
-    // log("=== 优先回复消息 ===")
-    // log(nowMsg)
-    // log("最新用户标签数据")
-    // log(fansLabel)
-
+    // ！！！！！！！！！！！！！！！！
+    log("=== 优先回复消息 ===")
+    log(nowMsg)
+    log("最新用户标签数据")
+    log(fansLabel)
+    console.info(0 < nowMsg.length)
     // 如果有标签消息则进行标签消息回复，没有则不进行回复
     if(0 < nowMsg.length) {
         reMsg = nowMsg.join("\n");
