@@ -17,7 +17,7 @@ var fasle = false;
         "修复发送失败三次不会切换账号问题",
         "注册结束后立即修改资料与头像,修改资料与头像时异常捕获",
         "修复回复时获取不了问题",
-        "测试_1_回复消息"
+        "测试_2_回复消息"
     ];
     uti = logs.pop();
 }
@@ -5430,16 +5430,19 @@ function 消息处理(fans, newMsgList) {
 
             // {labelName: "国家", words: ["usa","en"](已经处理为小写), ask: ["where are you from?"], reply: ["where are you from?"]}
 
-            // 全字匹配
-            if(tag.words.indexOf("*") < 0) {    
+            // 全字匹配，目前没用，可以关掉
+            // if(tag.words.indexOf("*") < 0) {    
                 // 没有全字匹配时
                 // 如果当前单词存在于标签中，则进行保存，将其转换成小写，这里的indexOf是在字符串中找
                 if(-1 < tag.words.indexOf(w)){
+                    log(" =-------= ")
                     // 判断是否存在当前标签，没有就创建
+                    log(!fansLabel[tag.labelName])
                     if(!fansLabel[tag.labelName]) {
                         fansLabel[tag.labelName]=[];
                         // 第一次创建将进行消息回复
                         try{
+                            log(0 < tag.reply.length)
                             if(0 < tag.reply.length) {
                                 // 存在触发词则保存触发词
                                 // nowMsg.push(tag.reply[random(0, tag.reply.length-1)]);
@@ -5454,8 +5457,11 @@ function 消息处理(fans, newMsgList) {
                                     nowMsg.push(replyes[random(0, replyes.length-1)].body);
                                 }
                             }
-                        }catch(e){}
+                        }catch(e){
+                            console.info(e)
+                        }
                     }
+                    log(" =-------= ")
                     // 判断是否已经存在当前标签,如果没有则进行保存，这里的indexOf是在数组中找
                     if(fansLabel[tag.labelName].indexOf(w) < 0) {
                         fansLabel[tag.labelName].push(w);
@@ -5474,6 +5480,7 @@ function 消息处理(fans, newMsgList) {
                         })
                     }
                 }
+            /*
             } else {
                 // 存在全字匹配时
                 if(allWord) {
@@ -5482,6 +5489,7 @@ function 消息处理(fans, newMsgList) {
                     // 
                 }
             }
+            */
         }
     }
 
