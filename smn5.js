@@ -17,6 +17,7 @@ var fasle = false;
         "修复发送失败三次不会切换账号问题",
         "注册结束后立即修改资料与头像,修改资料与头像时异常捕获",
         "修复回复时获取不了问题",
+        "测试_回复消息"
     ];
     uti = logs.pop();
 }
@@ -4054,6 +4055,7 @@ function mi6回复消息() {
                             //TODO 然后 newMsgCount != smallRedPointTag 条件成立，导致直接返回，又是小红点，又点进去，一直循环到没有小红点
                             let sendList = mi6GetNewMsgList();
                             if(sendList.length > 0){
+                                // 回复消息 ！！！！！！！！！！！！！
                                 newMsgCount -= replySendlist(sendList);
                             } else {
                                 i++;
@@ -4867,6 +4869,10 @@ function replySendlist(sendlist) {
             mi6ReplyMsg();
         // 如果上一条消息是自己发送的则跳出，不是则再继续聊天
         whileTag = 上一条消息是否为自己发送的(true);
+
+        console.warn("测试终止！！！！！！！！！");
+        exit()
+
         }while(!whileTag && whileTag != null)
         
         // 7. 返回上一级
@@ -5408,7 +5414,7 @@ function 消息处理(fans, newMsgList) {
 
     log("=== 已存标签 ===")
     log(fansLabel)
-    // console.verbose(fans)
+    console.verbose(fans)
 
     // 触发词优先回复
     let nowMsg=[];
