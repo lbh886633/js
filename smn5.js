@@ -362,8 +362,8 @@ ui.layout(
                                 </radiogroup>
                             </vertical>
                             <linear>
-                                    <checkbox id="switchVersion" text="长版本号" />
-                                    <checkbox id="switchVersionzl" text="短版本号" />
+                                    <checkbox id="switchVersionzl" text="长版本号" />
+                                    <checkbox id="switchVersion" text="短版本号" />
                                     <checkbox id="createAccount" text="生成邮箱" marginLeft="18sp"/>
                                     <checkbox id="daily" text="日常模式" />
                             </linear>
