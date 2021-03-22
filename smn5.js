@@ -17,7 +17,8 @@ var fasle = false;
         "修复发送失败三次不会切换账号问题",
         "注册结束后立即修改资料与头像,修改资料与头像时异常捕获",
         "修复回复时获取不了问题",
-        "修复bug"
+        "修复bug",
+        "新增注册时修改资料选项，还原至原来的版本",
     ];
     uti = logs.pop();
 }
@@ -26,7 +27,7 @@ var tempSave = {
     privacy: 30,
     NUMBER: 0,
     自动打码: true,
-    version: "76" + " -- " + uti,
+    version: "77" + " -- " + uti,
     // 直接发送的消息
     getSayMessage: "Hi",
     firstAccount: true,
@@ -377,6 +378,7 @@ ui.layout(
                                     <checkbox id="switchaccount" text="登录账号" />
                                     <checkbox id="readLocalAccountRecord" text="账号进度" />
                                     <checkbox id="autoValidation" checked="true" text="自动打码" />
+                                    <checkbox id="regEditInfo" text="注册完改资料" />
                                 </linear>
 
                                 <linear padding="2 0 0 0">
@@ -876,7 +878,7 @@ function 主程序() {
             返回首页()
             if(text("Sign up").findOne(2000)) {
                 log("无账号");   
-            } else {
+            } else if(ui.regEditInfo.checked) {
                 log("修改资料")
                 try{
                     修改资料("注册")
@@ -885,6 +887,8 @@ function 主程序() {
                     console.warn("新注册的账号修改资料或更换头像时出现异常！")
                     console.error(e)
                 }
+            } else {
+                log("不修改资料以及上传头像")
             }
 
             {/* 
@@ -5300,7 +5304,7 @@ function saveFansFile(path, arr) {
  */
 function getFans(username,arr) {
     for (let i = 0; i < arr.length; i++) {
-        // 先判断字符串(序列化的对象数据)中是否存在这个字符串
+        // ��判断字符串(序列化的对象数据)中是否存在这个字符串
         if(-1 < arr[i].indexOf(username)){
             // 将字符串转成对象再次进行对比
             let fans = JSON.parse(arr[i]);
@@ -5514,10 +5518,12 @@ function 消息处理(fans, newMsgList) {
             ]
         */
         r = tempSave.RequiredLabels[i];
+
+        console.verbose(r.labelName.indexOf("携带问题"), r.labelName);
         // 由于粉丝的标签是字符串，所以继续使用标签暂存对象来进行判断
-        // if(r.labelName != "携带问题" && !fansLabel[r.labelName]) {
+        if(r.labelName != "携带问题" && !fansLabel[r.labelName]) {
         // 开头不能是 "携带问题"
-        if("携带问题".length < r.labelName.indexOf("携带问题")  && !fansLabel[r.labelName]) {
+        // if("携带问题".length < r.labelName.indexOf("携带问题")  && !fansLabel[r.labelName]) {
             let appendMsg = r.ask[random(0, r.ask.length-1)];
             console.verbose(appendMsg);
             if(appendMsg) {
