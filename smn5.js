@@ -5519,7 +5519,7 @@ function 消息处理(fans, newMsgList) {
         */
         r = tempSave.RequiredLabels[i];
 
-        console.verbose(r.labelName.indexOf("携带问题"), r.labelName);
+        // console.verbose(r.labelName.indexOf("携带问题"), r.labelName);
         // 由于粉丝的标签是字符串，所以继续使用标签暂存对象来进行判断
         if(r.labelName != "携带问题" && !fansLabel[r.labelName]) {
         // 开头不能是 "携带问题"
