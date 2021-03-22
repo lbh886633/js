@@ -19,6 +19,7 @@ var fasle = false;
         "修复回复时获取不了问题",
         "修复bug",
         "新增注册时修改资料选项，还原至原来的版本",
+        "测试_1",
     ];
     uti = logs.pop();
 }
@@ -5434,6 +5435,9 @@ function 消息处理(fans, newMsgList) {
                 // 没有全字匹配时
                 // 如果当前单词存在于标签中，则进行保存，将其转换成小写，这里的indexOf是在字符串中找
                 if(-1 < tag.words.indexOf(w)){
+                    log(tag.words.indexOf(w))
+                    console.log(tag.words)
+                    log("+===========")
                     // 判断是否存在当前标签，没有就创建
                     if(!fansLabel[tag.labelName]) {
                         fansLabel[tag.labelName]=[];
