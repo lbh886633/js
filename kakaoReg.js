@@ -4,7 +4,7 @@ var st = {
     , appPackage: app.getAppName(this.appName) || "com.kakao.yellowid"  // app包名
     , appVersion: "3.8.3"                                               // app版本
     , version: "0.2"                                                    // 脚本版本
-    , 注册文件路径: "/sdcard/xxxxkk/testEmail.txt"                       // 邮箱路径
+    , 注册文件路径: "/sdcard/xxxxkk/regEmail.txt"                       // 邮箱路径
     , 注册成功保存路径: "/sdcard/xxxxkk/regFinish.txt"                   // 注册成功保存路径
     , 注册结束缓存路径: "/sdcard/xxxxkk/regCache.txt"                    // 注册结束操作触发时的缓存
     , account: "defaultName"                                            // 注册时的账号
@@ -13,7 +13,7 @@ var st = {
 
 toastLog("启动中..." + st.version)
 log("当前版本："+st.version+"\n"+[
-    "测试_3"
+    "测试_4"
 ].pop())
 
 var words = {
@@ -51,7 +51,7 @@ let 主要操作 = [
             // })
         , function () {
             console.hide();
-            sleep(30);
+            sleep(50);
             let rect = this.uo.bounds();
             clickOn({ 
                 x: rect.centerX()
@@ -189,7 +189,7 @@ let 主要操作 = [
 ]
 
 console.show()
-循环执行(主要操作)
+循环执行(主要操作, 300)
 
 
 // ======   以下内容为测试    ===============================================
