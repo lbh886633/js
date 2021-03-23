@@ -12,15 +12,19 @@ var st = {
 }
 
 toastLog("启动中..." + st.version)
+log("当前版本："+st.version+"\n"+[
+    "测试_1"
+].pop())
 
 var words = {
     "직접 입력해서 로그인": "직접 입력해서 로그인"
 }
 var conf = {
-    循环执行日志: true                         // 循环执行的日志
+    循环执行日志: true  // 循环执行的日志
 }
-
+waitUserClick("开始运行")
 // ===  生成邮箱文件  ===
+files.ensureDir(st.注册文件路径);
 if(!files.isFile(st.注册文件路径) && confirm("邮箱文件不存在！是否结束运行？\n继续运行将自动生成邮箱。")){
     toastLog("结束运行")
     exit();
@@ -620,5 +624,23 @@ function 循环执行(数组, 等待时间, 结束标记, 日志查看) {
             suffix = "@"+suffix;
 
         return account+suffix;
+    }
+}
+/**
+ * 等待用户点击继续
+ */
+function waitUserClick(title){
+    // 在执行完之后如果还为true则等待继续
+    let cf = floaty.rawWindow(<frame><button id="but" text="{{title||'开始测试'}}"/></frame>)
+    cf.setPosition(device.width*0.6, device.height*0.3)
+    cf.setPosition(400,800)
+    cf.but.click(()=>{
+        toast("继续")
+        cf.close()
+        cf = null
+    })
+    // launch(appPackage)
+    while(cf){
+        sleep(300);
     }
 }
