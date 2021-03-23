@@ -13,7 +13,7 @@ var st = {
 
 toastLog("启动中..." + st.version)
 log("当前版本："+st.version+"\n"+[
-    "测试_4"
+    "测试_5"
 ].pop())
 
 var words = {
@@ -87,7 +87,7 @@ let 主要操作 = [
     // 设置密码
     , step(
         // TODO
-        word("To sign up,register a password.")
+        word("To sign up, register a password.")
         , false
         , function() { 
             // 获取两个密码输入框，不是两个就跳过
@@ -106,36 +106,55 @@ let 主要操作 = [
     // Set up your Kakao Account Profile 
     // 设置账号名字
     , step(
-        word("Enter your nickname.")
+        word("Set up your Kakao Account Profile.")
         , null
         , function(){
-            log("设置账号名字：", this.uo.setText(st.account.split("@")[0]))
+            let num = 3;
+            let 设置账号信息操作 = [
+                step(
+                    word("Enter your nickname.")
+                    , null
+                    , function(){
+                        log("设置账号名字：", this.uo.setText(st.account.split("@")[0]))
+                    }
+                )
+                // , step(word("Confirm"))
+                , step(
+                      word("Year")
+                    , false
+                    , false
+                    , selectDate
+                )
+                , step(
+                      word("Month")
+                    , false
+                    , false
+                    , selectDate
+                )
+                , step(
+                      word("Day")
+                    , false
+                    , false
+                    , function(){
+                        //TODO 选择日
+                        selectDate(1,4);
+                    }
+                )
+                // 选择性别
+                , step(word("Female"))
+                , step(word("Confirm"))
+                , step(
+                    "界面检测"
+                    , function(){ 
+                        return !addPackUS(text("Set up your Kakao Account Profile."))
+                                .findOne(100) || num-- < 0;
+                    }
+                    , function(){ return "跳出循环执行"}
+                )
+            ]
+            循环执行(设置账号信息操作);
         }
     )
-    // , step(word("Confirm"))
-    , step(
-          word("Year")
-        , false
-        , false
-        , selectDate
-    )
-    , step(
-          word("Month")
-        , false
-        , false
-        , selectDate
-    )
-    , step(
-          word("Day")
-        , false
-        , false
-        , function(){
-            //TODO 选择日
-            selectDate(1,4);
-        }
-    )
-    // 选择性别
-    , step(word("Female"))
     , step(word("Confirm"))
     , step(
         "注册结果"
@@ -189,7 +208,7 @@ let 主要操作 = [
 ]
 
 console.show()
-循环执行(主要操作, 300)
+循环执行(主要操作, 200)
 
 
 // ======   以下内容为测试    ===============================================
@@ -197,28 +216,7 @@ console.show()
 // log(
     // addPackUS(text("首页")).findOne(1000)
 // )
-function 取注册(账号路径) {
-    if (!files.exists(账号路径 || 路径.zhuce)) {
-        alert("没有找到", 账号路径 || 路径.zhuce)
-        exit()
-    }
-    var 读取 = files.read(账号路径 || 路径.zhuce)
-    if (读取) {
-        var 分割 = 读取.split("\n")
-        var 账号a = 分割[0].split("，")
-        账号 = 账号a[0]
-        密码 = 账号a[1]
-        log(账号a[0])
-        log(账号a[1])
-        log("删除数据 " + 分割.splice(0, 1))
-        newtext = 分割.join('\n');
-        files.write(账号路径 || 路径.zhuce, newtext);
-        return 账号a[0]
-    } else {
-        alert("没号了,脚本停止")
-        exit()
-    }
-}
+
 
 // ======   以下内容为其它操作    ===============================================
 function selectDate(satrt, end){
@@ -285,6 +283,33 @@ function selectDate(satrt, end){
 }
 
 // ======   以下内容为工具类    ===============================================
+/**
+ * 从路径中读取一个邮箱
+ * @param {String} 账号路径 
+ * @returns {String} 返回一个邮箱，或者直接停止 
+ */
+function 取注册(账号路径) {
+    if (!files.exists(账号路径 || 路径.zhuce)) {
+        alert("没有找到", 账号路径 || 路径.zhuce)
+        exit()
+    }
+    var 读取 = files.read(账号路径 || 路径.zhuce)
+    if (读取) {
+        var 分割 = 读取.split("\n")
+        var 账号a = 分割[0].split("，")
+        账号 = 账号a[0]
+        密码 = 账号a[1]
+        log(账号a[0])
+        log(账号a[1])
+        log("删除数据 " + 分割.splice(0, 1))
+        newtext = 分割.join('\n');
+        files.write(账号路径 || 路径.zhuce, newtext);
+        return 账号a[0]
+    } else {
+        alert("没号了,脚本停止")
+        exit()
+    }
+}
 
 /**
  * 保存账号密码
