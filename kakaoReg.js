@@ -3,7 +3,7 @@ var st = {
       appName: "카카오톡 채널 관리자센터"                                 // app名字
     , appPackage: app.getAppName(this.appName) || "com.kakao.yellowid"  // app包名
     , appVersion: "3.8.3"                                               // app版本
-    , version: "0.2"                                                    // 脚本版本
+    , version: "1.0"                                                    // 脚本版本
     , 注册文件路径: "/sdcard/xxxxkk/regEmail.txt"                       // 邮箱路径
     , 注册成功保存路径: "/sdcard/xxxxkk/regFinish.txt"                   // 注册成功保存路径
     , 注册结束缓存路径: "/sdcard/xxxxkk/regCache.txt"                    // 注册结束操作触发时的缓存
@@ -13,7 +13,7 @@ var st = {
 
 toastLog("启动中..." + st.version)
 log("当前版本："+st.version+"\n"+[
-    "测试_5"
+    "基于英语界面制作"
 ].pop())
 
 var words = {
@@ -160,7 +160,7 @@ let 主要操作 = [
         "注册结果"
         , text(word("Get Started"))
         , function(){
-            saveReg(st.注册结束缓存路径)
+            saveReg(st.account, st.password, st.注册结束缓存路径)
             // 返回上一页
             let uo = addPackUS(clickable(true).filter(function(uo){
                 let rect = uo.bounds();
@@ -169,7 +169,7 @@ let 主要操作 = [
             // 返回上一级
             if(uo && clickOn(uo)){
                 //TODO 保存当前结果
-                saveReg()
+                saveReg(st.account, st.password)
                 log("注册成功！")
             }
         }
