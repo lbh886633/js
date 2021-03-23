@@ -3,7 +3,7 @@ var st = {
       appName: "카카오톡 채널 관리자센터"                                 // app名字
     , appPackage: app.getAppName(this.appName) || "com.kakao.yellowid"  // app包名
     , appVersion: "3.8.3"                                               // app版本
-    , version: "0.1"                                                    // 脚本版本
+    , version: "0.2"                                                    // 脚本版本
     , 注册文件路径: "/sdcard/xxxxkk/testEmail.txt"                       // 邮箱路径
     , 注册成功保存路径: "/sdcard/xxxxkk/regFinish.txt"                   // 注册成功保存路径
     , 注册结束缓存路径: "/sdcard/xxxxkk/regCache.txt"                    // 注册结束操作触发时的缓存
@@ -13,7 +13,7 @@ var st = {
 
 toastLog("启动中..." + st.version)
 log("当前版本："+st.version+"\n"+[
-    "测试_1"
+    "测试_2"
 ].pop())
 
 var words = {
@@ -631,7 +631,7 @@ function 循环执行(数组, 等待时间, 结束标记, 日志查看) {
  */
 function waitUserClick(title){
     // 在执行完之后如果还为true则等待继续
-    let cf = floaty.rawWindow(<frame><button id="but" text="{{title||'开始测试'}}"/></frame>)
+    let cf = floaty.rawWindow('<frame><button id="but">' + (title || "开始测试") + '</button></frame>')
     cf.setPosition(device.width*0.6, device.height*0.3)
     cf.setPosition(400,800)
     cf.but.click(()=>{
