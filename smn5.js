@@ -819,6 +819,8 @@ function 主程序() {
         try{
             console.info("开始测试");
             // TODO 测试代码
+            appPackage = appPackage || app.getPackageName(appName);
+            sm停止TikTok()
         }catch(e){
             log(e)
         }
@@ -1066,8 +1068,8 @@ function 主程序() {
                         if(text("Me").findOne(2000).parent().click()) {
                             // 获取到个人信息s
                             nowAccount = getFansInfo("个人信息", true);
-                            console.info("切换之前", lastAccount.username, lastAccount.name)
-                            console.info("当前账号", nowAccount.username, nowAccount.name)
+                            console.verbose("切换之前", lastAccount.username, lastAccount.name)
+                            console.verbose("当前账号", nowAccount.username, nowAccount.name)
                             if(lastAccount.username != nowAccount.username) {
                                 break;
                             }else{
@@ -1084,6 +1086,10 @@ function 主程序() {
                 if(lastAccount.username != [nowAccount.username||""]) {
                     log("账号切换完成")
                     break;
+                }
+                if(1 < I) {
+                    停止TikTok();
+                    返回首页(300);
                 }
             }
             if(lastAccount.username == nowAccount.username) {
@@ -5453,7 +5459,17 @@ function 消息处理(fans, newMsgList) {
                                 let replyes = server.post("labelInfo/list", {labelName: tag.labelName, type: "reply"}).json().rows;
                                 // console.verbose(replyes)
                                 if(0 < replyes.length) {
-                                    nowMsg.push(replyes[random(0, replyes.length-1)].body);
+                                    if(typeof tempSave.replyesLength != "number") {
+                                        tempSave.replyesLength = 0;
+                                    }
+                                    nowMsg.push(
+                                        replyes[
+                                        // random(0, replyes.length-1)
+                                            // random(0, replyes.length-1)
+                                            parseInt(tempSave.replyesLength%replyes.length)
+                                        ].body);
+                                    console.info("选择的消息下标：", parseInt(tempSave.replyesLength%replyes.length))
+                                    tempSave.replyesLength++;
                                 }
                             }
                         }catch(e){
@@ -5539,12 +5555,14 @@ function 消息处理(fans, newMsgList) {
                         let iss = getIssue(fansLabel);
                         // iss = server.get("labelInfo/randomIssue?labelName=携带问题", {resouce: true}).body.string();
                         if(iss) reMsg += "\n\n\n" + iss;
+
+                        console.info("新消息：", reMsg);
+                        return reMsg;
+
                     }catch(e){
-                        log("携带问题失败", e)
+                        console.warn("携带问题失败", e)
                     }
                 }
-                console.info("新消息：", reMsg);
-                return reMsg;
             } else {
                 log(r.labelName,"标签的询问消息为空!");
             }
@@ -5581,7 +5599,11 @@ function 消息处理(fans, newMsgList) {
 */
 }
     }
-    
+    console.verbose(reMsg);
+    console.info("不发送新消息");
+    // 不发送新消息
+    return false;
+
     if(reMsg=="") {
         console.info("不发送新消息")
         // 不发送新消息
@@ -7801,6 +7823,81 @@ function 新环境(s) {
         }
         sleep(500);
     }
+}
+function sm停止TikTok() {
+    log("停止TikTok");
+
+    let settingPackage = "com.android.settings";
+    let 操作 = [
+        step(
+            "打开应用界面"
+            , function() { return !(packageName(settingPackage).findOne(1000)) }
+            , function() {
+                // 打开抖音应用详情页面
+                app.startActivity({
+                    packageName: settingPackage,
+                    className: "com.android.settings.applications.InstalledAppDetails",
+                    data: "package:" + appPackage
+                })
+            }
+        )
+        , step(
+            "FORCE STOP"
+            , function(){ return (this.uo = text("FORCE STOP").packageName(settingPackage).findOne(200) 
+                                         || textContains("强制停止").packageName(settingPackage).findOne(200))
+                                    && !(text("CANCEL").packageName(settingPackage).findOne(200) 
+                                        || text("取消").packageName(settingPackage).findOne(200))
+                         }
+        )
+        // , step(
+        //     "FORCE STOP"
+        //     , function(){ return (this.uo = text("FORCE STOP").packageName(settingPackage).filter(function(uo){
+        //                             let rect = uo.bounds();
+        //                             return device.height*0.5 < rect.centerX() && rect.centerX() < device.height*0.7
+        //                         }).findOne(200) 
+        //                     || textContains("强制停止").packageName(settingPackage).filter(function(uo){
+        //                         let rect = uo.bounds();
+        //                         return device.height*0.5 < rect.centerX() && rect.centerX() < device.height*0.7
+        //                     }).findOne(200)) 
+        //                 && (text("CANCEL").packageName(settingPackage).findOne(200) 
+        //                     || text("取消").packageName(settingPackage).findOne(200))
+        //                 }
+        // )
+        , step(
+            "FORCE STOP1"
+            , function(){ return (this.uo = text("FORCE STOP").packageName(settingPackage).findOne(200) 
+                                         || textContains("强制停止").packageName(settingPackage).findOne(200))}
+        )
+        , step(
+            "FORCE STOP2"
+            , function(){ return (this.uo = text("FORCE STOP").packageName(settingPackage).findOne(200) 
+                                         || textContains("强制停止").packageName(settingPackage).findOne(200))}
+        )
+        , step(
+            "FORCE STOP3"
+            , function(){ return (this.uo = text("FORCE STOP").packageName(settingPackage).findOne(200) 
+                                         || textContains("强制停止").packageName(settingPackage).findOne(200))}
+        )
+        , step(
+            "FORCE STOP4"
+            , function(){ return (this.uo = text("FORCE STOP").packageName(settingPackage).findOne(200) 
+                                         || textContains("强制停止").packageName(settingPackage).findOne(200))}
+        )
+        , step(
+            "FORCE STOP"
+            , function(){ return (this.uo = text("FORCE STOP").packageName(settingPackage).findOne(200) 
+                                         || textContains("强制停止").packageName(settingPackage).findOne(200))
+                                    && !(text("CANCEL").packageName(settingPackage).findOne(200) 
+                                        || text("取消").packageName(settingPackage).findOne(200))
+                         }
+            , function(){ if(this.uo.length == 2) return "跳出循环执行" }
+        )
+    ]
+
+    循环执行(操作)
+
+    log("程序已停止");
+    return true;
 }
 function sm清除数据() {
     log("清除数据");
