@@ -1,8 +1,22 @@
 "ui";
 // https://lbh886633.github.io/js/script.js
 
-var uti;
 var fasle = false;
+var tempSave = {
+    // 测试环境
+    test: true,
+    // 版本号
+    version: "78" + " -- ",
+    firstEnvi: 0,
+    privacy: 30,
+    NUMBER: 0,
+    自动打码: true,
+    // 直接发送的消息
+    getSayMessage: "Hi",
+    firstAccount: true,
+    // 当前模式
+    model: "无",
+};
 {
     let logs = [
         "优化关注用户速度",
@@ -21,20 +35,8 @@ var fasle = false;
         "新增注册时修改资料选项，还原至原来的版本",
         "测试_1",
     ];
-    uti = logs.pop();
+    tempSave.version += logs.pop();
 }
-var tempSave = {
-    firstEnvi: 0,
-    privacy: 30,
-    NUMBER: 0,
-    自动打码: true,
-    version: "77" + " -- " + uti,
-    // 直接发送的消息
-    getSayMessage: "Hi",
-    firstAccount: true,
-    // 测试环境
-    test: false,
-};
 
 var server = {
     serverUrl: "没有链接",
@@ -210,6 +212,13 @@ function smenReset(){
 function smenDetection(){
     if(sendMessagesExceptionNumberMax <= sendMessagesExceptionNumber) throw "消息发送异常超过" + sendMessagesExceptionNumber + "或等于" + sendMessagesExceptionNumberMax + "次";;
 }
+// 切换模式
+function switchModel(str){
+    if(str) {
+        tempSave.model = str;
+        console.info("当前为", tempSave.model, "模式")
+    }
+}
 // 采集粉丝信息时使用
 var fansNameList = [], fansList = [], countGetFansNum = 0, getFansNum = 0;
 var modelIdList = ["loginmodel", "updatemodel", "getmodel"];
@@ -302,6 +311,7 @@ threads.start(function () {
             //     if(30 < i) i = 0;
             // }
         }
+        if((i++) % 5 == 0) console.verbose(tempSave.model + "模式");
         sleep(2000);
     }
 })
@@ -383,7 +393,7 @@ ui.layout(
                                 </linear>
 
                                 <linear padding="2 0 0 0">
-                                    <text textColor="black" text="指定关注数量: " />
+                                    <text textColor="black" text="指定关注用户数量: " />
                                     <input lines="1" id="focusUserNumber" w="auto" text="100"/>
                                 </linear>
                                 <linear padding="2 0 0 0">
@@ -802,6 +812,7 @@ function 主程序() {
     dec = false;
 
     if(ui.functionTest.checked) {
+        switchModel("测试");
         // 在执行完之后如果还为true则等待继续
         let cf = floaty.rawWindow(<frame><button id="but">开始测试</button></frame>)
         cf.setPosition(device.width*0.6, device.height*0.3)
@@ -821,6 +832,7 @@ function 主程序() {
             // TODO 测试代码
             appPackage = appPackage || app.getPackageName(appName);
             sm停止TikTok()
+            返回首页(300);
         }catch(e){
             log(e)
         }
@@ -829,7 +841,7 @@ function 主程序() {
     }
 
     if(ui.createAccount.checked){
-        log("邮箱生成");
+        switchModel("邮箱生成");
         邮箱生成();
     }
 
@@ -845,13 +857,13 @@ function 主程序() {
     }
 
     if(ui.readLocalAccountRecord.checked) {
-        log("读取本地账号记录");
+        switchModel("读取本地账号记录");
         accountList = files.read(路径.账号进度).split("\n");
         log("当前已完成的进度：", accountList);
     }
 
     if(ui.setServerUrl.checked){
-        log("修改服务器链接")
+        switchModel("修改服务器链接")
         let surl = ui.serverUrl.text();
         if(5 < surl.length) {
             server.serverUrl = surl;
@@ -861,14 +873,14 @@ function 主程序() {
     }
 
     if (ui.getUserList.checked) {
-        log("采集用户");
+        switchModel("采集用户");
         采集用户();
         console.info("采集用户模式结束");
         exit()
     }
         
     if (!tempSave.daily && ui.mi6_reg.checked) {
-        log("注册模式")
+        switchModel("注册模式")
         if(files.read(路径.zhuce).length < 10) {
             邮箱生成();
         }
@@ -949,18 +961,18 @@ function 主程序() {
 
 
                 if (!tempSave.daily && ui.mi6_dat.checked) {
-                    log("修改资料")
+                    switchModel("修改资料")
                     修改资料()
                     更换头像()
                 }
 
                 if (!tempSave.daily && ui.mi6_vid.checked) {
-                    log("上传视频")
+                    switchModel("上传视频")
                     上传视频();
                 }
 
                 if (tempSave.daily || ui.mi6_foc.checked) {
-                    log("关注模式")
+                    switchModel("关注模式")
                     限制 = random(Number(ui.gzsl.text()), Number(ui.gzsl1.text()))
                     mi6关注操作()
                 }
@@ -971,7 +983,7 @@ function 主程序() {
                 }
 
                 if (tempSave.daily || ui.mi6_rep.checked) {
-                    log("回复")
+                    switchModel("回复")
                     返回首页()
                     // tempSave.RequiredLabels = readRequiredLabelsFile();
                     // 获取标签
@@ -997,18 +1009,18 @@ function 主程序() {
                 }
 
                 if (ui.detectionException.checked) {
-                    log("消息异常检测重试")
+                    switchModel("消息异常检测重试")
                     返回首页()
                     消息异常检测重试()
                 }
                 
                 if (tempSave.daily || ui.mi6_task.checked) {
-                    log("任务模式");
+                    switchModel("任务模式");
                     任务发送指定消息();
                 }
                 
                 if (ui.focusUser.checked) {
-                    log("指定关注模式");
+                    switchModel("指定关注模式");
                     focusUser(0 <  ui.focusUserNumber.text() ? ui.focusUserNumber.text() || 200 : 200);
                 }
 
@@ -1041,7 +1053,7 @@ function 主程序() {
                 log(err)
                 console.error(err.stack);
                 if(autoConfirm(10000, true,
-                    "程序运行出现异常！是否重新运行？", "异常堆栈信息：" + err.stack)
+                    "脚本  " + tempSave.model + "  模式运行出现异常！是否重新运行？", "异常堆栈信息：" + err.stack)
                 ) {
                     continue;
                 }
@@ -1051,7 +1063,7 @@ function 主程序() {
                 smenReset();
             }
         }
-        toastLog("当前账号操作结束 " + (++whileNumber));
+        toastLog("当前账号的 " + tempSave.model + " 模式操作结束 " + (++whileNumber));
 
         if(!ui.switchaccount.checked) {
             let j=0;
@@ -1082,14 +1094,14 @@ function 主程序() {
                     }catch(e){
                         console.log(e)
                     }
+                    if(1 < I) {
+                        sm停止TikTok();
+                        返回首页(300);
+                    }
                 }
                 if(lastAccount.username != [nowAccount.username||""]) {
                     log("账号切换完成")
                     break;
-                }
-                if(1 < I) {
-                    停止TikTok();
-                    返回首页(300);
                 }
             }
             if(lastAccount.username == nowAccount.username) {
@@ -2004,14 +2016,26 @@ function mi6关注操作(num) {
                 sleep(1000)
                 var 滑动 = depth(9).visibleToUser().scrollForward()
                 if (滑动) {
-                    log("到底了,换个链接")
-                    if(detectionLoginView()) {
-                        toastLog("号被封了！");
-                        return false;
+                    // 检测网络
+                    try{
+                        console.warn("检测网络中...")
+                        do {
+                            sleep(1000)
+                        } while (399 < http.get("https://www.google.com").statusCode);
+                    } catch(e) {
+                        log("检测网络时发生异常！", e)
                     }
-                    let re = mi6关注操作(计数);
-                    log("到底后换链接并且关注完成");
-                    return re;
+                    滑动 = depth(9).visibleToUser().scrollForward()
+                    if(滑动){
+                        log("到底了,换个链接")
+                        if(detectionLoginView()) {
+                            toastLog("号被封了！");
+                            return false;
+                        }
+                        let re = mi6关注操作(计数);
+                        log("到底后换链接并且关注完成");
+                        return re;
+                    }
                 }
                 sleep(2000)
                 log("滑动 " + 滑动)
