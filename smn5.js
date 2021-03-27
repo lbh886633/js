@@ -32,7 +32,7 @@ var tempSave = {
         "修复回复时获取不了问题",
         "修复bug",
         "新增注册时修改资料选项，还原至原来的版本",
-        "测试_2",
+        "测试_3",
     ];
     tempSave.version += logs.pop();
 }
@@ -357,7 +357,7 @@ ui.layout(
                                     <radio id="detectionException" text="检测异常" />
                                 </radiogroup>
                                 {/* 测试时使用，将h="0"改成 h="auto"即可 */}
-                                <radiogroup orientation="horizontal" h="auto">
+                                <radiogroup orientation="horizontal" h="0">
                                     <radio id="mi6_null" checked="true" text="空" />
                                     <radio id="functionTest" text="测试函数" />
                                 </radiogroup>
@@ -2013,27 +2013,36 @@ function mi6关注操作(num) {
                 }
 
                 sleep(1000)
-                var 滑动 = depth(9).visibleToUser().scrollForward()
-                if (滑动) {
-                    // 检测网络
-                    try{
-                        console.warn("检测网络中...")
-                        do {
-                            sleep(1000)
-                        } while (399 < http.get("https://www.google.com").statusCode);
-                    } catch(e) {
-                        log("检测网络时发生异常！", e)
-                    }
-                    滑动 = depth(9).visibleToUser().scrollForward()
-                    if(滑动){
-                        log("到底了,换个链接")
-                        if(detectionLoginView()) {
-                            toastLog("号被封了！");
-                            return false;
+                var 滑动 = className("androidx.recyclerview.widget.RecyclerView").visibleToUser()
+                        .filter(function(uo){return uo.depth()==9 || uo.depth()==10})
+                        .scrollable(true)
+                if(滑动){
+                    滑动 = 滑动.scrollForward();
+                    // 滑动失败了才检测
+                    if (!滑动) {
+                        // 检测网络
+                        try{
+                            console.warn("检测网络中...")
+                            do {
+                                sleep(1000)
+                            } while (399 < http.get("https://www.google.com").statusCode);
+                        } catch(e) {
+                            log("检测网络时发生异常！", e)
                         }
-                        let re = mi6关注操作(计数);
-                        log("到底后换链接并且关注完成");
-                        return re;
+                        滑动 = className("androidx.recyclerview.widget.RecyclerView").visibleToUser()
+                            .filter(function(uo){return uo.depth()==9 || uo.depth()==10})
+                            .scrollable(true)
+                        // 再次滑动失败才跳出
+                        if(滑动 && !(滑动 = 滑动.scrollForward())){
+                            log("到底了,换个链接")
+                            if(detectionLoginView()) {
+                                toastLog("号被封了！");
+                                return false;
+                            }
+                            let re = mi6关注操作(计数);
+                            log("到底后换链接并且关注完成");
+                            return re;
+                        }
                     }
                 }
                 sleep(2000)
