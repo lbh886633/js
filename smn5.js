@@ -32,7 +32,7 @@ var tempSave = {
         "修复回复时获取不了问题",
         "修复bug",
         "新增注册时修改资料选项，还原至原来的版本",
-        "测试_5",
+        "测试_6",
     ];
     tempSave.version += logs.pop();
 }
@@ -2020,9 +2020,9 @@ function mi6关注操作(num) {
                     滑动 = className("androidx.recyclerview.widget.RecyclerView").visibleToUser()
                             .filter(function(uo){return uo.depth()==9 || uo.depth()==10})
                             .scrollable(true).scrollForward();
-                            log("滑动结果：", 滑动)
+                    log("滑动结果：", 滑动)
                     // 滑动失败了才检测
-                    if (!滑动) {
+                    if (!滑动 && text("Follow").visibleToUser().find().length < 2) {
                         // 检测网络
                         try{
                             console.warn("检测网络中...")
@@ -2038,7 +2038,7 @@ function mi6关注操作(num) {
                             .scrollable(true).scrollForward()
                         // 再次滑动失败才跳出
                         log("滑动结果2：", 滑动)
-                        if(!滑动){
+                        if(!滑动 && text("Follow").visibleToUser().find().length < 2){
                             log("到底了,换个链接")
                             if(detectionLoginView()) {
                                 toastLog("号被封了！");
@@ -8239,6 +8239,7 @@ function nextAccount() {
             log(accounts.list, accounts.progress)
             let un = accounts.list[accounts.progress % accounts.list.length];
             if(lh_find(text(un),  "切换账号到" + un, 0)) {
+                clickOn(text(un));
                 log("切换中...进度：",accounts.list.length,"  ===  ",accounts.progress);
                 if(accounts.list.length <= accounts.progress) {
                     console.info("已经完成一轮操作！")
