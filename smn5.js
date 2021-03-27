@@ -2018,6 +2018,7 @@ function mi6关注操作(num) {
                         .scrollable(true)
                 if(滑动){
                     滑动 = 滑动.scrollForward();
+                    log("滑动结果：", 滑动)
                     // 滑动失败了才检测
                     if (!滑动) {
                         // 检测网络
@@ -2029,11 +2030,16 @@ function mi6关注操作(num) {
                         } catch(e) {
                             log("检测网络时发生异常！", e)
                         }
+                        sleep(3000);
                         滑动 = className("androidx.recyclerview.widget.RecyclerView").visibleToUser()
                             .filter(function(uo){return uo.depth()==9 || uo.depth()==10})
                             .scrollable(true)
                         // 再次滑动失败才跳出
-                        if(滑动 && !(滑动 = 滑动.scrollForward())){
+                        if(滑动) {
+                            滑动 = 滑动.scrollForward()
+                        }
+                        log("滑动结果2：", 滑动)
+                        if(!滑动){
                             log("到底了,换个链接")
                             if(detectionLoginView()) {
                                 toastLog("号被封了！");
@@ -2268,7 +2274,7 @@ function focusUser(max) {
             if (follow.length == 1){
                 return follow[0];
             } else {
-                console.verbose("文字数量：", follow.length);
+                console.verbose("等待加载：", follow.length);
             }
 
             // 打开方式，有时出现太慢
@@ -8414,7 +8420,7 @@ function openUrlAndSleep3s(url,s) {
             if (follow.length == 1) {
                 return follow[0];
             } else {
-                console.verbose("文字数量：", follow.length);
+                console.verbose("等待加载：", follow.length);
             }
             // 打开方式
             try{
