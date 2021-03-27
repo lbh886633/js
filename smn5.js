@@ -32,7 +32,7 @@ var tempSave = {
         "修复回复时获取不了问题",
         "修复bug",
         "新增注册时修改资料选项，还原至原来的版本",
-        "测试_6",
+        "测试_7",
     ];
     tempSave.version += logs.pop();
 }
@@ -1959,23 +1959,23 @@ function mi6关注操作(num) {
     let 滑动异常次数 = 0;
     let 新链接 = 取链接();
     openUrlAndSleep3s(新链接)
-    sleep(1000)
-    for (let index = 0; index < 10; index++) {
-        var 打开方式 = textContains("TikTok").visibleToUser().findOne(2000)
-        if (打开方式) {
-            log("选择抖音 " + 打开方式.parent().parent().click())
-            sleep(1000)
-        }
-        var 始终 = text("始终").visibleToUser().findOne(1000)
-        if(!始终) 始终 = text("ALWAYS").visibleToUser().findOne(2000)
-        if (始终) {
-            log("始终 " + 始终.click())
-        }
-        let action = text("Open App").findOne(1000);
-        if(action) action.click();
+    // sleep(1000)
+    // for (let index = 0; index < 10; index++) {
+    //     var 打开方式 = textContains("TikTok").visibleToUser().findOne(2000)
+    //     if (打开方式) {
+    //         log("选择抖音 " + 打开方式.parent().parent().click())
+    //         sleep(1000)
+    //     }
+    //     var 始终 = text("始终").visibleToUser().findOne(1000)
+    //     if(!始终) 始终 = text("ALWAYS").visibleToUser().findOne(2000)
+    //     if (始终) {
+    //         log("始终 " + 始终.click())
+    //     }
+    //     let action = text("Open App").findOne(1000);
+    //     if(action) action.click();
     
-        if(packageName(appPackage).findOne(10)) break;
-    }
+    //     if(packageName(appPackage).findOne(10)) break;
+    // }
 
     sleep(random(2000, 3000))
     var 粉絲 = text("Followers").drawingOrder(2).visibleToUser().findOne(2000)
@@ -2020,7 +2020,9 @@ function mi6关注操作(num) {
                     滑动 = className("androidx.recyclerview.widget.RecyclerView").visibleToUser()
                             .filter(function(uo){return uo.depth()==9 || uo.depth()==10})
                             .scrollable(true).scrollForward();
-                    log("滑动结果：", 滑动)
+
+                    sleep(1000)
+                    log("滑动结果：", 滑动, "当前可关注按钮数量：", text("Follow").visibleToUser().find().length)
                     // 滑动失败了才检测
                     if (!滑动 && text("Follow").visibleToUser().find().length < 2) {
                         // 检测网络
@@ -2032,10 +2034,11 @@ function mi6关注操作(num) {
                         } catch(e) {
                             log("检测网络时发生异常！", e)
                         }
-                        sleep(3000);
+                        sleep(1000);
                         滑动 = className("androidx.recyclerview.widget.RecyclerView").visibleToUser()
                             .filter(function(uo){return uo.depth()==9 || uo.depth()==10})
                             .scrollable(true).scrollForward()
+                        sleep(2000)
                         // 再次滑动失败才跳出
                         log("滑动结果2：", 滑动)
                         if(!滑动 && text("Follow").visibleToUser().find().length < 2){
