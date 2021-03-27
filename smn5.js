@@ -358,7 +358,7 @@ ui.layout(
                                     <radio id="detectionException" text="检测异常" />
                                 </radiogroup>
                                 {/* 测试时使用，将h="0"改成 h="auto"即可 */}
-                                <radiogroup orientation="horizontal" h="{{tempSave.test}}">
+                                <radiogroup orientation="horizontal" h="auto">
                                     <radio id="mi6_null" checked="true" text="空" />
                                     <radio id="functionTest" text="测试函数" />
                                 </radiogroup>
