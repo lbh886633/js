@@ -32,7 +32,7 @@ var tempSave = {
         "修复回复时获取不了问题",
         "修复bug",
         "新增注册时修改资料选项，还原至原来的版本",
-        "测试_4",
+        "测试_5",
     ];
     tempSave.version += logs.pop();
 }
@@ -940,6 +940,7 @@ function 主程序() {
         smenReset();
         // 如果 发送消息异常次数小于3次则继续运行
         try{
+            sm停止TikTok();
             if(runTikTok()) {
                 log("账号正常，还原成功")
                 // 开启一个新线程来保存账号
@@ -1953,8 +1954,10 @@ function 采集前() {
 ////////////////////////////////////////////
 function mi6关注操作(num) {
     计数 = num || 0;
+    log("关注", 计数);
 
-    let 新链接 = 取链接()
+    let 滑动异常次数 = 0;
+    let 新链接 = 取链接();
     openUrlAndSleep3s(新链接)
     sleep(1000)
     for (let index = 0; index < 10; index++) {
@@ -2011,14 +2014,13 @@ function mi6关注操作(num) {
                     log("号被封了!")
                     return false
                 }
-
-                sleep(1000)
-                var 滑动 = className("androidx.recyclerview.widget.RecyclerView").visibleToUser()
-                        .filter(function(uo){return uo.depth()==9 || uo.depth()==10})
-                        .scrollable(true)
-                if(滑动){
-                    滑动 = 滑动.scrollForward();
-                    log("滑动结果：", 滑动)
+                var 滑动;
+                try{
+                    sleep(1000)
+                    滑动 = className("androidx.recyclerview.widget.RecyclerView").visibleToUser()
+                            .filter(function(uo){return uo.depth()==9 || uo.depth()==10})
+                            .scrollable(true).scrollForward();
+                            log("滑动结果：", 滑动)
                     // 滑动失败了才检测
                     if (!滑动) {
                         // 检测网络
@@ -2033,11 +2035,8 @@ function mi6关注操作(num) {
                         sleep(3000);
                         滑动 = className("androidx.recyclerview.widget.RecyclerView").visibleToUser()
                             .filter(function(uo){return uo.depth()==9 || uo.depth()==10})
-                            .scrollable(true)
+                            .scrollable(true).scrollForward()
                         // 再次滑动失败才跳出
-                        if(滑动) {
-                            滑动 = 滑动.scrollForward()
-                        }
                         log("滑动结果2：", 滑动)
                         if(!滑动){
                             log("到底了,换个链接")
@@ -2050,6 +2049,12 @@ function mi6关注操作(num) {
                             return re;
                         }
                     }
+                }catch(e){
+                    log("滑动异常！", e)
+                    if(5 < 滑动异常次数++) {
+                        console.warn("滑动异常超过5次！");
+                        return false;
+                    } 
                 }
                 sleep(2000)
                 log("滑动 " + 滑动)
@@ -2069,8 +2074,8 @@ function mi6关注操作(num) {
                 tempSave.inFansListError = 0;
             }
         }
-        计数 = 0
-        return true
+        计数 = 0;
+        return true;
     }
     log("===","结束")
 }
@@ -7758,7 +7763,7 @@ function runTikTok(run,tag) {
     }
 
     if(!info || (-1 == info.focusNumber) && (-1 == info.fansNumber) && (-1 == info.likeNumber)){
-        log("无账号");
+        console.warn("无账号");
         // 账号异常
         // let path = 路径.文件夹.账号 + xx("获取当前环境名称", true) + ".log"
         // files.append(path, new Date().toLocaleTimeString() +",账号失效！\n");
