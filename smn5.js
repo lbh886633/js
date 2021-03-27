@@ -18,7 +18,7 @@ var tempSave = {
 };
 {
     let logs = [
-        "测试_10",
+        "测试_11",
     ];
     tempSave.version += logs.pop();
 }
@@ -8255,7 +8255,7 @@ function nextAccount() {
             , function(){ return (this.uo = text("Switch account").find(300))}
             , function(){
                 // 选择账号
-                let accUO = text(switchAccountName).find(2000);
+                let accUO = text(switchAccountName).findOne(2000);
                 if(accUO) {
                     if(clickOn(accUO)){
                         log("已切换账号");
@@ -8267,6 +8267,7 @@ function nextAccount() {
                 } else log( switchAccountName + " 文字的控件不存在");
 
                 // 换另外一个账号
+                switchAccountName = null;
                 console.error("未找到账号：", switchAccountName)
                 // 将当前账号保存到局部账号进度中
                 localAccountList.push(switchAccountName);
@@ -8279,6 +8280,9 @@ function nextAccount() {
                     }
                 })
                 console.info("选择账号：", switchAccountName)
+
+                // 账号为空，跳出
+                if(!switchAccountName) return "跳出循环执行";
             }
         )
     ]
