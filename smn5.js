@@ -3,8 +3,7 @@
 
 var fasle = false;
 var tempSave = {
-    // 测试环境
-    test: true ? 'auto' : '0',
+    /* 测试时使用，将h="0"改成 h="auto"即可 */
     // 版本号
     version: "78" + " -- ",
     firstEnvi: 0,
@@ -33,7 +32,7 @@ var tempSave = {
         "修复回复时获取不了问题",
         "修复bug",
         "新增注册时修改资料选项，还原至原来的版本",
-        "测试_1",
+        "测试_2",
     ];
     tempSave.version += logs.pop();
 }
@@ -7852,6 +7851,7 @@ function sm停止TikTok() {
     log("停止TikTok");
 
     let settingPackage = "com.android.settings";
+    let clickNum = 0;
     let 操作 = [
         step(
             "打开应用界面"
@@ -7868,11 +7868,24 @@ function sm停止TikTok() {
         , step(
             "FORCE STOP"
             , function(){ return (this.uo = text("FORCE STOP").packageName(settingPackage).findOne(200) 
+                                         || text("强制停止").packageName(settingPackage).findOne(200)) }
+            , null
+            , function(){
+                // 点击成功进行等待并且计数
+                if(5 <= clickNum++) return "跳出循环执行";
+                sleep(300)
+            }
+        )
+        /* 
+        , step(
+            "FORCE STOP"
+            , function(){ return (this.uo = text("FORCE STOP").packageName(settingPackage).findOne(200) 
                                          || textContains("强制停止").packageName(settingPackage).findOne(200))
                                     && !(text("CANCEL").packageName(settingPackage).findOne(200) 
                                         || text("取消").packageName(settingPackage).findOne(200))
                          }
         )
+        
         // , step(
         //     "FORCE STOP"
         //     , function(){ return (this.uo = text("FORCE STOP").packageName(settingPackage).filter(function(uo){
@@ -7906,21 +7919,10 @@ function sm停止TikTok() {
             "FORCE STOP4"
             , function(){ return (this.uo = text("FORCE STOP").packageName(settingPackage).findOne(200) 
                                          || textContains("强制停止").packageName(settingPackage).findOne(200))}
-        )
-        , step(
-            "FORCE STOP"
-            , function(){ return (this.uo = text("FORCE STOP").packageName(settingPackage).findOne(200) 
-                                         || textContains("强制停止").packageName(settingPackage).findOne(200))
-                                    && !(text("CANCEL").packageName(settingPackage).findOne(200) 
-                                        || text("取消").packageName(settingPackage).findOne(200))
-                         }
-            , function(){ if(this.uo.length == 2) return "跳出循环执行" }
-        )
+        ) */
     ]
 
-    循环执行(操作)
-
-    log("程序已停止");
+    循环执行(操作);
     return true;
 }
 function sm清除数据() {
