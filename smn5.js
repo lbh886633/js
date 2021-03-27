@@ -14,11 +14,11 @@ var tempSave = {
     getSayMessage: "Hi",
     firstAccount: true,
     // 当前模式
-    model: "无",
+    model: "<-无->",
 };
 {
     let logs = [
-        "测试_11",
+        "解决一些问题",
     ];
     tempSave.version += logs.pop();
 }
@@ -932,6 +932,10 @@ function 主程序() {
                 log("账号正常，还原成功")
                 // 开启一个新线程来保存账号
                 threads.start(function () {
+                    // 检测当前列表中是否已经保存了当前的账号，如果没有保存则进行保存
+                    if(accountList.indexOf(accountInfo.name) < 0) {
+                        accountList.push(accountInfo.name);
+                    }
                     let saveAcc = {
                         username: accountInfo.username,
                         isExceptoion: 0,
@@ -8216,6 +8220,7 @@ function objToUri(obj) {
     }
     return uri
 }
+
 function nextAccount() {
     返回首页(300)
 
