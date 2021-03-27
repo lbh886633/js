@@ -18,20 +18,6 @@ var tempSave = {
 };
 {
     let logs = [
-        "优化关注用户速度",
-        "优化",
-        "修复",
-        "优化账号注册",
-        "账号注册",
-        "待测试_回复消息的问题在获取到标签之后去除重复，按照顺序询问(可能不按照顺序)",
-        "测试_优化打码",
-        "修复获取问题时异常，处理了注册成功后提示注册失败",
-        "修复消息状态获取错误",
-        "修复发送失败三次不会切换账号问题",
-        "注册结束后立即修改资料与头像,修改资料与头像时异常捕获",
-        "修复回复时获取不了问题",
-        "修复bug",
-        "新增注册时修改资料选项，还原至原来的版本",
         "测试_8",
     ];
     tempSave.version += logs.pop();
@@ -5597,8 +5583,13 @@ function 消息处理(fans, newMsgList) {
                 reMsg +=  appendMsg;
                 if(issue) {
                     try{
+                        // 拿到当前用户的所有标签
+                        let labels = [];
+                        for (let k in fansLabel) {
+                            labels.push(k)
+                        }
                         // 问题动态获取
-                        let iss = getIssue(fansLabel);
+                        let iss = getIssue(labels);
                         // iss = server.get("labelInfo/randomIssue?labelName=携带问题", {resouce: true}).body.string();
                         if(iss) reMsg += "\n\n\n" + iss;
 
@@ -5716,6 +5707,7 @@ function readRequiredLabelsFile(path){
 
 function getIssue(labelNameList){
     log("获取问题标签")
+    console.verbose(labelNameList)
     let labelNamesExcludes = "";
     try {
         labelNameList.forEach((e) => {
