@@ -32,7 +32,7 @@ var tempSave = {
         "修复回复时获取不了问题",
         "修复bug",
         "新增注册时修改资料选项，还原至原来的版本",
-        "测试_7",
+        "测试_8",
     ];
     tempSave.version += logs.pop();
 }
@@ -8224,6 +8224,10 @@ function nextAccount() {
     accounts.progress++;
     for (let i = 0; i < 5; i++) {
         try{
+            /* // 账号不完整的时候进行检测
+            if(accounts.list.length < 8) {
+                getAccountList();
+            } */
             while (accounts.list.length < 1) {
                 log("账号列表为空！正在重新获取");
                 返回首页();
@@ -8259,8 +8263,8 @@ function nextAccount() {
     log("账号切换结束")
 }
 
-function getAccountList() {
-    accounts.list = [];
+function getAccountList(reTag) {
+    let accountList = [];
     for (let i = 0; i < 5; i++) {
         try{
             // 点击
@@ -8286,15 +8290,15 @@ function getAccountList() {
                 ) {
                     let text = e.find(className("TextView"));
                     if(1 < text.length) {
-                        accounts.list.push(text[1].text());
+                        accountList.push(text[1].text());
                     }
                 }
             });
             // 获取到的账号列表小于1个时提示是否重新获取
-            if(accounts.list.length < 1) {
-                if(autoConfirm(2000,true,"是否重新获取？当前获取到的账号列表如下：",accounts.list.join("\n"))){
+            if(accountList.length < 1) {
+                if(autoConfirm(2000,true,"是否重新获取？当前获取到的账号列表如下：",accountList.join("\n"))){
                     // 跳过本次，重新获取
-                    accounts.list=[];
+                    accountList=[];
                     continue;
                 }
             }
@@ -8302,7 +8306,17 @@ function getAccountList() {
             break;
         }catch(e){}
     }
-    log(accounts.list)
+    // 如果存在标记则直接返回本次拿到的数据
+    if(reTag) return accountList;
+
+    sleep(1000)
+    // 重新获取一次账号并判断两次哪次的多
+    let reAccountList = getAccountList("重新获取账号列表");
+    if(accountList.length < reAccountList.length) accountList = reAccountList;
+
+    // 赋值账号列表
+    accounts.list = accountList;
+    console.verbose(accounts.list)
     log("数量：",accounts.list.length)
     return accounts;
 }
