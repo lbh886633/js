@@ -4,7 +4,7 @@
 var fasle = false;
 var tempSave = {
     // 测试环境
-    test: true,
+    test: true ? 'auto' : '0',
     // 版本号
     version: "78" + " -- ",
     firstEnvi: 0,
@@ -358,7 +358,7 @@ ui.layout(
                                     <radio id="detectionException" text="检测异常" />
                                 </radiogroup>
                                 {/* 测试时使用，将h="0"改成 h="auto"即可 */}
-                                <radiogroup orientation="horizontal" h="{{tempSave.test ? 'auto' : '0'}}">
+                                <radiogroup orientation="horizontal" h="{{tempSave.test}}">
                                     <radio id="mi6_null" checked="true" text="空" />
                                     <radio id="functionTest" text="测试函数" />
                                 </radiogroup>
