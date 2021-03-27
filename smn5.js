@@ -18,7 +18,7 @@ var tempSave = {
 };
 {
     let logs = [
-        "测试_9",
+        "测试_10",
     ];
     tempSave.version += logs.pop();
 }
@@ -171,6 +171,7 @@ var server = {
     }
 }
 var accountList = [];
+var switchAccountName;
 var accounts = {
     progress: 0,
     list: []
@@ -1087,6 +1088,12 @@ function 主程序() {
                 }
                 if(lastAccount.username != [nowAccount.username||""]) {
                     log("账号切换完成")
+                    console.verbose(
+                        "选择账号："+switchAccountName
+                        , "当前 username：" + nowAccount.username
+                        , "当前 name：" + nowAccount.name
+                    )
+                    accountList.push(switchAccountName);
                     break;
                 }
             }
@@ -8228,7 +8235,7 @@ function nextAccount() {
     }
 
     // 当前进度
-    let switchAccountName;
+    switchAccountName = null;
     let localAccountList = accountList;
     accounts.list.forEach((name)=>{
         if(localAccountList.indexOf(name) < 0) {
