@@ -18,7 +18,7 @@ var tempSave = {
 };
 {
     let logs = [
-        "测试_8",
+        "测试_9",
     ];
     tempSave.version += logs.pop();
 }
@@ -8209,17 +8209,98 @@ function objToUri(obj) {
     }
     return uri
 }
-
 function nextAccount() {
     返回首页(300)
+
+    // 账号不完整的时候进行检测
+    if(accounts.list.length < 8) {
+        getAccountList();
+    }
+    while (accounts.list.length < 1) {
+        log("账号列表为空！正在重新获取");
+        返回首页();
+        var 我 = text("Me").findOne(1000)
+        if (我) {
+            log("Me " + 我.parent().click())
+            sleep(random(1000, 1500))
+        }
+        getAccountList();
+    }
+
+    // 当前进度
+    let switchAccountName;
+    let localAccountList = accountList;
+    accounts.list.forEach((name)=>{
+        if(localAccountList.indexOf(name) < 0) {
+            // 选择账号
+            switchAccountName = name;
+            return false;
+        }
+    })
+
+    let 操作 = [
+        step(
+            "账号列表"
+            , function(){ return (this.uo = id("title").findOne(200))}
+        )
+        , step(
+            "选择账号 " + switchAccountName
+            , function(){ return (this.uo = text("Switch account").find(300))}
+            , function(){
+                // 选择账号
+                let accUO = text(switchAccountName).find(2000);
+                if(accUO) {
+                    if(clickOn(accUO)){
+                        log("已切换账号");
+                        // 跳出
+                        return "跳出循环执行";
+                    } else {
+                        console.error("点击切换账号失败！");
+                    }
+                } else log( switchAccountName + " 文字的控件不存在");
+
+                // 换另外一个账号
+                console.error("未找到账号：", switchAccountName)
+                // 将当前账号保存到局部账号进度中
+                localAccountList.push(switchAccountName);
+                // 选择新的账号
+                accounts.list.forEach((name)=>{
+                    if(localAccountList.indexOf(name) < 0) {
+                        // 选择账号
+                        switchAccountName = name;
+                        return false;
+                    }
+                })
+                console.info("选择账号：", switchAccountName)
+            }
+        )
+    ]
+
+    if(switchAccountName) {
+        // 进行账号选择
+        循环执行(操作);
+    } else {
+        // 不进行账号选择
+        if(confirm("是否结束运行？\n当前账号列表已经全部切换完毕：\n" + accountList.join("\n"))){
+            // 结束脚本
+            exit();
+        } else {
+            // 重新开始，清除当前列表，并且重新执行当前的函数
+            accountList = [];
+            nextAccount();
+        }
+    }
+
+{
+    /* 
     // 进度提高
     accounts.progress++;
     for (let i = 0; i < 5; i++) {
         try{
-            /* // 账号不完整的时候进行检测
+            // 账号不完整的时候进行检测
             if(accounts.list.length < 8) {
                 getAccountList();
-            } */
+            }
             while (accounts.list.length < 1) {
                 log("账号列表为空！正在重新获取");
                 返回首页();
@@ -8230,6 +8311,7 @@ function nextAccount() {
                 }
                 getAccountList();
             }
+
             log("第" + i + "次切换账号");
             let action = id("title").findOne(1000);
             if(action) {
@@ -8237,6 +8319,7 @@ function nextAccount() {
             }
             log(accounts.list, accounts.progress)
             let un = accounts.list[accounts.progress % accounts.list.length];
+
             if(lh_find(text(un),  "切换账号到" + un, 0)) {
                 clickOn(text(un));
                 log("切换中...进度：",accounts.list.length,"  ===  ",accounts.progress);
@@ -8253,10 +8336,12 @@ function nextAccount() {
         }
     }
     log("账号切换结束")
+     */
+}
 }
 
 function getAccountList(reTag) {
-    let accountList = [];
+    let nowAccountList = [];
     for (let i = 0; i < 5; i++) {
         try{
             // 点击
@@ -8282,15 +8367,15 @@ function getAccountList(reTag) {
                 ) {
                     let text = e.find(className("TextView"));
                     if(1 < text.length) {
-                        accountList.push(text[1].text());
+                        nowAccountList.push(text[1].text());
                     }
                 }
             });
             // 获取到的账号列表小于1个时提示是否重新获取
-            if(accountList.length < 1) {
-                if(autoConfirm(2000,true,"是否重新获取？当前获取到的账号列表如下：",accountList.join("\n"))){
+            if(nowAccountList.length < 1) {
+                if(autoConfirm(2000,true,"是否重新获取？当前获取到的账号列表如下：",nowAccountList.join("\n"))){
                     // 跳过本次，重新获取
-                    accountList=[];
+                    nowAccountList=[];
                     continue;
                 }
             }
@@ -8299,18 +8384,18 @@ function getAccountList(reTag) {
         }catch(e){}
     }
     // 如果存在标记则直接返回本次拿到的数据
-    if(reTag) return accountList;
+    if(reTag) return nowAccountList;
 
-    sleep(1000)
     // 重新获取一次账号并判断两次哪次的多
+/*     sleep(1000)
     let reAccountList = getAccountList("重新获取账号列表");
-    if(accountList.length < reAccountList.length) accountList = reAccountList;
+    if(accountList.length < reAccountList.length) accountList = reAccountList; */
 
     // 赋值账号列表
-    accounts.list = accountList;
+    accounts.list = nowAccountList;
     console.verbose(accounts.list)
     log("数量：",accounts.list.length)
-    return accounts;
+    return accounts.list;
 }
 
 
