@@ -20,6 +20,7 @@ var tempSave = {
     let logs = [
         "解决一些问题",
         "修复关注时卡在列表底部",
+        "修复没有log当前模式",
     ];
     tempSave.version += logs.pop();
 }
@@ -287,18 +288,22 @@ exit = function () {
 threads.start(function () {
     let i = 0;
     while(survive){
-        popupDetection();
-        {
-            // if(i==0) {
-            //     popupDetection();
-            // } else {
-            //     action = text("Okay").findOne(30);
-            //     if(action) action.click();
-                
-            //     if(30 < i) i = 0;
-            // }
+        try{
+            if((i++) % 5 == 0) console.verbose(tempSave.model + " 模式-------");
+            popupDetection(null, "关闭异常日志");
+            {
+                // if(i==0) {
+                //     popupDetection();
+                // } else {
+                //     action = text("Okay").findOne(30);
+                //     if(action) action.click();
+                    
+                //     if(30 < i) i = 0;
+                // }
+            }
+        }catch(e){
+            console.verbose("守护线程异常", e)
         }
-        if((i++) % 5 == 0) console.verbose(tempSave.model + "模式");
         sleep(2000);
     }
 })
@@ -504,7 +509,7 @@ ui.layout(
         </vertical>
     </drawer>
 );
-survive=false
+
 // ui绑定
 ui.ptxz.click(()=>{
     // 登号
@@ -8124,7 +8129,7 @@ function stopScript(msg){
 }
 
 // 弹窗检测
-function popupDetection(time) {
+function popupDetection(time, exceptionLog) {
     time = time || 3000;
     let action=[];
     let funList = [
@@ -8213,7 +8218,7 @@ function popupDetection(time) {
         }
     }catch(err){
         // 极低概率会出现控件消失或者就是脚本被关闭了，所以不用处理
-        console.info("3");
+        if(!exceptionLog) console.info("3");
     }
 }
 
