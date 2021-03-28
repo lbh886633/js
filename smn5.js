@@ -5,7 +5,7 @@ var fasle = false;
 var tempSave = {
     /* 测试时使用，将h="0"改成 h="auto"即可 */
     // 版本号
-    version: "78" + " -- ",
+    version: "79" + " -- ",
     firstEnvi: 0,
     privacy: 30,
     NUMBER: 0,
@@ -19,6 +19,7 @@ var tempSave = {
 {
     let logs = [
         "解决一些问题",
+        "修复关注时卡在列表底部",
     ];
     tempSave.version += logs.pop();
 }
@@ -1954,6 +1955,7 @@ function mi6关注操作(num) {
     log("关注", 计数);
 
     let 滑动异常次数 = 0;
+    let 关注失败次数 = 0;
     let 新链接 = 取链接();
     openUrlAndSleep3s(新链接)
     // sleep(1000)
@@ -1998,8 +2000,26 @@ function mi6关注操作(num) {
                     sleep(关注间隔)
                 }
                 if(关注.length == text("Follow").visibleToUser().find().length) {
-                    if(autoConfirm(3000,false,"似乎关注失败了，是否开始下一个账号？")) {
-                        计数 = 限制;
+                    let click;
+                    // 检测3次
+                    if(3 <= 关注失败次数++) {
+                        click = true;
+                    }
+                    // 剩余超过3个可点击的关注按钮
+                    if(3 < 关注.length) {
+                        // 切换账号
+                        if(autoConfirm(3000,click,"似乎关注失败了，是否开始下一个账号？")) {
+                            log("开始下一个账号")
+                            计数 = 限制;
+                        }
+                    } else {
+                        // 切换链接
+                        if(autoConfirm(3000,click,"似乎关注失败了，是否切换链接？")) {
+                            log("切换链接")
+                            mi6关注操作(计数);
+                            log("切换链接后关注结束");
+                            计数 = 限制;
+                        }
                     }
                 }
                 if(计数 >= 限制 || 计数标志 >= 限制 ) {
@@ -8289,6 +8309,24 @@ function nextAccount() {
                 // 账号为空，跳出
                 if(!switchAccountName) return "跳出循环执行";
             }
+        )
+        , step(
+            "账号真实性检测"
+            , function(){ 
+                if(!switchAccountName) {
+                    // 选择新的账号
+                    accounts.list.forEach((name)=>{
+                        if(localAccountList.indexOf(name) < 0) {
+                            // 选择账号
+                            switchAccountName = name;
+                            return false;
+                        }
+                    })
+                    console.info("选择账号：", switchAccountName)
+                }
+                return !switchAccountName;
+            }
+            , function(){ return switchAccountName ? switchAccountName : "跳出循环执行"}
         )
     ]
 
