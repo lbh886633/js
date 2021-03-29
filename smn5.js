@@ -21,7 +21,7 @@ var tempSave = {
         "解决一些问题",
         "修复关注时卡在列表底部",
         "修复没有log当前模式",
-        "测试_2",
+        "修复关注存在的一些问题",
     ];
     tempSave.version += logs.pop();
 }
@@ -823,7 +823,6 @@ function 主程序() {
         try{
             console.info("开始测试");
             // TODO 测试代码
-            mi6关注操作();
         }catch(e){
             log(e)
         }
@@ -2023,7 +2022,7 @@ function mi6关注操作(num) {
                     })
                 }
 
-                // 判断关注失败的人数是否超过40%（4个），超过则换号 ！！！！！！
+                // 判断关注失败的人数是否超过40%（4个），超过则换号
                 if(4 < 关注.length && 关注.length == text("Follow").visibleToUser().find().length) {
                     // 切换账号
                     let click;
@@ -2162,8 +2161,6 @@ function mi6关注操作(num) {
 }
 
 function 取链接() {
-    // ！！！！！！！！！！！！！！！！！！！！！！
-    return "https://vt.tiktok.com/ZSJdTatoB"
     let r;
     while (typeof r == "undefined") {
         try {
