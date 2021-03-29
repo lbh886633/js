@@ -5,7 +5,7 @@ var fasle = false;
 var tempSave = {
     /* 测试时使用，将h="0"改成 h="auto"即可 */
     // 版本号
-    version: "79" + " -- ",
+    version: "80" + " -- ",
     firstEnvi: 0,
     privacy: 30,
     NUMBER: 0,
@@ -21,6 +21,7 @@ var tempSave = {
         "解决一些问题",
         "修复关注时卡在列表底部",
         "修复没有log当前模式",
+        "测试_1",
     ];
     tempSave.version += logs.pop();
 }
@@ -822,9 +823,7 @@ function 主程序() {
         try{
             console.info("开始测试");
             // TODO 测试代码
-            appPackage = appPackage || app.getPackageName(appName);
-            sm停止TikTok()
-            返回首页(300);
+            mi6关注操作();
         }catch(e){
             log(e)
         }
@@ -1961,6 +1960,7 @@ function mi6关注操作(num) {
 
     let 滑动异常次数 = 0;
     let 关注失败次数 = 0;
+    let lastFansNameList = [];
     let 新链接 = 取链接();
     openUrlAndSleep3s(新链接)
     // sleep(1000)
@@ -2004,7 +2004,61 @@ function mi6关注操作(num) {
                     var 关注间隔 = random(Number(ui.gzjg.text()), Number(ui.gzjg1.text()))
                     sleep(关注间隔)
                 }
-                if(关注.length == text("Follow").visibleToUser().find().length) {
+
+                // 获取到当前列表所有人的名字
+                let arr = []
+                let uo = className("androidx.recyclerview.widget.RecyclerView").visibleToUser()
+                    .filter(function(uo){return uo.depth()==9 || uo.depth()==10})
+                    .scrollable(true).findOne(500);
+                if(uo) {
+                    uo.children().forEach((e)=>{
+                        let letUO = e.findOne(className("android.widget.LinearLayout"));
+                        if(letUO) {
+                            letUO = letUO.findOne(className("android.widget.TextView"))
+                            if(letUO) {
+                                // 保存当前的粉丝名字
+                                arr.push(letUO.text())
+                            }
+                        }
+                    })
+                }
+
+                // 判断关注失败的人数是否超过40%（4个），超过则换号
+                if(关注.length != 0 && 关注.length == text("Follow").visibleToUser().find().length) {
+                    // 切换账号
+                    let click;
+                    if(3 <= 关注失败次数++) {
+                        click = true;
+                    }
+                    if(autoConfirm(3000,click,"似乎关注失败了，是否开始下一个账号？")) {
+                        log("开始下一个账号")
+                        计数 = 限制;
+                    }
+                }
+
+                // 判断当前列表的人和上一次的是否一致，一致则换链接
+                let tempArr = [];
+                arr.forEach((name)=>{
+                    if(-1 < lastFansNameList.indexOf(name)) {
+                        tempArr.push(name);
+                    }
+                })
+                if(arr.length - tempArr.length < 3) {
+                    // 切换链接
+                    let click;
+                    // 检测3次
+                    if(3 <= 关注失败次数++) {
+                        click = true;
+                    }
+                    if(autoConfirm(3000,click,"似乎关注失败了，是否切换链接？")) {
+                        log("切换链接")
+                        mi6关注操作(计数);
+                        log("切换链接后关注结束");
+                        计数 = 限制;
+                    }
+                }
+
+               {/*  if(关注.length == text("Follow").visibleToUser().find().length) {
                     let click;
                     // 检测3次
                     if(3 <= 关注失败次数++) {
@@ -2026,7 +2080,9 @@ function mi6关注操作(num) {
                             计数 = 限制;
                         }
                     }
-                }
+                } */}
+
+
                 if(计数 >= 限制 || 计数标志 >= 限制 ) {
                     log("跳出循环", 计数, 计数标志)
                     break
