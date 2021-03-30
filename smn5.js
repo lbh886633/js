@@ -5,7 +5,7 @@ var fasle = false;
 var tempSave = {
     /* 测试时使用，将h="0"改成 h="auto"即可 */
     // 版本号
-    version: "80" + " -- ",
+    version: "81" + " -- ",
     firstEnvi: 0,
     privacy: 30,
     NUMBER: 0,
@@ -14,7 +14,9 @@ var tempSave = {
     getSayMessage: "Hi",
     firstAccount: true,
     // 当前模式
-    model: "<-无->",
+    model: "<无>",
+    // 选择的版本
+    switchVersion: "",
 };
 {
     let logs = [
@@ -22,6 +24,7 @@ var tempSave = {
         "修复关注时卡在列表底部",
         "修复没有log当前模式",
         "修复关注存在的一些问题",
+        "修复关注不会切换链接，优化日志提示",
     ];
     tempSave.version += logs.pop();
 }
@@ -290,7 +293,10 @@ threads.start(function () {
     let i = 0;
     while(survive){
         try{
-            if((i++) % 5 == 0) console.verbose(tempSave.model + " 模式-------");
+            if(i%15 == 0) {
+                tempSave.switchVersion = -1 < appPackage.indexOf("zhiliaoapp") ? "长版本" : "短版本";
+                console.verbose("模式：" + tempSave.model + " --- 版本：" + tempSave.switchVersion + " --- 包名：" +appPackage);
+            } else if((i++) % 5 == 0) console.verbose("模式：" + tempSave.model + " --- 版本：" + tempSave.switchVersion);
             popupDetection(null, "关闭异常日志");
             {
                 // if(i==0) {
@@ -2004,24 +2010,6 @@ function mi6关注操作(num) {
                     sleep(关注间隔)
                 }
 
-                // 获取到当前列表所有人的名字
-                let arr = []
-                let uo = className("androidx.recyclerview.widget.RecyclerView").visibleToUser()
-                    .filter(function(uo){return uo.depth()==9 || uo.depth()==10})
-                    .scrollable(true).findOne(500);
-                if(uo) {
-                    uo.children().forEach((e)=>{
-                        let letUO = e.findOne(className("android.widget.LinearLayout"));
-                        if(letUO) {
-                            letUO = letUO.findOne(className("android.widget.TextView"))
-                            if(letUO) {
-                                // 保存当前的粉丝名字
-                                arr.push(letUO.text())
-                            }
-                        }
-                    })
-                }
-
                 // 判断关注失败的人数是否超过40%（4个），超过则换号
                 if(4 < 关注.length && 关注.length == text("Follow").visibleToUser().find().length) {
                     // 切换账号
@@ -2035,26 +2023,47 @@ function mi6关注操作(num) {
                     }
                 }
 
-                // 判断当前列表的人和上一次的是否一致，一致则换链接
-                let tempArr = [];
-                arr.forEach((name)=>{
-                    if(-1 < lastFansNameList.indexOf(name)) {
-                        tempArr.push(name);
+                {
+                    // 获取到当前列表所有人的名字
+                    let arr = []
+                    let uo = className("androidx.recyclerview.widget.RecyclerView").visibleToUser()
+                        .filter(function(uo){return uo.depth()==9 || uo.depth()==10})
+                        .scrollable(true).findOne(500);
+                    if(uo) {
+                        uo.children().forEach((e)=>{
+                            let letUO = e.findOne(className("android.widget.LinearLayout"));
+                            if(letUO) {
+                                letUO = letUO.findOne(className("android.widget.TextView"))
+                                if(letUO) {
+                                    // 保存当前的粉丝名字
+                                    arr.push(letUO.text())
+                                }
+                            }
+                        })
                     }
-                })
-                if(arr.length - tempArr.length < 3) {
-                    // 切换链接
-                    let click;
-                    // 检测3次
-                    if(3 <= 关注失败次数++) {
-                        click = true;
+                    // 判断当前列表的人和上一次的是否一致，一致则换链接
+                    let tempArr = [];
+                    arr.forEach((name)=>{
+                        if(-1 < lastFansNameList.indexOf(name)) {
+                            tempArr.push(name);
+                        }
+                    })
+                    if(arr.length - tempArr.length < 3) {
+                        // 切换链接
+                        let click;
+                        // 检测3次
+                        if(3 <= 关注失败次数++) {
+                            click = true;
+                        }
+                        if(autoConfirm(3000,click,"似乎关注失败了，是否切换链接？")) {
+                            log("切换链接")
+                            mi6关注操作(计数);
+                            log("切换链接后关注结束");
+                            计数 = 限制;
+                        }
                     }
-                    if(autoConfirm(3000,click,"似乎关注失败了，是否切换链接？")) {
-                        log("切换链接")
-                        mi6关注操作(计数);
-                        log("切换链接后关注结束");
-                        计数 = 限制;
-                    }
+                    // 将本次获取到的账号名保存起来
+                    lastFansNameList = arr;
                 }
 
                {/*  if(关注.length == text("Follow").visibleToUser().find().length) {
