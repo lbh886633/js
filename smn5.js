@@ -293,10 +293,10 @@ threads.start(function () {
     let i = 0;
     while(survive){
         try{
-            if(i%15 == 0) {
+            if((i++) % 15 == 0) {
                 tempSave.switchVersion = -1 < appPackage.indexOf("zhiliaoapp") ? "长版本" : "短版本";
                 console.verbose("模式：" + tempSave.model + " --- 版本：" + tempSave.switchVersion + " --- 包名：" +appPackage);
-            } else if((i++) % 5 == 0) console.verbose("模式：" + tempSave.model + " --- 版本：" + tempSave.switchVersion);
+            } else if(i % 5 == 0) console.verbose("模式：" + tempSave.model + " --- 版本：" + tempSave.switchVersion);
             popupDetection(null, "关闭异常日志");
             {
                 // if(i==0) {
@@ -304,7 +304,6 @@ threads.start(function () {
                 // } else {
                 //     action = text("Okay").findOne(30);
                 //     if(action) action.click();
-                    
                 //     if(30 < i) i = 0;
                 // }
             }
