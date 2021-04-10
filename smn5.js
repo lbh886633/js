@@ -24,6 +24,7 @@ var tempSave = {
         "修复没有log当前模式",
         "修复关注存在的一些问题",
         "修复关注不会切换链接，优化日志提示",
+        "修复已存在标签还询问问题",
     ];
     tempSave.version += logs.pop();
 }
@@ -5335,7 +5336,7 @@ function getIssue(labelNameList){
     let labelNamesExcludes = "";
     try {
         labelNameList.forEach((e) => {
-            labelNamesExcludes += "&labelNamesExclude" + e.toString();
+            labelNamesExcludes += "&labelNamesExclude=" + e.toString();
         });
     } catch(e) {
 
