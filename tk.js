@@ -5,7 +5,7 @@ var tempSave = {
     privacy: 0,
     NUMBER: 0,
     自动打码: false,
-    version: "9" + "优化邮箱生成",
+    version: "10" + "优化注册7模式的流程",
 
 
 };
@@ -3470,6 +3470,10 @@ function 注册7模式() {
 
             app.launchApp(appName)
             for (let j = 0; j < 5; j++) {
+                
+                if(!packageName(pack).findOnce(10000)){
+                    app.launchApp(appName)
+                }
 
                 let action = textContains("Sign up").findOne(2000)
                 if(action) {
@@ -3477,9 +3481,8 @@ function 注册7模式() {
                     break;
                 }
 
-                if(!packageName(pack).findOnce(10000)){
-                    app.launchApp(appName)
-                }
+                popupDetection();
+                sleep(600)
             }
 
             for (let index = 0; index < 5; index++) {
