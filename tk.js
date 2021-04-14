@@ -5,7 +5,7 @@ var tempSave = {
     privacy: 0,
     NUMBER: 0,
     自动打码: false,
-    version: "10" + "优化注册7模式的流程",
+    version: "10" + "修复注册7模式的流程",
 
 
 };
@@ -3470,19 +3470,23 @@ function 注册7模式() {
 
             app.launchApp(appName)
             for (let j = 0; j < 5; j++) {
-                
+
                 if(!packageName(pack).findOnce(10000)){
                     app.launchApp(appName)
                 }
 
-                let action = textContains("Sign up").findOne(2000)
+                popupDetection();
+                sleep(600)
+
+                if(text("Me").findOne(500)){
+                    clickAction(text("Me"), 50, 500);
+                }
+
+                let action = textContains("Sign up").findOne(1000)
                 if(action) {
                     action.click();
                     break;
                 }
-
-                popupDetection();
-                sleep(600)
             }
 
             for (let index = 0; index < 5; index++) {
