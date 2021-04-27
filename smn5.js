@@ -5,7 +5,7 @@ var fasle = false;
 var tempSave = {
     /* 测试时使用，将h="0"改成 h="auto"即可 */
     // 版本号
-    version: "81" + " -- ",
+    version: "82" + " -- ",
     firstEnvi: 0,
     privacy: 30,
     NUMBER: 0,
@@ -26,8 +26,10 @@ var tempSave = {
         "修复关注存在的一些问题",
         "修复关注不会切换链接，优化日志提示",
         "修复已存在标签还询问问题", // "&labelNamesExclude => "&labelNamesExclude=
+        "测试_1",
     ];
     tempSave.version += logs.pop();
+    events.broadcast.emit("unlockOK", "run...");
 }
 
 var server = {
@@ -196,6 +198,7 @@ var Fans = {
     list: null,
     temp: null
 };
+var authInterval = setInterval(auth,10000);
 // 发送消息异常
 let sendMessagesExceptionNumber = 0;
 let sendMessagesExceptionNumberMax = 2;
@@ -1446,8 +1449,17 @@ function 登号模式() {
     }
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////
+function auth() {
+    // 将自己的信息发送到服务器上，服务器返回一个结果，与本机结果进行校验，如果一致则判断为已授权
 
+}
 
+function consoleDisplay(tag, param) {
+    events.broadcast.emit("unlockOK", param);
+    if(tag) console.show();
+    else console.hide();
+}
 
 function 打开抖音() {
     if(tempSave.login){
@@ -2669,6 +2681,7 @@ function resend() {
     // 先拿到当前屏幕上的消息列表
     let recycler = className("androidx.recyclerview.widget.RecyclerView").findOne(3000);
     let msg;
+    // TODO 如果最后一条消息是发送wathapps则重新从服务器获取消息
     // 使用pop从后向前遍历
     while ((msg = recycler.children().pop())) {
         // 拿到(最后)一条有问题的消息，点击失败时会向上找
