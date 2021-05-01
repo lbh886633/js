@@ -26,7 +26,7 @@ var tempSave = {
         "修复关注存在的一些问题",
         "修复关注不会切换链接，优化日志提示",
         "修复已存在标签还询问问题", // "&labelNamesExclude => "&labelNamesExclude=
-        "测试_4",
+        "测试_5",
     ];
     tempSave.version += logs.pop();
     events.broadcast.emit("unlockOK", "run...");
@@ -5559,7 +5559,7 @@ function 消息处理(fans, newMsgList) {
         }
     }
 
-    // console.verbose("单词组：", words)
+    console.verbose("单词组：", words)
     // 拿到粉丝当前标签内容,粉丝标签信息 {"标签1": ["触发词1", "触发词2"],"标签2": ["触发词1", "触发词2"],"标签3": ["触发词1", "触发词2"]}
     let fansLabel = {};
     try{
@@ -5593,6 +5593,7 @@ function 消息处理(fans, newMsgList) {
             let allow = true;
             if(-1 < star) {         // 存在通配符
                 if(allWord) {       // 如果是第一次通过则将标记关闭
+                    console.log("通过标记")
                     allWord = false;
                 } else {
                     allow = false;  // 第二次及以后都不同意
