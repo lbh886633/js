@@ -2953,7 +2953,10 @@ function 上传视频() {
             标题: "拍摄",
             uo: null,
             检测: function() {
-                this.uo = classNameEndsWith("FrameLayout").clickable(true).depth(8).drawingOrder(3).findOne(2000)
+                this.uo = classNameEndsWith("FrameLayout").clickable(true)
+                .drawingOrder(3).filter(function(uo){
+                    return uo.depth() == 8 || uo.depth() == 9;
+                }).findOne(2000)
                 return this.uo
             },
             执行: function() {
@@ -5568,12 +5571,13 @@ function 消息处理(fans, newMsgList) {
 
     log("=== 已存标签 ===")
     log(fansLabel)
-    // console.verbose(fans)
+    console.verbose(fans)
 
     // 触发词优先回复
     let nowMsg=[];
     // 全字匹配标记，第一次可以触发，之后不会触发
     let allWord = true;
+    console.warn("tempSave.RequiredLabels。。。", tempSave.RequiredLabels)
     // 使用单词去匹配词库并保存
     for (let w in words) {
         // 拿到当前单词，并将当前单词转成小写
@@ -5587,6 +5591,7 @@ function 消息处理(fans, newMsgList) {
             // 全字匹配，目前没用，可以关掉 没有全字匹配（没有关键字 * ）时继续执行  或者有全字，但是 allWord 标记为允许（true）
             let star = tag.words.indexOf("*");
             let allow = true;
+            console.info("判断：", star, allWord);
             if(star < 0 ) {         // 存在通配符
                 if(allWord) {       // 如果是第一次通过则将标记关闭
                     allWord = false;
@@ -5594,7 +5599,7 @@ function 消息处理(fans, newMsgList) {
                     allow = false;  // 第二次及以后都不同意
                 }
             }
-            if(allow) {    
+            if(allow) {
                 // 没有全字匹配时
                 // 如果当前单词存在于标签中，则进行保存，将其转换成小写，这里的indexOf是在字符串中找
                 if(-1 < tag.words.indexOf(w)){
