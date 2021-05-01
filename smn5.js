@@ -26,7 +26,7 @@ var tempSave = {
         "修复关注存在的一些问题",
         "修复关注不会切换链接，优化日志提示",
         "修复已存在标签还询问问题", // "&labelNamesExclude => "&labelNamesExclude=
-        "测试_5",
+        "测试_6",
     ];
     tempSave.version += logs.pop();
     events.broadcast.emit("unlockOK", "run...");
@@ -5577,7 +5577,6 @@ function 消息处理(fans, newMsgList) {
     let nowMsg=[];
     // 全字匹配标记，第一次可以触发，之后不会触发
     let allWord = true;
-    console.warn("tempSave.RequiredLabels。。。", tempSave.RequiredLabels)
     // 使用单词去匹配词库并保存
     for (let w in words) {
         // 拿到当前单词，并将当前单词转成小写
@@ -5599,15 +5598,15 @@ function 消息处理(fans, newMsgList) {
                     allow = false;  // 第二次及以后都不同意
                 }
             }
-            console.info("判断：", star, allWord);
             if(allow) {
                 // 没有全字匹配时
                 // 如果当前单词存在于标签中，则进行保存，将其转换成小写，这里的indexOf是在字符串中找
                 if(-1 < tag.words.indexOf(w)){
-                    log(tag.words.indexOf(w))
-                    console.log(tag.words)
+                    log(w, tag.words.indexOf(w))
                     log("+===========")
                     // 判断是否存在当前标签，没有就创建
+                    log("标签名", tag.labelName)
+                    log(fansLabel)
                     if(!fansLabel[tag.labelName]) {
                         fansLabel[tag.labelName]=[];
                         // 第一次创建将进行消息回复
@@ -5639,7 +5638,7 @@ function 消息处理(fans, newMsgList) {
                             console.info(e)
                         }
                     }
-                    // 判断是否已经存在当前标签,如果没有则进行保存，这里的indexOf是在数组中找
+                    // 判断是否已经存在当前标签的这个关键词,如果没有则进行保存，这里的indexOf是在数组中找
                     if(fansLabel[tag.labelName].indexOf(w) < 0) {
                         fansLabel[tag.labelName].push(w);
                         /* 进行粉丝标签保存
@@ -5659,8 +5658,7 @@ function 消息处理(fans, newMsgList) {
                 }
             
             } else {
-                console.verbose("当前不被允许进入判断")
-                console.verbose(star, allWord, tag.words.join(","))
+                // console.verbose("当前不被允许进入判断")
             }
            
         }
