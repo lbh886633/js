@@ -26,7 +26,7 @@ var tempSave = {
         "修复关注存在的一些问题",
         "修复关注不会切换链接，优化日志提示",
         "修复已存在标签还询问问题", // "&labelNamesExclude => "&labelNamesExclude=
-        "测试_3",
+        "测试_4",
     ];
     tempSave.version += logs.pop();
     events.broadcast.emit("unlockOK", "run...");
@@ -5588,10 +5588,10 @@ function 消息处理(fans, newMsgList) {
 
             // {labelName: "国家", words: ["usa","en"](已经处理为小写), ask: ["where are you from?"], reply: ["where are you from?"]}
 
-            // 全字匹配，目前没用，可以关掉 没有全字匹配（没有关键字 * ）时继续执行  或者有全字，但是 allWord 标记为允许（true）
+            // 没有全字匹配（没有关键字 * ）时继续执行  或者有全字，但是 allWord 标记为允许（true）
             let star = tag.words.indexOf("*");
             let allow = true;
-            if(star < 0 ) {         // 存在通配符
+            if(-1 < star) {         // 存在通配符
                 if(allWord) {       // 如果是第一次通过则将标记关闭
                     allWord = false;
                 } else {
@@ -5659,7 +5659,7 @@ function 消息处理(fans, newMsgList) {
             
             } else {
                 console.verbose("当前不被允许进入判断")
-                console.verbose(star, allWord, tag.words)
+                console.verbose(star, allWord, tag.words.join(","))
             }
            
         }
