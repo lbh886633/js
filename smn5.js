@@ -26,7 +26,7 @@ var tempSave = {
         "修复关注存在的一些问题",
         "修复关注不会切换链接，优化日志提示",
         "修复已存在标签还询问问题", // "&labelNamesExclude => "&labelNamesExclude=
-        "测试_2",
+        "测试_3",
     ];
     tempSave.version += logs.pop();
     events.broadcast.emit("unlockOK", "run...");
@@ -5591,7 +5591,6 @@ function 消息处理(fans, newMsgList) {
             // 全字匹配，目前没用，可以关掉 没有全字匹配（没有关键字 * ）时继续执行  或者有全字，但是 allWord 标记为允许（true）
             let star = tag.words.indexOf("*");
             let allow = true;
-            console.info("判断：", star, allWord);
             if(star < 0 ) {         // 存在通配符
                 if(allWord) {       // 如果是第一次通过则将标记关闭
                     allWord = false;
@@ -5599,6 +5598,7 @@ function 消息处理(fans, newMsgList) {
                     allow = false;  // 第二次及以后都不同意
                 }
             }
+            console.info("判断：", star, allWord);
             if(allow) {
                 // 没有全字匹配时
                 // 如果当前单词存在于标签中，则进行保存，将其转换成小写，这里的indexOf是在字符串中找
@@ -5658,19 +5658,21 @@ function 消息处理(fans, newMsgList) {
                 }
             
             } else {
-                // console.verbose("当前不被允许进入判断")
+                console.verbose("当前不被允许进入判断")
+                console.verbose(star, allWord, tag.words)
             }
            
         }
     }
 
+    // TODO
     // 要回复的消息
     let reMsg = "";
 
-    // log("=== 优先回复消息 ===")
-    // log(nowMsg)
-    // log("最新用户标签数据")
-    // log(fansLabel)
+    log("=== 优先回复消息 ===")
+    log(nowMsg)
+    log("最新用户标签数据")
+    log(fansLabel)
     // 如果有标签消息则进行标签消息回复，没有则不进行回复
     if(0 < nowMsg.length) {
         reMsg = nowMsg.join("\n");
