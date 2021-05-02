@@ -371,7 +371,7 @@ ui.layout(
                                     <radio id="mi6_rep"  text="回复" />
                                 </radiogroup>
                                 {/* 测试时使用，将h="0"改成 h="auto"即可 */}
-                                <radiogroup orientation="horizontal" h="0">
+                                <radiogroup orientation="horizontal" h="auto">
                                     <radio id="mi6_null" checked="true" text="空" />
                                     <radio id="functionTest" text="测试函数" />
                                 </radiogroup>
@@ -842,7 +842,11 @@ function 主程序() {
 
         try{
             console.info("开始测试");
-            // TODO 测试代码
+            // TODO TEST 测试代码
+            // TODO TEST 测试代码
+            // TODO TEST 测试代码
+            sendMsg("测试一下")
+
         }catch(e){
             log(e)
         }
