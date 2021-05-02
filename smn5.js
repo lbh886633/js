@@ -26,7 +26,7 @@ var tempSave = {
         "修复关注存在的一些问题",
         "修复关注不会切换链接，优化日志提示",
         "修复已存在标签还询问问题", // "&labelNamesExclude => "&labelNamesExclude=
-        "测试_9",
+        "新增可插入全字匹配",
     ];
     tempSave.version += logs.pop();
     events.broadcast.emit("unlockOK", "run...");
@@ -5559,7 +5559,7 @@ function 消息处理(fans, newMsgList) {
         }
     }
 
-    console.verbose("单词组：", words)
+    // console.verbose("单词组：", words)
     // 拿到粉丝当前标签内容,粉丝标签信息 {"标签1": ["触发词1", "触发词2"],"标签2": ["触发词1", "触发词2"],"标签3": ["触发词1", "触发词2"]}
     let fansLabel = {};
     try{
@@ -5571,7 +5571,7 @@ function 消息处理(fans, newMsgList) {
 
     log("=== 已存标签 ===")
     log(fansLabel)
-    console.verbose(fans)
+    // console.verbose(fans)
 
     // 触发词优先回复
     let nowMsg=[];
@@ -5592,7 +5592,6 @@ function 消息处理(fans, newMsgList) {
             let allow = true;
             if(-1 < star) {         // 存在通配符
                 if(allWord) {       // 如果是第一次通过则将标记关闭
-                    console.log("通过标记")
                     allWord = false;
                 } else {
                     allow = false;  // 第二次及以后都不通过
@@ -5601,13 +5600,11 @@ function 消息处理(fans, newMsgList) {
             if(allow) {
                 // 没有全字匹配时
                 // 如果当前单词存在于标签中，则进行保存，将其转换成小写，这里的indexOf是在字符串中找
-                log("关键词", w)
                 // 当前标签中存在这个关键词或者存在“*” 
                 if(-1 < tag.words.indexOf(w) || -1 < star){
                     log(w, tag.words.indexOf(w))
                     log("+===========")
                     // 判断是否存在当前标签，没有就创建
-                    log(fansLabel)
                     if(!fansLabel[tag.labelName]) {
                         fansLabel[tag.labelName]=[];
                         // 第一次创建将进行消息回复
@@ -5665,14 +5662,13 @@ function 消息处理(fans, newMsgList) {
         }
     }
 
-    // TODO
     // 要回复的消息
     let reMsg = "";
 
-    log("=== 优先回复消息 ===")
-    log(nowMsg)
-    log("最新用户标签数据")
-    log(fansLabel)
+    // log("=== 优先回复消息 ===")
+    // log(nowMsg)
+    // log("最新用户标签数据")
+    // log(fansLabel)
     // 如果有标签消息则进行标签消息回复，没有则不进行回复
     if(0 < nowMsg.length) {
         reMsg = nowMsg.join("\n");
