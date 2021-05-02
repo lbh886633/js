@@ -207,6 +207,36 @@ var emojiData = [
     , "(｡･ω･｡)ﾉ♡"
     , "٩( 'ω' )و"
     , "(ಡωಡ)"
+    , "ԅ(¯ㅂ¯ԅ)"
+    , "(´｡✪ω✪｡｀)"
+    , "\^O^/"
+    , "(^～^)"
+    , "(๑＞ڡ＜)☆ "
+    , "(๑>؂<๑）"
+    , "(^_^) "
+    , "(σ′▽‵)′▽‵)σ"
+    , "(´▽｀)ノ♪"
+    , "๑乛v乛๑"
+    , "(*˘︶˘*).｡.:*♡"
+    , "ε٩(๑> ₃ <)۶ з"
+    , "٩(๑^o^๑)۶"
+    , "✧٩(ˊωˋ*)و✧"
+    , "(≧▽≦)"
+    , "(*^ω^*)"
+    , "(^ω^)"
+    , "(^0^)/"
+    , "(=^▽^=)"
+    , "o(^o^)o"
+    , "o(≧v≦)o"
+    , "(☆∀☆)"
+    , "(/≧▽≦/)"
+    , "(^-^)"
+    , "^ω^"
+    , " (≧∇≦*)"
+    , "(*^▽^)/★*☆"
+    , "♪～(´ε｀　)"
+    , "(✪▽✪)"
+    , "ヾ(@゜∇゜@)ノ"
 ]
 
 var authInterval = setInterval(auth,10000);
@@ -4771,7 +4801,7 @@ function sendMsg(msg, sayHelloTag, breakNum, emoji) {
         if(typeof breakNum != "number") breakNum = 0;
         console.error(breakNum)
         if(breakNum < 2) {
-            return sendMsg(msg, sayHelloTag, breakNum, emojiData[random(0, emojiData.length-1)]);
+            return sendMsg(msg, sayHelloTag, ++breakNum, emojiData[random(0, emojiData.length-1)]);
         } else {
             msgList[0].she="sayHelloException:默认第一个";
             return msgList[0];
