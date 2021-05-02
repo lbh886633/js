@@ -5,7 +5,7 @@ var fasle = false;
 var tempSave = {
     /* 测试时使用，将h="0"改成 h="auto"即可 */
     // 版本号
-    version: "82" + " -- ",
+    version: "93" + " -- ",
     firstEnvi: 0,
     privacy: 30,
     NUMBER: 0,
@@ -27,6 +27,7 @@ var tempSave = {
         "修复关注不会切换链接，优化日志提示",
         "修复已存在标签还询问问题", // "&labelNamesExclude => "&labelNamesExclude=
         "新增可插入全字匹配",
+        "1_测试重发消息时加入颜文字",
     ];
     tempSave.version += logs.pop();
     events.broadcast.emit("unlockOK", "run...");
@@ -198,6 +199,16 @@ var Fans = {
     list: null,
     temp: null
 };
+var emojiData = [
+    "(๑• . •๑)"
+    , "(๑•ั็ω•็ั๑)"
+    , "(･ิϖ･ิ)っ"
+    , "(๑>؂<๑）"
+    , "(｡･ω･｡)ﾉ♡"
+    , "٩( 'ω' )و"
+    , "(ಡωಡ)"
+]
+
 var authInterval = setInterval(auth,10000);
 // 发送消息异常
 let sendMessagesExceptionNumber = 0;
@@ -4666,7 +4677,7 @@ function sayHello(f, msg){
 }
 
 // 在聊天界面发送消息
-function sendMsg(msg, sayHelloTag) {
+function sendMsg(msg, sayHelloTag, breakNum, emoji) {
     if(sayHelloTag) {
         // 检测是否自己发送过消息
         let msgs = 获取消息();
@@ -4700,7 +4711,11 @@ function sendMsg(msg, sayHelloTag) {
         action = text("Send a message...").findOne(1000);
         if(action) {
             log("消息输入框")
-            action.setText(msg);
+            if(emoji) {
+                action.setText(emoji + "\n" + msg);
+            } else {
+                action.setText(msg);
+            }
         }
         // 3. 发送消息  发送按钮 950,1700, 1100,1950
         action = className("android.widget.ImageView")
@@ -4749,9 +4764,9 @@ function sendMsg(msg, sayHelloTag) {
                 return m;
             }
         }
-        
+        if(!breakNum) breakNum = 0;
         if(breakNum < 2) {
-            return sendMsg(msg+"\n.", breakNum);
+            return sendMsg(msg, sayHelloTag, breakNum, emojiData[random(0, emojiData.length-1)]);
         } else {
             msgList[0].she="sayHelloException:默认第一个";
             return msgList[0];
@@ -4765,6 +4780,7 @@ function sendMsg(msg, sayHelloTag) {
         }
     }
 }
+
 // 检测到整句话则提示用户
 function detectionMsgStatus() {
     let uo = text("This message violated our Community Guidelines. We restrict certain content and actions to protect our community. If you believe this was a mistake, tap Feedback to let us know.")
