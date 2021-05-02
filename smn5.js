@@ -27,7 +27,7 @@ var tempSave = {
         "修复关注不会切换链接，优化日志提示",
         "修复已存在标签还询问问题", // "&labelNamesExclude => "&labelNamesExclude=
         "新增可插入全字匹配",
-        "1_测试重发消息时加入颜文字",
+        "2_测试重发消息时加入颜文字",
     ];
     tempSave.version += logs.pop();
     events.broadcast.emit("unlockOK", "run...");
@@ -4768,7 +4768,8 @@ function sendMsg(msg, sayHelloTag, breakNum, emoji) {
                 return m;
             }
         }
-        if(!breakNum) breakNum = 0;
+        if(typeof breakNum != "number") breakNum = 0;
+        console.error(breakNum)
         if(breakNum < 2) {
             return sendMsg(msg, sayHelloTag, breakNum, emojiData[random(0, emojiData.length-1)]);
         } else {
