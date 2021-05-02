@@ -27,7 +27,7 @@ var tempSave = {
         "修复关注不会切换链接，优化日志提示",
         "修复已存在标签还询问问题", // "&labelNamesExclude => "&labelNamesExclude=
         "新增可插入全字匹配",
-        "4_测试重发消息时加入颜文字",
+        "重发消息时加入颜文字",
     ];
     tempSave.version += logs.pop();
     events.broadcast.emit("unlockOK", "run...");
@@ -401,7 +401,7 @@ ui.layout(
                                     <radio id="mi6_rep"  text="回复" />
                                 </radiogroup>
                                 {/* 测试时使用，将h="0"改成 h="auto"即可 */}
-                                <radiogroup orientation="horizontal" h="auto">
+                                <radiogroup orientation="horizontal" h="0">
                                     <radio id="mi6_null" checked="true" text="空" />
                                     <radio id="functionTest" text="测试函数" />
                                 </radiogroup>
@@ -875,7 +875,6 @@ function 主程序() {
             // TODO TEST 测试代码
             // TODO TEST 测试代码
             // TODO TEST 测试代码
-            sendMsg("测试一下")
 
         }catch(e){
             log(e)
@@ -4739,7 +4738,7 @@ function sendMsg(msg, sayHelloTag, breakNum, emoji) {
         }
     }
 
-    log("发送消息：", msg)
+    log("发送消息：", emoji ? emoji+"\n"+msg : msg)
     for (let j = 0; j < 5; j++) {
         // 检测消息页面（需要判断是否存在输入框）
         action = text("Send a message...").findOne(1000);
@@ -4799,7 +4798,6 @@ function sendMsg(msg, sayHelloTag, breakNum, emoji) {
             }
         }
         if(typeof breakNum != "number") breakNum = 0;
-        console.error(breakNum)
         if(breakNum < 2) {
             return sendMsg(msg, sayHelloTag, ++breakNum, emojiData[random(0, emojiData.length-1)]);
         } else {
