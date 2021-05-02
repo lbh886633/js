@@ -26,7 +26,7 @@ var tempSave = {
         "修复关注存在的一些问题",
         "修复关注不会切换链接，优化日志提示",
         "修复已存在标签还询问问题", // "&labelNamesExclude => "&labelNamesExclude=
-        "测试_8",
+        "测试_9",
     ];
     tempSave.version += logs.pop();
     events.broadcast.emit("unlockOK", "run...");
@@ -5593,7 +5593,6 @@ function 消息处理(fans, newMsgList) {
             if(-1 < star) {         // 存在通配符
                 if(allWord) {       // 如果是第一次通过则将标记关闭
                     console.log("通过标记")
-                    log(tag)
                     allWord = false;
                 } else {
                     allow = false;  // 第二次及以后都不通过
@@ -5603,7 +5602,8 @@ function 消息处理(fans, newMsgList) {
                 // 没有全字匹配时
                 // 如果当前单词存在于标签中，则进行保存，将其转换成小写，这里的indexOf是在字符串中找
                 log("关键词", w)
-                if(-1 < tag.words.indexOf(w)){
+                // 当前标签中存在这个关键词或者存在“*” 
+                if(-1 < tag.words.indexOf(w) || -1 < star){
                     log(w, tag.words.indexOf(w))
                     log("+===========")
                     // 判断是否存在当前标签，没有就创建
