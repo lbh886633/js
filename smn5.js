@@ -5,7 +5,7 @@ var fasle = false;
 var tempSave = {
     /* 测试时使用，将h="0"改成 h="auto"即可 */
     // 版本号
-    version: "93" + " -- ",
+    version: "94" + " -- ",
     firstEnvi: 0,
     privacy: 30,
     NUMBER: 0,
@@ -28,6 +28,7 @@ var tempSave = {
         "修复已存在标签还询问问题", // "&labelNamesExclude => "&labelNamesExclude=
         "新增可插入全字匹配",
         "重发消息时加入颜文字",
+        "测试2",
     ];
     tempSave.version += logs.pop();
     events.broadcast.emit("unlockOK", "run...");
@@ -479,8 +480,9 @@ ui.layout(
                                     <input lines="1" id="focusUserNumber" w="auto" text="100"/>
                                 </linear>
                                 <linear padding="2 0 0 0">
+                                    <checkbox id="areaLimit" />
                                     <text textColor="black" text="指定国家: " />
-                                    <input lines="1" id="areaCode" w="*" text="100"/>
+                                    <input lines="1" id="areaCode" w="*" text="US"/>
                                 </linear>
                                 <linear padding="2 0 0 0">
                                     <checkbox id="setServerUrl" text="" />
@@ -8804,8 +8806,8 @@ function openUrlAndSleep3s(url,s) {
 }
 function getUrlByUserId() {
     // 从后台获取id   areaList：限制国家
-    let area = ui.areaCode.text();
-    let user = server.get("idList/gain" + (area ? "areaList="+area : ""));
+    let area = ui.areaCode.text().split(/[.,，。]/g).join("&areaList=");
+    let user = server.get("idList/gain" + (area ? "?areaList="+area : ""));
     if(user.uid) {
         console.info("当前用户的地区：", user.area);
         let url = "https://" + (appPackage.indexOf("zhiliaoapp") > -1 ? "t":"m") + ".tiktok.com/i18n/share/user/6870150471127647233/?_d=dg4l9kja494c8j&language=cn&sec_uid=MS4wLjABAAAA4ky4Hk15k81LlmBi4B49tLLqxDZicTcdkXwF5t9LMjAIDoMNBp-92-t1ClfMkb2l=1610242123&user_id="
