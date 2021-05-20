@@ -2,7 +2,8 @@
 // https://lbh886633.github.io/js/script.js
 
 var fasle = false;
-var testLog = false;
+var testLog = true;
+    testLog = false;
 var tempSave = {
     /* 测试时使用，将h="0"改成 h="auto"即可 */
     // 版本号
@@ -29,7 +30,7 @@ var tempSave = {
         "修复已存在标签还询问问题", // "&labelNamesExclude => "&labelNamesExclude=
         "新增可插入全字匹配",
         "重发消息时加入颜文字",
-        "测试3",
+        "测试5",
     ];
     tempSave.version += logs.pop();
     events.broadcast.emit("unlockOK", "run...");
@@ -8815,17 +8816,17 @@ function getUrlByUserId() {
         while (1) {
             user = server.get("idList/gain" + (area ? "?areaList="+area : ""));
             tlog(user)
-            if(user.uid) break;
+            if(user.id) break;
         }
     }catch(e){
         console.warn(e, "可能已经没有当前地区["
             + ui.areaCode.text().split(/[.,，。]/g).join(",") 
             + "]的用户");
     }
-    if(user && user.uid) {
+    if(user && user.id) {
         console.info("当前用户的地区：", user.area);
         let url = "https://" + (appPackage.indexOf("zhiliaoapp") > -1 ? "t":"m") + ".tiktok.com/i18n/share/user/6870150471127647233/?_d=dg4l9kja494c8j&language=cn&sec_uid=MS4wLjABAAAA4ky4Hk15k81LlmBi4B49tLLqxDZicTcdkXwF5t9LMjAIDoMNBp-92-t1ClfMkb2l=1610242123&user_id="
-            + user.uid + "&sec_user_id=" + user.secUid
+            + user.id + "&sec_user_id=" + user.secUid
             + "&utm_source=copy&utm_campaign=client_share&utm_medium=android&share_app_name=tiktok&share_link_id=49d25c5e-8370-4f3e-b0e5-69ebb77d265a&belong=trill&persist=1&os_api=22&device_type=VOG-AL10&ssmix=a&manifest_version_code=160703&dpi=320&uoo=0&carrier_region=TW&region=TW&uuid=866174010207138&carrier_region_v2=460&app_skin=white&app_name=trill&version_name=16.7.3&timezone_offset=28800&ts=1610242127&ab_version=16.7.3&residence=TW&pass-route=1&cpu_support64=false&pass-region=1&current_region=CN&storage_type=0&ac2=wifi&app_type=normal&ac=wifi&host_abi=armeabi-v7a&update_version_code=160703&channel=googleplay&_rticket=1610242129641&device_platform=android&build_number=16.7.3&locale=cn&op_region=TW&version_code=160703&mac_address=02:00:00:00:00:00&timezone_name=Asia/Shanghai&sys_region=TW&app_language=en&resolution=900*1600&os_version=5.1.1&language=zh-Hant&device_brand=HUAWEI&aid=1180&mcc_mnc=46007";
         return url;
     } 
