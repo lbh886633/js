@@ -457,6 +457,9 @@ ui.layout(
                                     <checkbox id="createAccount" text="生成邮箱" marginLeft="18sp"/>
                                     <checkbox id="daily" text="日常模式" />
                             </linear>
+                            <linear>
+                                <checkbox id="urlId" text="ID用户" />
+                            </linear>
 
                             <linear padding="5 0 0 0" margin="40dp">
                                 <button id="ok" w="*" h="auto" layout_gravity="bottom" style="Widget.AppCompat.Button.Colored" text="启动" />
@@ -474,6 +477,10 @@ ui.layout(
                                 <linear padding="2 0 0 0">
                                     <text textColor="black" text="指定关注用户数量: " />
                                     <input lines="1" id="focusUserNumber" w="auto" text="100"/>
+                                </linear>
+                                <linear padding="2 0 0 0">
+                                    <text textColor="black" text="指定国家: " />
+                                    <input lines="1" id="areaCode" w="*" text="100"/>
                                 </linear>
                                 <linear padding="2 0 0 0">
                                     <checkbox id="setServerUrl" text="" />
@@ -4822,14 +4829,23 @@ function sendMsg(msg, sayHelloTag, breakNum, emoji) {
     detectionMsgStatus();
     try{
         sleep(500)
-        // 4. 检测是否发送成功
+        // 4. 检测是否发送成功 
+        // TODO
         let msgList = 获取消息();
+        log(msgList)
+        log("========测试日志========")
         for (let m in msgList) {
             m = msgList[m];
+            log(m)
             if(msg == m.msg) {
-                return m;
+                // if(temp.status && sender != temp.sender) {
+                // 发送成功
+                if(temp.status) {
+                    return m;
+                }
             }
         }
+        log("-------测试日志-------")
         if(typeof breakNum != "number") breakNum = 0;
         if(breakNum < 2) {
             return sendMsg(msg, sayHelloTag, ++breakNum, emojiData[random(0, emojiData.length-1)]);
@@ -8692,35 +8708,44 @@ function 循环执行(数组, 等待时间) {
     }
 }
 function openUrlAndSleep3s(url,s) {
-    let ch = url.substring(url.indexOf("//")+2, url.indexOf(".com"));
-    let mapKey;
-    var map = {
-        "app-va.tiktokv.com": "",
-        "m.tiktok": "t.tiktok",
-        "vm.tiktok": "vt.tiktok",
-        "app-va.tiktok": "www.tiktokv",
-        "www.tiktok": "www.tiktok"
-    }
-    if(!map[ch]) {
-        // re 为key
-        for (let k in map) {
-            if(map[k] == ch) {
-                mapKey = k;
-                break;
+    // 如果是id sec_id 的话就使用另外一个模式
+    if(ui.urlId.checked) {
+        url = getUrlByUserId();
+    } else {
+        let ch = url.substring(url.indexOf("//")+2, url.indexOf(".com"));
+        let mapKey;
+        var map = {
+            "app-va.tiktokv.com": "",
+            "m.tiktok": "t.tiktok",
+            "vm.tiktok": "vt.tiktok",
+            "app-va.tiktok": "www.tiktokv",
+            "www.tiktok": "www.tiktok"
+        }
+        if(!map[ch]) {
+            // re 为key
+            for (let k in map) {
+                if(map[k] == ch) {
+                    mapKey = k;
+                    break;
+                }
             }
+        } else {
+            mapKey = ch;
         }
-    } else {
-        mapKey = ch;
+        if(appPackage.indexOf("zhiliaoapp") > -1) {
+            if(mapKey != ch) {
+                // 当前url不合适当前版本，进行切换
+                url = url.replace(ch,mapKey)
+            }
+        } else {
+        if(mapKey == ch) {
+                url = url.replace(ch,map[mapKey])
+        }
+        }
     }
-    if(appPackage.indexOf("zhiliaoapp") > -1) {
-        if(mapKey != ch) {
-            // 当前url不合适当前版本，进行切换
-            url = url.replace(ch,mapKey)
-        }
-    } else {
-       if(mapKey == ch) {
-            url = url.replace(ch,map[mapKey])
-       }
+    if(!url) {
+        console.warn("无链接！", url);
+        return false;
     }
     console.verbose("打开链接", url);
     app.startActivity({ 
@@ -8776,6 +8801,19 @@ function openUrlAndSleep3s(url,s) {
     };
     dfs(true);
     // sleep(1000)
+}
+function getUrlByUserId() {
+    // 从后台获取id   areaList：限制国家
+    let area = ui.areaCode.text();
+    let user = server.get("idList/gain" + (area ? "areaList="+area : ""));
+    if(user.uid) {
+        console.info("当前用户的地区：", user.area);
+        let url = "https://" + (appPackage.indexOf("zhiliaoapp") > -1 ? "t":"m") + ".tiktok.com/i18n/share/user/6870150471127647233/?_d=dg4l9kja494c8j&language=cn&sec_uid=MS4wLjABAAAA4ky4Hk15k81LlmBi4B49tLLqxDZicTcdkXwF5t9LMjAIDoMNBp-92-t1ClfMkb2l=1610242123&user_id="
+            + user.uid + "&sec_user_id=" + user.secUid
+            + "&utm_source=copy&utm_campaign=client_share&utm_medium=android&share_app_name=tiktok&share_link_id=49d25c5e-8370-4f3e-b0e5-69ebb77d265a&belong=trill&persist=1&os_api=22&device_type=VOG-AL10&ssmix=a&manifest_version_code=160703&dpi=320&uoo=0&carrier_region=TW&region=TW&uuid=866174010207138&carrier_region_v2=460&app_skin=white&app_name=trill&version_name=16.7.3&timezone_offset=28800&ts=1610242127&ab_version=16.7.3&residence=TW&pass-route=1&cpu_support64=false&pass-region=1&current_region=CN&storage_type=0&ac2=wifi&app_type=normal&ac=wifi&host_abi=armeabi-v7a&update_version_code=160703&channel=googleplay&_rticket=1610242129641&device_platform=android&build_number=16.7.3&locale=cn&op_region=TW&version_code=160703&mac_address=02:00:00:00:00:00&timezone_name=Asia/Shanghai&sys_region=TW&app_language=en&resolution=900*1600&os_version=5.1.1&language=zh-Hant&device_brand=HUAWEI&aid=1180&mcc_mnc=46007";
+        return url;
+    } 
+    // 没有数据的时候没有返回值
 }
 
 function autoConfirm(num, choose, title, content, callback) {
