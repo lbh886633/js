@@ -3,7 +3,7 @@
 
 var fasle = false;
 var testLog = true;
-    // testLog = false;
+    testLog = false;
 var tempSave = {
     /* 测试时使用，将h="0"改成 h="auto"即可 */
     // 版本号
@@ -19,6 +19,8 @@ var tempSave = {
     model: "<无>",
     // 选择的版本
     switchVersion: "",
+    // 从后台获取id   areaList：限制国家
+    area: null,
 };
 {
     let logs = [
@@ -30,7 +32,7 @@ var tempSave = {
         "修复已存在标签还询问问题", // "&labelNamesExclude => "&labelNamesExclude=
         "新增可插入全字匹配",
         "重发消息时加入颜文字",
-        "测试7",
+        "新增ID用户关注",
     ];
     tempSave.version += logs.pop();
     events.broadcast.emit("unlockOK", "run...");
@@ -440,7 +442,7 @@ ui.layout(
                                     <radio id="mi6_rep"  text="回复" />
                                 </radiogroup>
                                 {/* 测试时使用，将h="0"改成 h="auto"即可 */}
-                                <radiogroup orientation="horizontal" h="auto">
+                                <radiogroup orientation="horizontal" h="0">
                                     <radio id="mi6_null" checked="true" text="空" />
                                     <radio id="functionTest" text="测试函数" />
                                 </radiogroup>
@@ -2355,25 +2357,31 @@ function focusUser(max) {
                 break;
             }
             let user;
-            try {
-                user = server.get("focusList/gain");
-            } catch (err) {
-                console.verbose("请求用户异常！");
-            }
-            // 没有新用户了
-            if(!user) break;
-            // 用户不是一个对象，用户没有链接，用户链接长度过短
-            if(typeof user != "object" || !user.url || user.url.length < 5 ) {
-                console.verbose("信息不符合", user);
-                if(user.code == 500){
-                    log("没有需要关注的用户了！")
-                    exit();
+            if(ui.urlId.checked) {
+                // 通过id用户打开
+                user = getUrlByUserId()
+            } else {
+                // 通过用户列表打开
+                try {
+                    user = server.get("focusList/gain");
+                } catch (err) {
+                    console.verbose("请求用户异常！");
                 }
-                continue;
+                // 没有新用户了
+                if(!user) break;
+                // 用户不是一个对象，用户没有链接，用户链接长度过短
+                if(typeof user != "object" || !user.url || user.url.length < 5 ) {
+                    console.verbose("信息不符合", user);
+                    if(user.code == 500){
+                        log("没有需要关注的用户了！")
+                        exit();
+                    }
+                    continue;
+                }
             }
             log("正在打开用户信息")
             // 打开链接
-            openUrlAndSleep3s(user.url);
+            openUrlAndSleep3s(user.url, user);
             // 检测当前界面，如果当前界面不是用户信息页面则等待，
             let state;
             let nowTime = Date.now();
@@ -2414,7 +2422,11 @@ function focusUser(max) {
                                 log("关注异常！")
                                 focusException++;
                                 // 向服务器取消持有
-                                log("归还用户", server.get("focusList/regain?id=" + user.id || -1));
+                                if(ui.urlId.checked) {
+                                    log("归还ID用户", server.get("idList/regain?id=" + user.id || -1));
+                                } else {
+                                    log("归还用户", server.get("focusList/regain?id=" + user.id || -1));
+                                }
                                 break;
                             }
                             sleep(1000)
@@ -2427,7 +2439,7 @@ function focusUser(max) {
                         user.label = state.text();
                         // 上传当前状态
                         threads.start(function () {
-                            log(server.post("focusList/use?id="+user.id+"&label="+user.label,{}).json());
+                            log(server.post((ui.urlId.checked ? "idList":"focusList") + "/use?id="+user.id+"&label="+user.label,{}).json());
                         })
                         break;
                     }
@@ -8710,10 +8722,19 @@ function 循环执行(数组, 等待时间) {
         进度++;
     }
 }
-function openUrlAndSleep3s(url,s) {
+function openUrlAndSleep3s(url, user) {
     // 如果是id sec_id 的话就使用另外一个模式
     if(ui.urlId.checked) {
-        url = getUrlByUserId();
+        if(user && user.id) {
+            // 通过user对象进行打开
+            console.info("当前用户的地区：", user.area);
+            let url = "https://" + (appPackage.indexOf("zhiliaoapp") > -1 ? "m":"t") + ".tiktok.com/i18n/share/user/6870150471127647233/?_d=dg4l9kja494c8j&language=cn&sec_uid=MS4wLjABAAAA4ky4Hk15k81LlmBi4B49tLLqxDZicTcdkXwF5t9LMjAIDoMNBp-92-t1ClfMkb2l=1610242123&user_id="
+                + user.id + "&sec_user_id=" + user.secId.replace("\r","")
+                + "&utm_source=copy&utm_campaign=client_share&utm_medium=android&share_app_name=tiktok&share_link_id=49d25c5e-8370-4f3e-b0e5-69ebb77d265a&belong=trill&persist=1&os_api=22&device_type=VOG-AL10&ssmix=a&manifest_version_code=160703&dpi=320&uoo=0&carrier_region=TW&region=TW&uuid=866174010207138&carrier_region_v2=460&app_skin=white&app_name=trill&version_name=16.7.3&timezone_offset=28800&ts=1610242127&ab_version=16.7.3&residence=TW&pass-route=1&cpu_support64=false&pass-region=1&current_region=CN&storage_type=0&ac2=wifi&app_type=normal&ac=wifi&host_abi=armeabi-v7a&update_version_code=160703&channel=googleplay&_rticket=1610242129641&device_platform=android&build_number=16.7.3&locale=cn&op_region=TW&version_code=160703&mac_address=02:00:00:00:00:00&timezone_name=Asia/Shanghai&sys_region=TW&app_language=en&resolution=900*1600&os_version=5.1.1&language=zh-Hant&device_brand=HUAWEI&aid=1180&mcc_mnc=46007";
+            return url;
+        }  else {
+            console.error("用户信息不正确！请检查是否误勾选ID用户模式。")
+        }
     } else {
         let ch = url.substring(url.indexOf("//")+2, url.indexOf(".com"));
         let mapKey;
@@ -8810,30 +8831,22 @@ function tlog() {
 }
 function getUrlByUserId() {
     // 从后台获取id   areaList：限制国家
-    let area = ui.areaCode.text().split(/[.,，。]/g).join("&areaList=");
-    let user = {};
-    // try{
-    //     while (1) {
-    //         user = server.get("idList/gain" + (area ? "?areaList="+area : ""));
-    //         tlog(user)
-    //         if(user.id) break;
-    //     }
-    // }catch(e){
-    //     console.warn(e, "可能已经没有当前地区["
-    //         + ui.areaCode.text().split(/[.,，。]/g).join(",") 
-    //         + "]的用户");
-    // }
-    user.id = "6959531627248845825";
-    user.secId = "MS4wLjABAAAAwN7V7xK6O1bloVf7XQ-aM1XY9ZTfYwLtlTvWjATJCLoKrtsjqS387DEnUQ0ZWAo2";
-    if(user && user.id) {
-
-        console.info("当前用户的地区：", user.area);
-        let url = "https://" + (appPackage.indexOf("zhiliaoapp") > -1 ? "m":"t") + ".tiktok.com/i18n/share/user/6870150471127647233/?_d=dg4l9kja494c8j&language=cn&sec_uid=MS4wLjABAAAA4ky4Hk15k81LlmBi4B49tLLqxDZicTcdkXwF5t9LMjAIDoMNBp-92-t1ClfMkb2l=1610242123&user_id="
-            + user.id + "&sec_user_id=" + user.secId.replace("\r","")
-            + "&utm_source=copy&utm_campaign=client_share&utm_medium=android&share_app_name=tiktok&share_link_id=49d25c5e-8370-4f3e-b0e5-69ebb77d265a&belong=trill&persist=1&os_api=22&device_type=VOG-AL10&ssmix=a&manifest_version_code=160703&dpi=320&uoo=0&carrier_region=TW&region=TW&uuid=866174010207138&carrier_region_v2=460&app_skin=white&app_name=trill&version_name=16.7.3&timezone_offset=28800&ts=1610242127&ab_version=16.7.3&residence=TW&pass-route=1&cpu_support64=false&pass-region=1&current_region=CN&storage_type=0&ac2=wifi&app_type=normal&ac=wifi&host_abi=armeabi-v7a&update_version_code=160703&channel=googleplay&_rticket=1610242129641&device_platform=android&build_number=16.7.3&locale=cn&op_region=TW&version_code=160703&mac_address=02:00:00:00:00:00&timezone_name=Asia/Shanghai&sys_region=TW&app_language=en&resolution=900*1600&os_version=5.1.1&language=zh-Hant&device_brand=HUAWEI&aid=1180&mcc_mnc=46007";
-        return url;
-    } 
+    tempSave.area = tempSave.area || ui.areaCode.text().split(/[.,，。]/g).join("&areaList=");
+    let user;
+    try{
+        while (1) {
+            user = server.get("idList/gain" + (area ? "?areaList="+area : ""));
+            tlog(user)
+            // 如果当前的user对象有id属性则跳出
+            if(user.id) break;
+        }
+    }catch(e){
+        console.warn(e, "可能已经没有当前地区["
+            + ui.areaCode.text().split(/[.,，。]/g).join(",") 
+            + "]的用户");
+    }
     // 没有数据的时候没有返回值
+    return user
 }
 
 function autoConfirm(num, choose, title, content, callback) {
