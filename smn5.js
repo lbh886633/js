@@ -7,7 +7,7 @@ var testLog = true;
 var tempSave = {
     /* 测试时使用，将h="0"改成 h="auto"即可 */
     // 版本号
-    version: "94" + " -- ",
+    version: "95" + " -- ",
     firstEnvi: 0,
     privacy: 30,
     NUMBER: 0,
@@ -8716,7 +8716,7 @@ function 循环执行(数组, 等待时间) {
             // 这里写true是可以查看日志
             if(true && 数组[下标].标题) console.verbose("当前操作步骤：", 数组[下标].标题);
             if(数组[下标].检测()) 进度 = 数组[下标].执行() != "跳出循环执行" ? 进度 : -2;
-            sleep(等待);
+            sleep(0<等待?等待:0);
         }
  
         进度++;
