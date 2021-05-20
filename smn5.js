@@ -2,6 +2,7 @@
 // https://lbh886633.github.io/js/script.js
 
 var fasle = false;
+var testLog = false;
 var tempSave = {
     /* 测试时使用，将h="0"改成 h="auto"即可 */
     // 版本号
@@ -28,7 +29,7 @@ var tempSave = {
         "修复已存在标签还询问问题", // "&labelNamesExclude => "&labelNamesExclude=
         "新增可插入全字匹配",
         "重发消息时加入颜文字",
-        "测试2",
+        "测试3",
     ];
     tempSave.version += logs.pop();
     events.broadcast.emit("unlockOK", "run...");
@@ -422,7 +423,7 @@ ui.layout(
                                     <text textColor="black" textSize="20" text="模式选择" />
                                 </linear>
                                 <radiogroup orientation="horizontal">
-                                    <radio id="mi6_null" checked="true" text="空" />
+                                    <radio id="mi6_null" checked="true" text="" />
                                     <radio id="mi6_reg" text="注册" />
                                     <radio id="mi6_dat" text="资料" />
                                     <radio id="mi6_vid" text="视频" />
@@ -430,7 +431,7 @@ ui.layout(
                                     <radio id="mi6_fan" text="粉丝" />
                                 </radiogroup>
                                 <radiogroup orientation="horizontal">
-                                    <radio id="mi6_null" checked="true" text="空" />
+                                    <radio id="mi6_null" checked="true" text="" />
                                     <radio id="mi6_task" text="任务" />
                                     <radio id="getUserList" text="采集用户" />
                                     <radio id="focusUser" text="关注用户" />
@@ -438,7 +439,7 @@ ui.layout(
                                     <radio id="mi6_rep"  text="回复" />
                                 </radiogroup>
                                 {/* 测试时使用，将h="0"改成 h="auto"即可 */}
-                                <radiogroup orientation="horizontal" h="0">
+                                <radiogroup orientation="horizontal" h="auto">
                                     <radio id="mi6_null" checked="true" text="空" />
                                     <radio id="functionTest" text="测试函数" />
                                 </radiogroup>
@@ -480,7 +481,6 @@ ui.layout(
                                     <input lines="1" id="focusUserNumber" w="auto" text="100"/>
                                 </linear>
                                 <linear padding="2 0 0 0">
-                                    <checkbox id="areaLimit" />
                                     <text textColor="black" text="指定国家: " />
                                     <input lines="1" id="areaCode" w="*" text="US"/>
                                 </linear>
@@ -920,7 +920,7 @@ function 主程序() {
             // TODO TEST 测试代码
             // TODO TEST 测试代码
             // TODO TEST 测试代码
-
+            log(getUrlByUserId())
         }catch(e){
             log(e)
         }
@@ -8804,11 +8804,25 @@ function openUrlAndSleep3s(url,s) {
     dfs(true);
     // sleep(1000)
 }
+function tlog() {
+    if(testLog) console.verbose("测试日志：", arguments)
+}
 function getUrlByUserId() {
     // 从后台获取id   areaList：限制国家
     let area = ui.areaCode.text().split(/[.,，。]/g).join("&areaList=");
-    let user = server.get("idList/gain" + (area ? "?areaList="+area : ""));
-    if(user.uid) {
+    let user = {};
+    try{
+        while (1) {
+            user = server.get("idList/gain" + (area ? "?areaList="+area : ""));
+            tlog(user)
+            if(user.uid) break;
+        }
+    }catch(e){
+        console.warn(e, "可能已经没有当前地区["
+            + ui.areaCode.text().split(/[.,，。]/g).join(",") 
+            + "]的用户");
+    }
+    if(user && user.uid) {
         console.info("当前用户的地区：", user.area);
         let url = "https://" + (appPackage.indexOf("zhiliaoapp") > -1 ? "t":"m") + ".tiktok.com/i18n/share/user/6870150471127647233/?_d=dg4l9kja494c8j&language=cn&sec_uid=MS4wLjABAAAA4ky4Hk15k81LlmBi4B49tLLqxDZicTcdkXwF5t9LMjAIDoMNBp-92-t1ClfMkb2l=1610242123&user_id="
             + user.uid + "&sec_user_id=" + user.secUid
