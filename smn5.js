@@ -3,11 +3,11 @@
 
 var fasle = false;
 var testLog = true;
-    // testLog = false;
+    testLog = false;
 var tempSave = {
     /* 测试时使用，将h="0"改成 h="auto"即可 */
     // 版本号
-    version: "96" + " -- ",
+    version: "97" + " -- ",
     firstEnvi: 0,
     privacy: 30,
     NUMBER: 0,
@@ -8733,10 +8733,9 @@ function openUrlAndSleep3s(url, user) {
         if(user && user.id) {
             // 通过user对象进行打开
             console.info("当前用户的地区：", user.area);
-            let url = "https://" + (appPackage.indexOf("zhiliaoapp") > -1 ? "m":"t") + ".tiktok.com/i18n/share/user/6870150471127647233/?_d=dg4l9kja494c8j&language=cn&sec_uid=MS4wLjABAAAA4ky4Hk15k81LlmBi4B49tLLqxDZicTcdkXwF5t9LMjAIDoMNBp-92-t1ClfMkb2l=1610242123&user_id="
+            url = "https://" + (appPackage.indexOf("zhiliaoapp") > -1 ? "m":"t") + ".tiktok.com/i18n/share/user/6870150471127647233/?_d=dg4l9kja494c8j&language=cn&sec_uid=MS4wLjABAAAA4ky4Hk15k81LlmBi4B49tLLqxDZicTcdkXwF5t9LMjAIDoMNBp-92-t1ClfMkb2l=1610242123&user_id="
                 + user.id + "&sec_user_id=" + user.secId.replace("\r","")
                 + "&utm_source=copy&utm_campaign=client_share&utm_medium=android&share_app_name=tiktok&share_link_id=49d25c5e-8370-4f3e-b0e5-69ebb77d265a&belong=trill&persist=1&os_api=22&device_type=VOG-AL10&ssmix=a&manifest_version_code=160703&dpi=320&uoo=0&carrier_region=TW&region=TW&uuid=866174010207138&carrier_region_v2=460&app_skin=white&app_name=trill&version_name=16.7.3&timezone_offset=28800&ts=1610242127&ab_version=16.7.3&residence=TW&pass-route=1&cpu_support64=false&pass-region=1&current_region=CN&storage_type=0&ac2=wifi&app_type=normal&ac=wifi&host_abi=armeabi-v7a&update_version_code=160703&channel=googleplay&_rticket=1610242129641&device_platform=android&build_number=16.7.3&locale=cn&op_region=TW&version_code=160703&mac_address=02:00:00:00:00:00&timezone_name=Asia/Shanghai&sys_region=TW&app_language=en&resolution=900*1600&os_version=5.1.1&language=zh-Hant&device_brand=HUAWEI&aid=1180&mcc_mnc=46007";
-            return url;
         }  else {
             console.error("用户信息不正确！请检查是否误勾选ID用户模式。")
         }
@@ -8788,7 +8787,8 @@ function openUrlAndSleep3s(url, user) {
     let words = ["Follow","Message","Requested"];
     function dfs(wait) {
         for (let i = 0; wait && i < 50; i++) {
-            // 等待加载()
+            // 不知道要不要注释掉
+            等待加载()
             let follow = className("android.widget.TextView")
                 .clickable(true).drawingOrder(1).filter(function(uo){
                     return -1 < words.indexOf(uo.text());
