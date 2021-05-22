@@ -7,7 +7,7 @@ var testLog = true;
 var tempSave = {
     /* 测试时使用，将h="0"改成 h="auto"即可 */
     // 版本号
-    version: "95" + " -- ",
+    version: "96" + " -- ",
     firstEnvi: 0,
     privacy: 30,
     NUMBER: 0,
@@ -8840,7 +8840,7 @@ function getUrlByUserId() {
     let user;
     try{
         while (1) {
-            user = server.get("idList/gain" + (area ? "?areaList="+area : ""));
+            user = server.get("idList/gain" + (tempSave.area ? "?areaList="+tempSave.area : ""));
             tlog(user)
             // 如果当前的user对象有id属性则跳出
             if(user.id) break;
