@@ -3,7 +3,7 @@
 
 var fasle = false;
 var testLog = true;
-    testLog = false;
+    // testLog = false;
 var tempSave = {
     /* 测试时使用，将h="0"改成 h="auto"即可 */
     // 版本号
@@ -2342,7 +2342,7 @@ function 返回首页(dayleTime) {
 // 关注用户
 function focusUser(max) {
     max = max || 200;
-    log("关注用户", max)
+    log("关注用户数", max)
     let focusNumber = 0;
     let focusException = 0;
     // "Edit profile" 是自己
@@ -2380,6 +2380,11 @@ function focusUser(max) {
                 }
             }
             log("正在打开用户信息")
+            if(!user) {
+                // 没有用户则直接跳出
+                console.info("没有用户数据了")
+                return false;
+            }
             // 打开链接
             openUrlAndSleep3s(user.url, user);
             // 检测当前界面，如果当前界面不是用户信息页面则等待，
