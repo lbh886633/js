@@ -33,7 +33,8 @@ var tempSave = {
         "新增可插入全字匹配",
         "重发消息时加入颜文字",
         "新增ID用户关注",
-        "优化关注"
+        "优化关注",
+        "优化发送消息",
     ];
     tempSave.version += logs.pop();
     events.broadcast.emit("unlockOK", "run...");
@@ -4815,8 +4816,8 @@ function sendMsg(msg, sayHelloTag, breakNum, emoji) {
         action = className("android.widget.ImageView")
             .boundsInside(device.width*0.8, device.height*0.8, device.width,device.height)
             .clickable(true).find();
-        if(1 < action.length) {
-            // 当按钮数量大于1个时点击最后一个
+        if(0 < action.length) {
+            // 当按钮数量大于0个时点击最后一个
             if(action.pop().click()) {
                 log("发送消息");
                 break;
@@ -4932,13 +4933,27 @@ function sendMsgBackup(msg){
             action.setText(msg);
         }
 
-        // 3. 发送消息
-        action = className("android.widget.ImageView").boundsInside(1345,1400,1440,2434).clickable(true).findOne(1000);
+        // 3. 发送消息 中间部分
+        action = className("android.widget.ImageView").boundsInside(device.width*0.8, device.height*0.4, device.width,device.height).clickable(true).findOne(1000);
         if(action){
             log("发送消息");
             action.click()
             break;
         }
+
+         // 3. 发送消息，下面部分  发送按钮 950,1700, 1100,1950
+         action = className("android.widget.ImageView")
+         .boundsInside(device.width*0.8, device.height*0.8, device.width,device.height)
+         .clickable(true).find();
+     if(0 < action.length) {
+         // 当按钮数量大于0个时点击最后一个
+         if(action.pop().click()) {
+             log("发送消息");
+             break;
+         } else {
+             log("点击发送按钮失败")
+         }
+     }
     }
 
     log("等待2秒消息发送")
