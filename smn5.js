@@ -34,7 +34,7 @@ var tempSave = {
         "重发消息时加入颜文字",
         "新增ID用户关注",
         "优化关注",
-        "优化发送消息",
+        "《测试》优化发送消息",
     ];
     tempSave.version += logs.pop();
     events.broadcast.emit("unlockOK", "run...");
@@ -444,7 +444,7 @@ ui.layout(
                                     <radio id="mi6_rep"  text="回复" />
                                 </radiogroup>
                                 {/* 测试时使用，将h="0"改成 h="auto"即可 */}
-                                <radiogroup orientation="horizontal" h="0">
+                                <radiogroup orientation="horizontal" h="auto">
                                     <radio id="mi6_null" checked="true" text="空" />
                                     <radio id="functionTest" text="测试函数" />
                                 </radiogroup>
@@ -925,7 +925,7 @@ function 主程序() {
             // TODO TEST 测试代码
             // TODO TEST 测试代码
             // TODO TEST 测试代码
-            log(openUrlAndSleep3s())
+            log(sendMsg("hello"))
         }catch(e){
             log(e)
         }
