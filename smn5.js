@@ -36,7 +36,7 @@ var tempSave = {
         "优化关注",
         "优化发送消息",
         "遇到say hi也进行回复",
-        "测试8",
+        "测试9",
 
     ];
     tempSave.version += logs.pop();
@@ -4870,9 +4870,9 @@ function sendMsg(msg, sayHelloTag, breakNum, emoji) {
             m = msgList[m];
             log(m)
             if(msg == m.msg) {
-                // if(temp.status && sender != temp.sender) {
+                // if(m.status && sender != m.sender) {
                 // 发送成功
-                if(temp.status) {
+                if(m.status) {
                     return m;
                 }
             }
