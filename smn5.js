@@ -36,7 +36,7 @@ var tempSave = {
         "优化关注",
         "优化发送消息",
         "遇到say hi也进行回复",
-        "测试4",
+        "测试5",
 
     ];
     tempSave.version += logs.pop();
@@ -933,7 +933,7 @@ function 主程序() {
             // TODO TEST 测试代码
             // TODO TEST 测试代码
             // TODO TEST 测试代码
-                            
+            birthdaySwipe() 
         }catch(e){
             log(e)
         }
@@ -6542,27 +6542,7 @@ function mi6注册模式(closeAccountDetection) {
         if (lh_find(text("Use phone or email"), "Use phone or email", 0)) {
         // if (clickOn(text("Use phone or email"))) {
             index = 10; // 防止不能跳出
-            var 生日 = text("When’s your birthday?").visibleToUser().findOne(2000)
-            if (生日) {
-                console.hide()
-                log("开始滑动");
-                for (var ii = 1; ii < 3; ii++) {
-                    var 年 = filter(function(uo){
-                            return uo.depth() == 8 || uo.depth() == 9;
-                        }).drawingOrder((ii + 1)).classNameEndsWith("view.View").findOne(1000)
-                    if (年) {
-                        var 坐标 = 年.bounds()
-                        for (var i = 0; i < random(3, 4); i++) {
-                            swipe(坐标.centerX(), 坐标.centerY(), 坐标.centerX(), device.height, 500)
-                            sleep(1000)
-                        }
-                    }
-                }
-                console.show()
-                if (lh_find(text("Next"), "Next", 0)) {
-
-                }
-            }
+            birthdaySwipe()
             if (lh_find(text("Email").id("android:id/text1"), "Email", 0, 15000)) {
                 sleep(2000)
                 //随机账号 = lh_randomStr(10, 15) + "@qq.com"
@@ -6746,24 +6726,7 @@ function 注册7模式() {
                 }
                 if (lh_find(text("Use phone or email"), "Use phone or email", 0)) {
                     index = 10; // 防止不能跳出
-                    var 生日 = text("When’s your birthday?").visibleToUser().findOne(2000)
-                    if (生日) {
-                        console.hide()
-                        for (var ii = 1; ii < 3; ii++) {
-                            var 年 = depth(8).drawingOrder((ii + 1)).classNameEndsWith("view.View").findOne(1000)
-                            if (年) {
-                                var 坐标 = 年.bounds()
-                                for (var i = 0; i < random(3, 4); i++) {
-                                    swipe(坐标.centerX(), 坐标.centerY(), 坐标.centerX(), device.height, 500)
-                                    sleep(1000)
-                                }
-                            }
-                        }
-                        console.show()
-                        if (lh_find(text("Next"), "Next", 0)) {
-
-                        }
-                    }
+                    birthdaySwipe()
                     if (lh_find(text("Email").id("android:id/text1"), "Email", 0, 15000)) {
                         sleep(2000)
                         //随机账号 = lh_randomStr(10, 15) + "@qq.com"
@@ -6926,24 +6889,7 @@ function 注册前往登录() {
         if (lh_find(text("Sign up").clickable(true), "Sign up", 0)) {
             if (lh_find(text("Use phone or email"), "Use phone or email", 0)) {
                 // sleep(2000) // 关闭看看有没有问题
-                var 生日 = text("When’s your birthday?").visibleToUser().findOne(2000)
-                if (生日) {
-                    console.hide()
-                    for (var ii = 1; ii < 3; ii++) {
-                        var 年 = depth(8).drawingOrder((ii + 1)).classNameEndsWith("view.View").findOne(1000)
-                        if (年) {
-                            var 坐标 = 年.bounds()
-                            for (var i = 0; i < random(3, 4); i++) {
-                                swipe(坐标.centerX(), 坐标.centerY(), 坐标.centerX(), device.height, 500)
-                                sleep(1000)
-                            }
-                        }
-                    }
-                    console.show()
-                    if (lh_find(text("Next"), "Next", 0)) {
-
-                    }
-                }
+                birthdaySwipe()
                 if (lh_find(text("Email").id("android:id/text1"), "Email", 0, 15000)) {
                     sleep(2000)
                     //随机账号 = lh_randomStr(10, 15) + "@qq.com"
@@ -8388,6 +8334,43 @@ function stopScript(msg){
     exit();
 }
 
+function birthdaySwipe(){
+    var 生日 = text("When’s your birthday?").visibleToUser().findOne(2000)
+    if (生日) {
+        consoleDisplay(false)
+        for (var ii = 1; ii < 3; ii++) {
+            var 年 = depth(8).drawingOrder((ii + 1)).classNameEndsWith("view.View").findOne(1000)
+            if (年) {
+                var 坐标 = 年.bounds()
+                for (var i = 0; i < random(3, 4); i++) {
+                    swipe(坐标.centerX(), 坐标.centerY(), 坐标.centerX(), device.height, 500)
+                    sleep(1000)
+                }
+            }
+        }
+        consoleDisplay(true)
+        // if (lh_find(text("Next"), "Next", 0)) { }
+    }
+}
+// function birthdaySwipe(){
+//     var 生日 = text("When’s your birthday?").visibleToUser().findOne(2000);
+//     if (生日) {
+//         for (var ii = 1; ii < 3; ii++) {
+//             var 年 = depth(8).drawingOrder((ii + 1)).classNameEndsWith("view.View").findOne(1000);
+//             if (年) {
+//                 var 坐标 = 年.bounds();
+//                 for (var i = 0; i < random(3, 4); i++) {
+//                     log("滑动", i);
+//                     swipe(坐标.centerX(), 坐标.centerY(), 坐标.centerX(), device.height, 500);
+//                     sleep(1000);
+//                 }
+//             }
+//         }
+//     }
+
+// }
+
+
 // 弹窗检测
 function popupDetection(time, exceptionLog) {
     time = time || 3000;
@@ -8471,24 +8454,7 @@ function popupDetection(time, exceptionLog) {
                 if (action) action.click()
             }
         },
-        function(t) {
-            let action = text("When’s your birthday?").visibleToUser().findOne(t)
-            if (action) {
-                consoleDisplay(false)
-                for (var ii = 1; ii < 3; ii++) {
-                    var year = depth(8).drawingOrder((ii + 1)).classNameEndsWith("view.View").findOne(1000)
-                    if (year) {
-                        var point = year.bounds()
-                        for (var i = 0; i < random(2, 2); i++) {
-                            swipe(point.centerX(), point.centerY(), point.centerX(), device.height, 500)
-                            sleep(1000)
-                        }
-                    }
-                }
-                consoleDisplay(true)
-                if (lh_find(text("Next"), "Next", 0)) {}
-            }
-        }
+        birthdaySwipe
     ]
     try{
         for (let i = 0; i < funList.length; i++) {
@@ -9128,22 +9094,7 @@ function signIn() {
                 this.uo = text("When’s your birthday?").visibleToUser().findOne(200)
                 return this.uo
             },
-            执行: function() {
-                console.hide()
-                for (var ii = 1; ii < 3; ii++) {
-                    var year = depth(8).drawingOrder((ii + 1)).classNameEndsWith("view.View").findOne(1000)
-                    if (year) {
-                        var point = year.bounds()
-                        for (var i = 0; i < random(3, 4); i++) {
-                            swipe(point.centerX(), point.centerY(), point.centerX(), device.height, 500)
-                            sleep(1000)
-                        }
-                    }
-                }
-                console.show()
-                if (lh_find(text("Next"), "Next", 0)) {
-                }
-            }
+            执行: birthdaySwipe
         },
         {
             标题: "首页",
