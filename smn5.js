@@ -36,7 +36,7 @@ var tempSave = {
         "优化关注",
         "优化发送消息",
         "遇到say hi也进行回复",
-        "测试3",
+        "测试4",
 
     ];
     tempSave.version += logs.pop();
@@ -8479,7 +8479,7 @@ function popupDetection(time, exceptionLog) {
                     var year = depth(8).drawingOrder((ii + 1)).classNameEndsWith("view.View").findOne(1000)
                     if (year) {
                         var point = year.bounds()
-                        for (var i = 0; i < random(3, 4); i++) {
+                        for (var i = 0; i < random(2, 2); i++) {
                             swipe(point.centerX(), point.centerY(), point.centerX(), device.height, 500)
                             sleep(1000)
                         }
