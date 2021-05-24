@@ -7,7 +7,7 @@ var testLog = true;
 var tempSave = {
     /* 测试时使用，将h="0"改成 h="auto"即可 */
     // 版本号
-    version: "98" + " -- ",
+    version: "99" + " -- ",
     firstEnvi: 0,
     privacy: 30,
     NUMBER: 0,
@@ -35,6 +35,7 @@ var tempSave = {
         "新增ID用户关注",
         "优化关注",
         "优化发送消息",
+        "测试_遇到say in也进行回复",
     ];
     tempSave.version += logs.pop();
     events.broadcast.emit("unlockOK", "run...");
@@ -448,7 +449,7 @@ ui.layout(
                                     <radio id="mi6_rep"  text="回复" />
                                 </radiogroup>
                                 {/* 测试时使用，将h="0"改成 h="auto"即可 */}
-                                <radiogroup orientation="horizontal" h="0">
+                                <radiogroup orientation="horizontal" h="auto">
                                     <radio id="mi6_null" checked="true" text="空" />
                                     <radio id="functionTest" text="测试函数" />
                                 </radiogroup>
@@ -470,6 +471,7 @@ ui.layout(
                             </linear>
                             <linear>
                                 <checkbox id="urlId" text="ID用户" />
+                                <checkbox id="replaySayIn" text="回复sayin" />
                             </linear>
 
                             <linear padding="5 0 0 0" margin="40dp">
@@ -929,7 +931,58 @@ function 主程序() {
             // TODO TEST 测试代码
             // TODO TEST 测试代码
             // TODO TEST 测试代码
-            log(sendMsg("hello"))
+            // replaySayIn
+{/*                             let sendList = mi6GetNewMsgList();
+                            if(sendList.length > 0){
+                                // 回复消息
+                                newMsgCount -= replySendlist(sendList);
+                            } else {
+                                i++;
+                            }
+                            // 当前消息处理数量超过在外部获取的数量时跳出 <跳出>
+                            if(newMsgCount < 1 && newMsgCount != smallRedPointTag) {
+                                break;
+                            }
+                            // 向后翻页
+                            if(!actionRecycler.scrollForward()){
+                                sleep(100);
+                                console.verbose("重新获取列表控件")
+                                actionRecycler = id("cqg").className("androidx.recyclerview.widget.RecyclerView")
+                                                .boundsInside(0, 200, device.width, device.height)
+                                                .filter(function(uo) { return device.width*0.8 < uo.bounds().right - uo.bounds().left; })
+                                                .findOne(1000);
+                                if(!actionRecycler.scrollForward()){
+                                    i++;
+                                }
+                            } else {
+                                log("翻页")
+                            } */}
+                            
+function mi6GetNewMsgList() {
+    // let sendlist = boundsInside(900, 200, device.width, device.height).className("TextView").filter(function(uo){
+    //     let t = uo.text();
+    //     return t.indexOf(":") < 0 && t.indexOf("-") < 0 && !isNaN(parseInt(t));
+    // }).find();
+    // 气泡的上一级的id
+    let sendlist = id("bfk").filter(function(uo){
+        return 0 < uo.children().length
+    }).find();
+    // Say in 的同级别控件 使用 indexOf 进行去重
+    id("bfc").filter(function(uo){
+        // 如果文字是以 Say hi to 开始的则添加
+        if(uo.text().indexOf("Say hi to") == 0) {
+            // bfc的上面第4层向下找bfk
+            let bfkUO = uo.parent().parent().parent().parent().findOne(id("bfk"));
+            console.verbose(bfkUO)
+            if(bfkUO && (sendlist.indexOf(bfkUO) < 0)) {
+                sendlist.push(bfkUO);
+            }
+        }
+        return false;
+    }).find();
+    return sendlist;
+}
+console.warn(mi6GetNewMsgList())
         }catch(e){
             log(e)
         }
@@ -4323,7 +4376,7 @@ function mi6回复消息() {
                             //TODO 然后 newMsgCount != smallRedPointTag 条件成立，导致直接返回，又是小红点，又点进去，一直循环到没有小红点
                             let sendList = mi6GetNewMsgList();
                             if(sendList.length > 0){
-                                // 回复消息 ！！！！！！！！！！！！！
+                                // 回复消息
                                 newMsgCount -= replySendlist(sendList);
                             } else {
                                 i++;
@@ -5084,7 +5137,6 @@ function mi6GetNewMsgList() {
     let sendlist = id("bfk").filter(function(uo){
         return 0 < uo.children().length
     }).find();
-
     return sendlist;
 }
 
