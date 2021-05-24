@@ -35,7 +35,7 @@ var tempSave = {
         "新增ID用户关注",
         "优化关注",
         "优化发送消息",
-        "测试_遇到say in也进行回复",
+        "测试1_遇到say hi也进行回复",
     ];
     tempSave.version += logs.pop();
     events.broadcast.emit("unlockOK", "run...");
