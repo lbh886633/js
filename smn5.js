@@ -36,7 +36,7 @@ var tempSave = {
         "优化关注",
         "优化发送消息",
         "遇到say hi也进行回复",
-        "测试2",
+        "测试3",
 
     ];
     tempSave.version += logs.pop();
@@ -473,7 +473,7 @@ ui.layout(
                             </linear>
                             <linear>
                                 <checkbox id="urlId" text="ID用户" />
-                                <checkbox id="replaySayIn" text="回复sayin" />
+                                <checkbox id="replaySayIn" text="回复sayhi" />
                             </linear>
 
                             <linear padding="5 0 0 0" margin="40dp">
@@ -8172,13 +8172,18 @@ function sm停止TikTok() {
             }
         )
         , step(
+            "OK"
+            , function(){ return (this.uo = text("OK").packageName(settingPackage).findOne(200) 
+                                         || text("确定").packageName(settingPackage).findOne(200)) }
+        )
+        , step(
             "FORCE STOP"
             , function(){ return (this.uo = text("FORCE STOP").packageName(settingPackage).findOne(200) 
                                          || text("强制停止").packageName(settingPackage).findOne(200)) }
             , null
             , function(){
                 // 点击成功进行等待并且计数
-                if(5 <= clickNum++) return "跳出循环执行";
+                if(3 <= clickNum++) return "跳出循环执行";
                 sleep(300)
             }
         )
@@ -8464,6 +8469,24 @@ function popupDetection(time, exceptionLog) {
             if (action) {
                 action = className("ImageView").boundsInside(800, 500, 1000, 700).findOne(10);
                 if (action) action.click()
+            }
+        },
+        function(t) {
+            let action = text("When’s your birthday?").visibleToUser().findOne(t)
+            if (action) {
+                consoleDisplay(false)
+                for (var ii = 1; ii < 3; ii++) {
+                    var year = depth(8).drawingOrder((ii + 1)).classNameEndsWith("view.View").findOne(1000)
+                    if (year) {
+                        var point = year.bounds()
+                        for (var i = 0; i < random(3, 4); i++) {
+                            swipe(point.centerX(), point.centerY(), point.centerX(), device.height, 500)
+                            sleep(1000)
+                        }
+                    }
+                }
+                consoleDisplay(true)
+                if (lh_find(text("Next"), "Next", 0)) {}
             }
         }
     ]
