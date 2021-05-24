@@ -36,7 +36,7 @@ var tempSave = {
         "优化关注",
         "优化发送消息",
         "遇到say hi也进行回复",
-        "测试1",
+        "测试2",
 
     ];
     tempSave.version += logs.pop();
@@ -1084,7 +1084,7 @@ function 主程序() {
                 }
 
                 if (tempSave.daily || ui.mi6_fan.checked) {
-                    log("采集粉丝信息，打招呼")
+                    switchModel("采集粉丝信息，打招呼")
                     采集粉丝信息()
                 }
 
@@ -3687,7 +3687,9 @@ function 采集粉丝信息() {
     返回首页()
     getFansNum = 0
     // 2. 点击 我 ，确保在个人信息页面
+    tlog("点击 我 me")
     clickAction(text("Me"), 50)
+    tlog("当前粉丝数", accountInfo.fansNumber)
     if(accountInfo.fansNumber < 1) {
         console.warn("粉丝数量为0")
         return false;
