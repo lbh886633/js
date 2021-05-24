@@ -36,7 +36,7 @@ var tempSave = {
         "优化关注",
         "优化发送消息",
         "遇到say hi也进行回复",
-        "测试7",
+        "测试8",
 
     ];
     tempSave.version += logs.pop();
@@ -8350,7 +8350,7 @@ function birthdaySwipe(){
             }
         }
         consoleDisplay(true)
-        // if (lh_find(text("Next"), "Next", 0)) { }
+        if (lh_find(text("Next"), "Next", 0)) { }
     }
 }
 {
