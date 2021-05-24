@@ -36,7 +36,7 @@ var tempSave = {
         "优化关注",
         "优化发送消息",
         "遇到say hi也进行回复",
-        "测试6",
+        "测试7",
 
     ];
     tempSave.version += logs.pop();
@@ -8338,13 +8338,13 @@ function birthdaySwipe(){
     var 生日 = text("When’s your birthday?").visibleToUser().findOne(2000)
     if (生日) {
         consoleDisplay(false)
-        for (var ii = 1; ii < 4; ii++) {
+        for (var ii = 0; ii < 3; ii++) {
             var view = drawingOrder((ii + 1)).classNameEndsWith("view.View")
             .filter(function(uo){return uo.depth()==8 || uo.depth()==9}).findOne(1000)
             if (view) {
                 var 坐标 = view.bounds()
-                for (var i = 0; i < random(3, 4); i++) {
-                    swipe(坐标.centerX(), 坐标.centerY(), 坐标.centerX(), device.height, 500)
+                for (var i = 0; i < random(2, 2); i++) {
+                    swipe(坐标.centerX(), 坐标.centerY(), 坐标.centerX(), device.height*1.0, 500)
                     sleep(1000)
                 }
             }
