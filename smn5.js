@@ -35,7 +35,7 @@ var tempSave = {
         "新增ID用户关注",
         "优化关注",
         "优化发送消息",
-        "测试1_遇到say hi也进行回复",
+        "测试2_遇到say hi也进行回复",
     ];
     tempSave.version += logs.pop();
     events.broadcast.emit("unlockOK", "run...");
@@ -967,13 +967,14 @@ function mi6GetNewMsgList() {
     let sendlist = id("bfk").filter(function(uo){
         return 0 < uo.children().length
     }).find();
+    console.warn(sendlist.length)
     // Say in 的同级别控件 使用 indexOf 进行去重
     id("bfc").filter(function(uo){
         // 如果文字是以 Say hi to 开始的则添加
         if(uo.text().indexOf("Say hi to") == 0) {
             // bfc的上面第4层向下找bfk
             let bfkUO = uo.parent().parent().parent().parent().findOne(id("bfk"));
-            console.verbose(bfkUO)
+            console.verbose(bfkUO?"Y":"不存在")
             if(bfkUO && (sendlist.indexOf(bfkUO) < 0)) {
                 sendlist.push(bfkUO);
             }
@@ -982,7 +983,7 @@ function mi6GetNewMsgList() {
     }).find();
     return sendlist;
 }
-console.warn(mi6GetNewMsgList())
+console.warn(mi6GetNewMsgList().length)
         }catch(e){
             log(e)
         }
