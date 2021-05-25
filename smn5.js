@@ -37,6 +37,7 @@ var tempSave = {
         "优化发送消息",
         "遇到say hi也进行回复",
         "测试9",
+        "优化",
 
     ];
     tempSave.version += logs.pop();
@@ -445,10 +446,10 @@ ui.layout(
                                 <radiogroup orientation="horizontal">
                                     <radio id="mi6_null" checked="true" text="" />
                                     <radio id="mi6_task" text="任务" />
+                                    <radio id="mi6_rep"  text="回复" />
                                     <radio id="getUserList" text="采集用户" />
                                     <radio id="focusUser" text="关注用户" />
                                     <radio id="detectionException" text="检测异常" />
-                                    <radio id="mi6_rep"  text="回复" />
                                 </radiogroup>
                                 {/* 测试时使用，将h="0"改成 h="auto"即可 */}
                                 <radiogroup orientation="horizontal" h="auto">
@@ -1552,13 +1553,6 @@ function 登号模式() {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
-
-
-function consoleDisplay(tag, param) {
-    events.broadcast.emit("unlockOK", param);
-    if(tag) console.show();
-    else console.hide();
-}
 
 function 打开抖音() {
     if(tempSave.login){
@@ -8337,7 +8331,7 @@ function stopScript(msg){
 function birthdaySwipe(){
     var 生日 = text("When’s your birthday?").visibleToUser().findOne(2000)
     if (生日) {
-        consoleDisplay(false)
+        console.hide();
         for (var ii = 0; ii < 3; ii++) {
             var view = drawingOrder((ii + 1)).classNameEndsWith("view.View")
             .filter(function(uo){return uo.depth()==8 || uo.depth()==9}).findOne(1000)
@@ -8349,7 +8343,7 @@ function birthdaySwipe(){
                 }
             }
         }
-        consoleDisplay(true)
+        console.show();
         if (lh_find(text("Next"), "Next", 0)) { }
     }
 }
