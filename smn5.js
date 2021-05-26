@@ -36,8 +36,7 @@ var tempSave = {
         "优化关注",
         "优化发送消息",
         "遇到say hi也进行回复",
-        "测试9",
-        "优化",
+        "测试1_回复",
 
     ];
     tempSave.version += logs.pop();
@@ -934,7 +933,7 @@ function 主程序() {
             // TODO TEST 测试代码
             // TODO TEST 测试代码
             // TODO TEST 测试代码
-            birthdaySwipe() 
+            sendMsg("Hi") 
         }catch(e){
             log(e)
         }
