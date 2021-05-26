@@ -36,7 +36,7 @@ var tempSave = {
         "优化关注",
         "优化发送消息",
         "遇到say hi也进行回复",
-        "测试3_回复",
+        "修复连续回复",
 
     ];
     tempSave.version += logs.pop();
@@ -451,7 +451,7 @@ ui.layout(
                                     <radio id="detectionException" text="检测异常" />
                                 </radiogroup>
                                 {/* 测试时使用，将h="0"改成 h="auto"即可 */}
-                                <radiogroup orientation="horizontal" h="auto">
+                                <radiogroup orientation="horizontal" h="*">
                                     <radio id="mi6_null" checked="true" text="空" />
                                     <radio id="functionTest" text="测试函数" />
                                 </radiogroup>
@@ -933,7 +933,8 @@ function 主程序() {
             // TODO TEST 测试代码
             // TODO TEST 测试代码
             // TODO TEST 测试代码
-            sendMsg("Hi~") 
+
+            
         }catch(e){
             log(e)
         }
@@ -4815,8 +4816,7 @@ function sendMsg(msg, sayHelloTag, breakNum, emoji) {
                 action.setText(msg);
             }
         }
-        log("不发送消息")
-        break;
+
         // 3. 发送消息  发送按钮 950,1700, 1100,1950
         action = className("android.widget.ImageView")
             .boundsInside(device.width*0.8, device.height*0.8, device.width,device.height)
@@ -4859,22 +4859,16 @@ function sendMsg(msg, sayHelloTag, breakNum, emoji) {
         // 4. 检测是否发送成功 
         // TODO
         let msgList = 获取消息();
-        log(msgList)
-        log("========测试日志========")
         for (let m in msgList) {
             m = msgList[m];
-            log("")
-            log(m)
             if(msg == m.msg) {
                 // if(m.status && sender != m.sender) {
                 // 发送成功
                 if(m.status) {
-                    log("==>发送成功")
                     return m;
                 }
             }
         }
-        log("-------测试日志-------")
         if(typeof breakNum != "number") breakNum = 0;
         if(breakNum < 2) {
             return sendMsg(msg, sayHelloTag, ++breakNum, emojiData[random(0, emojiData.length-1)]);
@@ -4939,9 +4933,6 @@ function sendMsgBackup(msg){
             log("消息输入框")
             action.setText(msg);
         }
-
-        log("不发送消息")
-        break;
 
         // 3. 发送消息 中间部分
         action = className("android.widget.ImageView").boundsInside(device.width*0.8, device.height*0.4, device.width,device.height).clickable(true).findOne(1000);
