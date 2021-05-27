@@ -39,7 +39,7 @@ var tempSave = {
         "遇到say hi也进行回复",
         "修复连续回复",
         "测试配置-还没有开启授权验证",
-        "测试1-顺序回复&&循环运行次数&&优化",
+        "测试2-顺序回复&&循环运行次数&&优化",
     ];
     tempSave.version += logs.pop();
     events.broadcast.emit("unlockOK", "run...");
@@ -5164,10 +5164,12 @@ function mi6GetNewMsgList() {
     if(ui.replaySayIn.checked) {
         id("bfc").filter(function(uo){
             // 如果文字是以 Say hi to 开始的则添加
+            log("sayhi坐标位置", uo.text().indexOf("Say hi to"))
             if(uo.text().indexOf("Say hi to") == 0) {
                 // bfc的上面第4层向下找bfk
                 let bfkUO = uo.parent().parent().parent().parent().findOne(id("bfk"));
                 if(bfkUO && (sendlist.indexOf(bfkUO) < 0)) {
+                    console.info("添加")
                     sendlist.push(bfkUO);
                 }
             }
@@ -5985,10 +5987,12 @@ function 消息处理(fans, newMsgList) {
     // 优先从顺序消息标签中排序匹配
     let labelList = [];
     tempSave.RequiredLabels.forEach((labelTemp)=>{
+        log(labelTemp.labelName)
         // 将所有以“顺序”开头的标签拿出来
         let name = labelTemp.labelName.replace(/(^\s*)|(\s*$)/g, "");
         // 以“顺序”开头，且存在ask询问消息属性
         if(name.indexOf("顺序") == 0 && labelTemp.ask) {
+            console.info(labelTemp)
             // 将后缀转成小数点类型并存放到标签对象中
             labelTemp.num = parseFloat(name.substring("顺序".length));
             if(!isNaN(labelTemp.num)) {
@@ -6034,6 +6038,7 @@ function 消息处理(fans, newMsgList) {
         if(r.labelName != "携带问题" && !fansLabel[r.labelName]) {
         // 开头不能是 "携带问题"
         // if("携带问题".length < r.labelName.indexOf("携带问题")  && !fansLabel[r.labelName]) {
+            log(r.ask)
             let appendMsg = r.ask[random(0, r.ask.length-1)];
             console.verbose(appendMsg);
             if(appendMsg) {
