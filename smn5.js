@@ -41,7 +41,7 @@ var tempSave = {
         "修复连续回复",
         "测试配置-还没有开启授权验证",
         "测试4-顺序回复&&循环运行次数&&优化",
-        "测试6-测试切版本",
+        "测试6-++测试切版本",
     ];
     tempSave.version += logs.pop();
     events.broadcast.emit("unlockOK", "run...");
@@ -867,6 +867,7 @@ ui.ok.click(function () {
             for (let runNumber = 0; runNumber < maxRunNumber; runNumber++) {
                 主程序()
                 appPackage = appPackage.indexOf("zhiliaoapp") < 0 ? "com.zhiliaoapp.musically"　: "com.ss.android.ugc.trill";
+                console.info("开始运行版本", appPackage, "次数", runNumber/2);
             }
         })
     } else {
@@ -1564,7 +1565,6 @@ function 还原模式() {
                 if (ui.replymsg.checked) {
                     // 对标签对象进行加载
                     tempSave.RequiredLabels = readRequiredLabelsFile(路径.标签);
-                    log(tempSave.RequiredLabels);
                     log("回复消息")
                     回复消息()
                 }
@@ -6148,6 +6148,8 @@ function readRequiredLabelsFile(path){
             tempSave.LabelsData.push(JSON.parse(ls[i].label));
         }
     }
+
+    log(tempSave.LabelsData);
     return tempSave.LabelsData;
     [
         {
