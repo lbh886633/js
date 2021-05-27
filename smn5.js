@@ -41,7 +41,7 @@ var tempSave = {
         "修复连续回复",
         "测试配置-还没有开启授权验证",
         "测试4-顺序回复&&循环运行次数&&优化",
-        "测试6-++测试切版本",
+        "测试6-+++++测试切版本",
     ];
     tempSave.version += logs.pop();
     events.broadcast.emit("unlockOK", "run...");
@@ -5452,6 +5452,8 @@ function mi6ReplyMsg() {
 
     // 6. 进行消息处理，返回false则不回复消息
     let 回消息 = 消息处理(fans,新消息);
+    log(回消息)
+    exit()
     let sm;
     if(回消息){
         // 输入消息并发送
@@ -5582,6 +5584,8 @@ function replyMsg() {
 
     // 6. 进行消息处理，返回false则不回复消息
     let 回消息 = 消息处理(fans,新消息);
+    log(回消息)
+    exit()
     if(回消息){
         // 输入消息并发送
         let sm = sendMsg(回消息)
