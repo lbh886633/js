@@ -34,7 +34,7 @@ var tempSave = {
         "遇到say hi也进行回复",
         "测试配置-还没有开启授权验证",
         "测试环节",
-        "测试1-打招呼粉丝个数",
+        "测试2-打招呼粉丝个数",
 
     ];
     tempSave.version += logs.pop();
@@ -3975,11 +3975,11 @@ function getFansList(fansNameList, fansList, all) {
             "当前账号粉丝已保存：", (saveNumber / fansTotal*100).toFixed(2),"%")
             log(ui.sayHiNumber.text(), (ui.sayHiNumber.text()/getFansNum).toFixed(2) + "%")
             log(ui.sayHiNumber.text() < getFansNum)
-
             if(ui.sayHiNumber.text() < getFansNum){
                 log("已达到目标粉丝个数，停止继续遍历");
                 break;
             }
+            log("----------")
         }
 
         log("=========")
@@ -4976,19 +4976,6 @@ function sendMsg(msg, sayHelloTag, breakNum, emoji) {
         sleep(500)
         {
             // 4. 检测是否发送成功 
-            let msgList = 获取消息();
-            for (let m in msgList) {
-                m = msgList[m];
-                tlog(msg, m.msg, msg==m.msg);
-                if(msg == m.msg) {
-                    // if(m.status && sender != m.sender) {
-                    // 发送成功
-                    if(m.status) {
-                        return m;
-                    }
-                }
-            }
-            // 检测方案二
             if(0 < msgList.length) {
                 // 拿到最后一个消息，从上往下，也就是最新的一个消息
                 m = msgList.pop();
