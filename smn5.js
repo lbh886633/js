@@ -34,7 +34,7 @@ var tempSave = {
         "遇到say hi也进行回复",
         "测试配置-还没有开启授权验证",
         "测试环节",
-        "测试9-打招呼粉丝个数",
+        "测试10-打招呼粉丝个数",
     ];
     tempSave.version += logs.pop();
     events.broadcast.emit("unlockOK", "run...");
@@ -4905,6 +4905,11 @@ function sendMsg(msg, sayHelloTag, breakNum, emoji) {
                         return msgList[tempi];
                     }
                 }
+                // 消息匹配方式
+                tlog(msgList[tempi].msg, (emoji ? emoji+"\n"+msg : msg))
+                if(msgList[tempi].msg == (emoji ? emoji+"\n"+msg : msg)) {
+                    return msgList[tempi];
+                }
             }
         }
         log("==========")
@@ -4985,6 +4990,11 @@ function sendMsg(msg, sayHelloTag, breakNum, emoji) {
                             // 发送成功
                             return msgList[tempi];
                         }
+                    }
+                    // 消息匹配方式
+                    tlog(msgList[tempi].msg, (emoji ? emoji+"\n"+msg : msg))
+                    if(msgList[tempi].msg == (emoji ? emoji+"\n"+msg : msg)) {
+                        return msgList[tempi];
                     }
                 }
             } else {
