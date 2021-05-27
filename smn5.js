@@ -23,6 +23,7 @@ var tempSave = {
     // 从后台获取id   areaList：限制国家
     area: null,
 };
+
 {
     let logs = [
         "解决一些问题",
@@ -39,7 +40,8 @@ var tempSave = {
         "遇到say hi也进行回复",
         "修复连续回复",
         "测试配置-还没有开启授权验证",
-        "测试3-顺序回复&&循环运行次数&&优化",
+        "测试4-顺序回复&&循环运行次数&&优化",
+        "测试5-测试切版本",
     ];
     tempSave.version += logs.pop();
     events.broadcast.emit("unlockOK", "run...");
@@ -450,6 +452,28 @@ threads.start(function () {
 
 server.serverUrl = files.read(路径.服务器链接).split("\n").shift();
 
+var floatWindow = floaty.rawWindow(
+    <frame>
+        <button id="exit" padding="0">退出</button>
+    </frame>
+)
+floatWindow.setPosition(device.width * 0.8, device.height*0.05)
+floatWindow.exit.click(()=>{exit()})
+
+/**
+ * 开关悬浮窗
+ * @param {boolean} tag 开启或者关闭
+ */
+function showHideConsole(tag) {
+    if(tag) {
+        floatWindow.setPosition(device.width * 0.8, device.height * 0.05)
+        console.show()
+    } else {
+        floatWindow.setPosition(device.width * 1.1, device.height * 1.1)
+        console.hide()
+    }
+}
+
 function c() {}
 ui.layout(
     <drawer id="drawer">
@@ -834,16 +858,6 @@ function 保存数据() {
 var qd = 0
 ui.ok.click(function () {
 
-    {
-        let w = floaty.rawWindow(
-            <frame>
-                <button id="exit">退出</button>
-            </frame>
-        )
-        w.setPosition(device.width * 0.8, device.height*0.05)
-        w.exit.click(()=>{exit()})
-    }
-
     //保存数据()
     if (qd == 0) {
         qd = 1
@@ -970,7 +984,7 @@ function 主程序(forTag) {
             if(action) action.click();
         }
     })
-    console.show()
+    showHideConsole(true)
     console.setPosition(10,0)
     if (!requestScreenCapture()) {            
         toast("请求截图失败");
@@ -2884,7 +2898,7 @@ function resend() {
     return false;
 }
 function feedback(feed) {
-    console.hide();
+    showHideConsole(false);
     for (let num = 0; num < 3; num++) {
         // 获取控件的最后一个并且复制给feed
         if((feed = feed || text("This message violated our Community Guidelines. We restrict certain content and actions to protect our community. If you believe this was a mistake, tap Feedback to let us know.")
@@ -2899,7 +2913,7 @@ function feedback(feed) {
                 clickOn({x: rect.left+offsetX, y: rect.bottom+offsetY});
                 sleep(100)
             }
-            console.show();
+            showHideConsole(true);
             return true;
         }
         // 等待1秒(1000ms)
@@ -8511,7 +8525,7 @@ function stopScript(msg){
 function birthdaySwipe(){
     var 生日 = text("When’s your birthday?").visibleToUser().findOne(2000)
     if (生日) {
-        console.hide();
+        showHideConsole(false);
         for (var ii = 0; ii < 3; ii++) {
             var view = drawingOrder((ii + 1)).classNameEndsWith("view.View")
             .filter(function(uo){return uo.depth()==8 || uo.depth()==9}).findOne(1000)
@@ -8523,7 +8537,7 @@ function birthdaySwipe(){
                 }
             }
         }
-        console.show();
+        showHideConsole(true);
         if (lh_find(text("Next"), "Next", 0)) { }
     }
 }
@@ -8669,6 +8683,9 @@ function objToUri(obj) {
 }
 
 function nextAccount() {
+    console.warn("测试切版本");
+    return "end";
+
     返回首页(300)
 
     // 账号不完整的时候进行检测
