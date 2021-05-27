@@ -39,7 +39,7 @@ var tempSave = {
         "遇到say hi也进行回复",
         "修复连续回复",
         "测试配置-还没有开启授权验证",
-        "测试-顺序回复",
+        "测试-顺序回复&&循环运行次数",
     ];
     tempSave.version += logs.pop();
     events.broadcast.emit("unlockOK", "run...");
@@ -549,6 +549,10 @@ ui.layout(
                                     <text textColor="black" text="采集打招呼个数: " />
                                     <input lines="1" id="fanslistnumber" w="*" text="10" inputType="number|numberDecimal"/>
                                 </linear>
+                                <linear padding="2 0 0 0">
+                                    <text textColor="black" text="循环运行次数: " />
+                                    <input lines="1" id="forRunNumber" w="*" text="1" inputType="number|numberDecimal"/>
+                                </linear>
                             </vertical>
 
                             <text h="30sp" lines="1" textColor="#007ACC">———————————————————————————————————————————————</text>
@@ -838,7 +842,13 @@ ui.ok.click(function () {
     if (qd == 0) {
         qd = 1
         //threads.start(悬浮)
-        threads.start(主程序)
+        threads.start(function(){
+            let maxRunNumber = ui.forRunNumber.text()*2;
+            for (let runNumber = 0; runNumber < maxRunNumber; runNumber++) {
+                主程序()
+                appPackage = appPackage.indexOf("zhiliaoapp") < 0 ? "com.zhiliaoapp.musically"　: "com.ss.android.ugc.trill";
+            }
+        })
     } else {
         // qd = 0;
         toastLog("脚本已经启动了~");
@@ -941,7 +951,7 @@ var 序号 = ""
 var 随机账号 = ""
 
 // TODO
-function 主程序() {
+function 主程序(forTag) {
     log("当前版本：",tempSave.version)
     let dec = true;
     threads.start(function () {
@@ -962,7 +972,7 @@ function 主程序() {
         exit();
     }
     dec = false;
-
+    
     if(ui.functionTest.checked) {
         switchModel("测试");
         // 在执行完之后如果还为true则等待继续
@@ -993,17 +1003,19 @@ function 主程序() {
         return false;
     }
 
+    if(!forTag)
     if(ui.createAccount.checked){
         switchModel("邮箱生成");
         邮箱生成();
     }
 
-    
+    if(!forTag)
     if(ui.switchVersionzl.checked){
         log("切换zl版本");
         appPackage = "com.zhiliaoapp.musically";
     }
 
+    if(!forTag)
     if(ui.switchVersion.checked){
         log("切换ss版本");
         appPackage = "com.ss.android.ugc.trill";
@@ -1011,10 +1023,11 @@ function 主程序() {
 
     if(ui.readLocalAccountRecord.checked) {
         switchModel("读取本地账号记录");
-        accountList = files.read(路径.账号进度).split("\n");
+        accountList = files.read(路径.账号进度+appPackage+".txt").split("\n");
         log("当前已完成的进度：", accountList);
     }
 
+    if(!forTag)
     if(ui.setServerUrl.checked){
         switchModel("修改服务器链接")
         let surl = ui.serverUrl.text();
@@ -1025,6 +1038,7 @@ function 主程序() {
         }
     }
 
+    if(!forTag)
     if (ui.getUserList.checked) {
         switchModel("采集用户");
         采集用户();
@@ -9076,9 +9090,9 @@ function switchAccount(sin, sup) {
     if(1 < getAccountList().list.length) {
         if(accountInfo.username) {
             log("记录账号进度")
-            // files.append(路径.账号进度, "\n"+accountInfo.username);
+            // files.append(路径.账号进度+appPackage+".txt", "\n"+accountInfo.username);
             // 这样的话在切换账号时就会向 accountList 中添加账号，但是只会在下一次切换账号时才会进行保存
-            files.write(路径.账号进度, accountList.join("\n"));
+            files.write(路径.账号进度+appPackage+".txt", accountList.join("\n"));
         }
         if(!sup && !tempSave.firstAccount) {
             signUp();
@@ -9196,7 +9210,7 @@ function signIn() {
                     else log("账号切换失败")
                 }catch(e){
                     log(e)
-                    files.write(路径.账号进度, "");
+                    files.write(路径.账号进度+appPackage+".txt", "");
                     if(confirm("似乎当前所有账号已全部执行完毕,是否结束执行？", "本地进度记录已清空！\n已经执行"+accountList.length+"个账号。\n"+e)) {
                         exit();
                     }
