@@ -41,7 +41,7 @@ var tempSave = {
         "修复连续回复",
         "测试配置-还没有开启授权验证",
         "测试4-顺序回复&&循环运行次数&&优化",
-        "测试6-+++++测试切版本",
+        "测试7-切版本&&回复",
     ];
     tempSave.version += logs.pop();
     events.broadcast.emit("unlockOK", "run...");
@@ -864,6 +864,7 @@ ui.ok.click(function () {
         //threads.start(悬浮)
         threads.start(function(){
             let maxRunNumber = ui.forRunNumber.text()*2;
+            运行前()
             for (let runNumber = 0; runNumber < maxRunNumber; runNumber++) {
                 主程序()
                 appPackage = appPackage.indexOf("zhiliaoapp") < 0 ? "com.zhiliaoapp.musically"　: "com.ss.android.ugc.trill";
@@ -970,30 +971,46 @@ var newtext = ""
 var 序号 = ""
 var 随机账号 = ""
 
+function 运行前(){
+    log("当前版本：",tempSave.version)
+
+    let dec = true;
+    threads.start(function () {
+        while(dec) {
+            action = text("Don't show again").findOne(300);
+            if(action) action.click()
+            action = text("Start now").findOne(30)
+                    || text("START NOW").findOne(30)
+                    || text("立即开始").findOne(30)
+                    || text("立即開始").findOne(30);
+            if(action) action.click();
+        }
+    })
+    showHideConsole(true)
+    console.setPosition(10,0)
+    if (!requestScreenCapture()) {            
+        toast("请求截图失败");
+        exit();
+    }
+    dec = false;
+
+    if(ui.createAccount.checked){
+        switchModel("邮箱生成");
+        邮箱生成();
+    }
+    
+    if(ui.setServerUrl.checked){
+        switchModel("修改服务器链接")
+        let surl = ui.serverUrl.text();
+        if(5 < surl.length) {
+            server.serverUrl = surl;
+            let fileData = files.read(路径.服务器链接);
+            files.write(路径.服务器链接, surl+"\n"+fileData);
+        }
+    }
+}
 // TODO
 function 主程序(forTag) {
-    log("当前版本：",tempSave.version)
-    if(!forTag) {
-        let dec = true;
-        threads.start(function () {
-            while(dec) {
-                action = text("Don't show again").findOne(300);
-                if(action) action.click()
-                action = text("Start now").findOne(30)
-                        || text("START NOW").findOne(30)
-                        || text("立即开始").findOne(30)
-                        || text("立即開始").findOne(30);
-                if(action) action.click();
-            }
-        })
-        showHideConsole(true)
-        console.setPosition(10,0)
-        if (!requestScreenCapture()) {            
-            toast("请求截图失败");
-            exit();
-        }
-        dec = false;
-    }
     
     if(ui.functionTest.checked) {
         switchModel("测试");
@@ -1026,12 +1043,6 @@ function 主程序(forTag) {
     }
 
     if(!forTag)
-    if(ui.createAccount.checked){
-        switchModel("邮箱生成");
-        邮箱生成();
-    }
-
-    if(!forTag)
     if(ui.switchVersionzl.checked){
         log("切换zl版本");
         appPackage = "com.zhiliaoapp.musically";
@@ -1047,17 +1058,6 @@ function 主程序(forTag) {
         switchModel("读取本地账号记录");
         accountList = files.read(路径.账号进度+appPackage+".txt").split("\n");
         log("当前已完成的进度：", accountList);
-    }
-
-    if(!forTag)
-    if(ui.setServerUrl.checked){
-        switchModel("修改服务器链接")
-        let surl = ui.serverUrl.text();
-        if(5 < surl.length) {
-            server.serverUrl = surl;
-            let fileData = files.read(路径.服务器链接);
-            files.write(路径.服务器链接, surl+"\n"+fileData);
-        }
     }
 
     if(!forTag)
