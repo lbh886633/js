@@ -34,7 +34,7 @@ var tempSave = {
         "遇到say hi也进行回复",
         "测试配置-还没有开启授权验证",
         "测试环节",
-        "测试5-打招呼粉丝个数",
+        "测试6-打招呼粉丝个数",
     ];
     tempSave.version += logs.pop();
     events.broadcast.emit("unlockOK", "run...");
@@ -3978,24 +3978,18 @@ function getFansList(fansNameList, fansList, all) {
                 log("已达到目标粉丝个数，停止继续遍历");
                 break;
             }
-            log("----------")
         }
 
         log("=========")
         saveNumber = fansNameList.length;
         console.info("保存数量：", score,"当前进展：", getFansNum, "总进展：", countGetFansNum, 
                     "当前账号粉丝已保存：", (saveNumber / fansTotal*100).toFixed(2),"%")
+        // 限制个数 比如30
+        if(ui.sayHiNumber.text() < getFansNum){
+            log("已达到目标粉丝个数，停止继续遍历");
+            break;
+        }
         if(score == 0) {
-            
-            // 限制个数 比如30
-            log(ui.sayHiNumber.text(), (ui.sayHiNumber.text()/getFansNum).toFixed(2) + "%")
-            log(ui.sayHiNumber.text() < getFansNum)
-
-            if(ui.sayHiNumber.text() < getFansNum){
-                log("已达到目标粉丝个数，停止继续遍历");
-                break;
-            }
-
             // 数量差 10%
             // fansNameList
             if(fansTotal - fansNameList.length < fansTotal * 0.1) {
@@ -4888,6 +4882,7 @@ function sayHello(f, msg){
 // 在聊天界面发送消息
 function sendMsg(msg, sayHelloTag, breakNum, emoji) {
     if(sayHelloTag) {
+        log("==========")
         // 检测是否自己发送过消息
         let msgList = 获取消息();
         tlog(msgList);
@@ -4898,7 +4893,10 @@ function sendMsg(msg, sayHelloTag, breakNum, emoji) {
             // 检测是否有自己的消息
             // 拿到最后一个消息，从上往下，也就是最新的一个消息
             for (let tempi = msgList.length -1; 0 <= tempi; tempi--) {
+                tlog(msgList[tempi])
+                log(msgList[tempi].sender == accountInfo.name, msgList[tempi].sender == accountInfo.username)
                 if(msgList[tempi].sender == accountInfo.name || msgList[tempi].sender == accountInfo.username) {
+                    log(msgList[tempi].status)
                     if(msgList[tempi].status) {
                         // 发送成功
                         return msgList[tempi];
@@ -4906,6 +4904,7 @@ function sendMsg(msg, sayHelloTag, breakNum, emoji) {
                 }
             }
         }
+        log("==========")
     }
 
     log("发送消息：", emoji ? emoji+"\n"+msg : msg)
@@ -4970,10 +4969,15 @@ function sendMsg(msg, sayHelloTag, breakNum, emoji) {
         msgList = 获取消息();
         {
             // 4. 检测是否发送成功 
+            log("-------------")
+            log(msgList.length)
             if(0 < msgList.length) {
                 // 拿到最后一个消息，从上往下，也就是最新的一个消息
-                for (let tempi = 0; tempi < msgList.length; tempi++) {
+                for (let tempi = msgList.length; 0 <= tempi; tempi--) {
+                    log(msgList[tempi])
+                    log(msgList[tempi].sender == accountInfo.name , msgList[tempi].sender == accountInfo.username)
                     if(msgList[tempi].sender == accountInfo.name || msgList[tempi].sender == accountInfo.username) {
+                        log("消息状态", msgList[tempi].status)
                         if(msgList[tempi].status) {
                             // 发送成功
                             return msgList[tempi];
@@ -4983,6 +4987,7 @@ function sendMsg(msg, sayHelloTag, breakNum, emoji) {
             } else {
                 log("没有任何消息");
             }
+            log("-------------")
         }
 
         if(typeof breakNum != "number") breakNum = 0;
