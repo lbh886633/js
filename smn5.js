@@ -39,10 +39,20 @@ var tempSave = {
         "遇到say hi也进行回复",
         "修复连续回复",
         "测试配置-还没有开启授权验证",
-        "测试-顺序回复&&循环运行次数&&优化",
+        "测试1-顺序回复&&循环运行次数&&优化",
     ];
     tempSave.version += logs.pop();
     events.broadcast.emit("unlockOK", "run...");
+}
+
+{
+    let w = floaty.rawWindow(
+        <frame>
+            <button id="exit">退出</button>
+        </frame>
+    )
+    // w.setPosition(device.width * 0.8, device.height*0.05)
+    w.exit.click(()=>{exit()})
 }
 
 var server = {
@@ -833,17 +843,6 @@ function 保存数据() {
 
 var qd = 0
 ui.ok.click(function () {
-
-    {
-        let w = floaty.rawWindow(
-            <frame>
-                <button id="exit">退出</button>
-            </frame>
-        )
-        w.setPosition(device.width * 0.8, device.height*0.05)
-        w.exit.click(()=>{exit()})
-    }
-
     //保存数据()
     if (qd == 0) {
         qd = 1
