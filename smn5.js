@@ -34,7 +34,7 @@ var tempSave = {
         "遇到say hi也进行回复",
         "测试配置-还没有开启授权验证",
         "测试环节",
-        "测试2-打招呼粉丝个数",
+        "测试3-打招呼粉丝个数",
 
     ];
     tempSave.version += logs.pop();
@@ -4974,21 +4974,18 @@ function sendMsg(msg, sayHelloTag, breakNum, emoji) {
     detectionMsgStatus();
     try{
         sleep(500)
+        msgList = 获取消息();
         {
             // 4. 检测是否发送成功 
             if(0 < msgList.length) {
                 // 拿到最后一个消息，从上往下，也就是最新的一个消息
-                m = msgList.pop();
-                tlog(m)
-                if(temp.status) {
-                    /* 如果恰好对方发消息过来了，那么状态也是成功，出现的概率几乎为0，暂时不管
-                    try{
-                        if(sender != m.sender){
-                            return m;
+                for (let tempi = 0; tempi < msgList.length; tempi++) {
+                    if(msgList[tempi].sender == accountInfo.name || msgList[tempi].sender == accountInfo.username) {
+                        if(msgList[tempi].status) {
+                            // 发送成功
+                            return msgList[tempi];
                         }
-                    }catch(e){} */
-                    // 发送成功
-                    return m;
+                    }
                 }
             } else {
                 log("没有任何消息");
@@ -5007,7 +5004,7 @@ function sendMsg(msg, sayHelloTag, breakNum, emoji) {
         return {
             status: false,
             msg: msg,
-            she: "sayHelloException:出现异常！"+err
+            she: "sayHelloException:出现异常！" + err
         }
     }
 }
@@ -5088,12 +5085,19 @@ function sendMsgBackup(msg){
     // if(action) action.click()
     // 4. 检测是否发送成功
     let msgList = 获取消息();
-    for (let m in msgList) {
-        m = msgList[m]
-        if(msg == m.msg){
+    let m;
+    while ((m = msgList.pop())) {
+        if(m.sender == accountInfo.name || m.sender == accountInfo.username) {
             return m;
         }
     }
+    // 发送失败时消息不一样
+    // for (let m in msgList) {
+    //     m = msgList[m]
+    //     if(msg == m.msg){
+    //         return m;
+    //     }
+    // }
 
     return {
         status:false,
