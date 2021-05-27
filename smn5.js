@@ -41,7 +41,7 @@ var tempSave = {
         "修复连续回复",
         "测试配置-还没有开启授权验证",
         "测试4-顺序回复&&循环运行次数&&优化",
-        "测试5-测试切版本",
+        "测试6-测试切版本",
     ];
     tempSave.version += logs.pop();
     events.broadcast.emit("unlockOK", "run...");
@@ -972,25 +972,27 @@ var 随机账号 = ""
 // TODO
 function 主程序(forTag) {
     log("当前版本：",tempSave.version)
-    let dec = true;
-    threads.start(function () {
-        while(dec) {
-            action = text("Don't show again").findOne(300);
-            if(action) action.click()
-            action = text("Start now").findOne(30)
-                    || text("START NOW").findOne(30)
-                    || text("立即开始").findOne(30)
-                    || text("立即開始").findOne(30);
-            if(action) action.click();
+    if(!forTag) {
+        let dec = true;
+        threads.start(function () {
+            while(dec) {
+                action = text("Don't show again").findOne(300);
+                if(action) action.click()
+                action = text("Start now").findOne(30)
+                        || text("START NOW").findOne(30)
+                        || text("立即开始").findOne(30)
+                        || text("立即開始").findOne(30);
+                if(action) action.click();
+            }
+        })
+        showHideConsole(true)
+        console.setPosition(10,0)
+        if (!requestScreenCapture()) {            
+            toast("请求截图失败");
+            exit();
         }
-    })
-    showHideConsole(true)
-    console.setPosition(10,0)
-    if (!requestScreenCapture()) {            
-        toast("请求截图失败");
-        exit();
+        dec = false;
     }
-    dec = false;
     
     if(ui.functionTest.checked) {
         switchModel("测试");
