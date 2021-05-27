@@ -34,7 +34,7 @@ var tempSave = {
         "遇到say hi也进行回复",
         "测试配置-还没有开启授权验证",
         "测试环节",
-        "测试6-打招呼粉丝个数",
+        "测试7-打招呼粉丝个数",
     ];
     tempSave.version += logs.pop();
     events.broadcast.emit("unlockOK", "run...");
@@ -450,7 +450,7 @@ var floatWindow = floaty.rawWindow(
         <button id="exit" padding="0" w="50">退出</button>
     </frame>
 )
-floatWindow.setPosition(device.width * 0.5, device.height*0.02)
+floatWindow.setPosition(device.width * 0.45, device.height*0.02)
 floatWindow.exit.click(()=>{exit()})
 
 /**
@@ -4973,7 +4973,7 @@ function sendMsg(msg, sayHelloTag, breakNum, emoji) {
             log(msgList.length)
             if(0 < msgList.length) {
                 // 拿到最后一个消息，从上往下，也就是最新的一个消息
-                for (let tempi = msgList.length; 0 <= tempi; tempi--) {
+                for (let tempi = msgList.length -1; 0 <= tempi; tempi--) {
                     log(msgList[tempi])
                     log(msgList[tempi].sender == accountInfo.name , msgList[tempi].sender == accountInfo.username)
                     if(msgList[tempi].sender == accountInfo.name || msgList[tempi].sender == accountInfo.username) {
