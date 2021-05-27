@@ -22,6 +22,8 @@ var tempSave = {
     switchVersion: "",
     // 从后台获取id   areaList：限制国家
     area: null,
+    // 回复sayhi消息数量
+    replySayHiNumber: 0,
 };
 
 {
@@ -32,7 +34,7 @@ var tempSave = {
         "遇到say hi也进行回复",
         "测试配置-还没有开启授权验证",
         "测试环节",
-        "测试-修复连续回复，粉丝个数",
+        "测试1-打招呼粉丝个数",
 
     ];
     tempSave.version += logs.pop();
@@ -545,11 +547,11 @@ ui.layout(
                                 </linear>
 
                                 <linear padding="2 0 0 0">
-                                    <text textColor="black" text="指定打招呼数量: " />
+                                    <text textColor="black" text="打招呼数量: " />
                                     <input lines="1" id="sayHiNumber" w="*" text="20"/>
                                 </linear>
                                 <linear padding="2 0 0 0">
-                                    <text textColor="black" text="指定关注用户数量: " />
+                                    <text textColor="black" text="关注用户数量: " />
                                     <input lines="1" id="focusUserNumber" w="*" text="100"/>
                                 </linear>
                                 <linear padding="2 0 0 0">
@@ -558,12 +560,16 @@ ui.layout(
                                 </linear>
                                 <linear padding="2 0 0 0">
                                     <checkbox id="setServerUrl" text="" />
-                                    <text textColor="black" text="指定服务器地址: " />
+                                    <text textColor="black" text="服务器地址: " />
                                     <input lines="1" id="serverUrl" w="*" lines="2" text="{{server.serverUrl}}"/>
                                 </linear>
                                 <linear padding="2 0 0 0">
                                     <text textColor="black" text="停留时间: " />
                                     <input lines="1" id="stopTime" w="*" text="1" inputType="number|numberDecimal"/>
+                                </linear>
+                                <linear padding="2 0 0 0">
+                                    <text textColor="black" text="回复Say hi数量: " />
+                                    <input lines="1" id="replySayHiNumber" w="*" text="10" inputType="number|numberDecimal"/>
                                 </linear>
                                 <linear padding="2 0 0 0">
                                     <text textColor="black" text="采集打招呼个数: " />
@@ -1191,6 +1197,8 @@ function 主程序(forTag) {
                     if(!tempSave.issue || tempSave.issue.length < 1) {
                         console.warn("未获取到要携带的问题");
                     }
+                    // 回复消息数量
+                    tempSave.replySayHiNumber = ui.replySayHiNumber.text();
                     mi6回复消息()
                 }
 
@@ -3962,6 +3970,7 @@ function getFansList(fansNameList, fansList, all) {
 
             }
 
+            log("----------")
             log("保存数量：", score,"当前进展：", getFansNum, "总进展：", countGetFansNum, 
             "当前账号粉丝已保存：", (saveNumber / fansTotal*100).toFixed(2),"%")
             log(ui.sayHiNumber.text(), (ui.sayHiNumber.text()/getFansNum).toFixed(2) + "%")
@@ -3971,9 +3980,9 @@ function getFansList(fansNameList, fansList, all) {
                 log("已达到目标粉丝个数，停止继续遍历");
                 break;
             }
-
         }
 
+        log("=========")
         saveNumber = fansNameList.length;
         console.info("保存数量：", score,"当前进展：", getFansNum, "总进展：", countGetFansNum, 
                     "当前账号粉丝已保存：", (saveNumber / fansTotal*100).toFixed(2),"%")
@@ -5212,14 +5221,17 @@ function mi6GetNewMsgList() {
         return 0 < uo.children().length
     }).find();
     // Say in 的同级别控件 使用 indexOf 进行去重
-    if(ui.replaySayIn.checked) {
+    if(ui.replaySayIn.checked && 0 < tempSave.replySayHiNumber) {
         id("bfc").filter(function(uo){
-            // 如果文字是以 Say hi to 开始的则添加
-            if(uo.text().indexOf("Say hi to") == 0) {
-                // bfc的上面第4层向下找bfk
-                let bfkUO = uo.parent().parent().parent().parent().findOne(id("bfk"));
-                if(bfkUO && (sendlist.indexOf(bfkUO) < 0)) {
-                    sendlist.push(bfkUO);
+            // 还没有满数量之前才加入
+            if(0 < tempSave.replySayHiNumber--) {
+                // 如果文字是以 Say hi to 开始的则添加
+                if(uo.text().indexOf("Say hi to") == 0) {
+                    // bfc的上面第4层向下找bfk
+                    let bfkUO = uo.parent().parent().parent().parent().findOne(id("bfk"));
+                    if(bfkUO && (sendlist.indexOf(bfkUO) < 0)) {
+                        sendlist.push(bfkUO);
+                    }
                 }
             }
             return false;
