@@ -34,7 +34,7 @@ var tempSave = {
         "遇到say hi也进行回复",
         "测试配置-还没有开启授权验证",
         "测试环节",
-        "测试8-打招呼粉丝个数",
+        "测试9-打招呼粉丝个数",
     ];
     tempSave.version += logs.pop();
     events.broadcast.emit("unlockOK", "run...");
@@ -1031,7 +1031,7 @@ function 主程序(forTag) {
             // TODO TEST 测试代码
             // TODO TEST 测试代码
 
-
+            log(获取消息())
         }catch(e){
             log(e)
         }
@@ -3845,7 +3845,7 @@ function getFansList(fansNameList, fansList, all) {
     }
 
     // while(true){ // 无限采集
-    let saveNumberMax = saveNumber + ui.fanslistnumber.text();
+    let saveNumberMax = saveNumber + parseInt(ui.fanslistnumber.text());
     while(saveNumber < saveNumberMax) {
 console.error(saveNumber , saveNumberMax)
 console.warn(saveNumber , saveNumberMax)
@@ -3975,8 +3975,8 @@ console.warn(saveNumber , saveNumberMax)
             log("保存数量：", score,"当前进展：", getFansNum, "总进展：", countGetFansNum, 
                     "当前账号粉丝已保存：", (saveNumber / fansTotal*100).toFixed(2),"%")
             log(ui.sayHiNumber.text(), (getFansNum/ui.sayHiNumber.text()*100).toFixed(2) + "%")
-            log(ui.sayHiNumber.text() < getFansNum, saveNumber < saveNumberMax)
-            if(ui.sayHiNumber.text() < getFansNum || saveNumber < saveNumberMax){
+            log(ui.sayHiNumber.text() < getFansNum, saveNumberMax < saveNumber)
+            if(ui.sayHiNumber.text() < getFansNum || saveNumberMax < saveNumber){
                 log("已达到目标粉丝个数，停止继续遍历");
                 break;
             }
@@ -4896,6 +4896,7 @@ function sendMsg(msg, sayHelloTag, breakNum, emoji) {
             // 拿到最后一个消息，从上往下，也就是最新的一个消息
             for (let tempi = msgList.length -1; 0 <= tempi; tempi--) {
                 tlog(msgList[tempi])
+                log(msgList[tempi].sender, accountInfo.name, accountInfo.username)
                 log(msgList[tempi].sender == accountInfo.name, msgList[tempi].sender == accountInfo.username)
                 if(msgList[tempi].sender == accountInfo.name || msgList[tempi].sender == accountInfo.username) {
                     log(msgList[tempi].status)
