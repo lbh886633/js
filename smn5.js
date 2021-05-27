@@ -34,7 +34,7 @@ var tempSave = {
         "遇到say hi也进行回复",
         "测试配置-还没有开启授权验证",
         "测试环节",
-        "测试4-打招呼粉丝个数",
+        "测试5-打招呼粉丝个数",
     ];
     tempSave.version += logs.pop();
     events.broadcast.emit("unlockOK", "run...");
@@ -4889,10 +4889,10 @@ function sayHello(f, msg){
 function sendMsg(msg, sayHelloTag, breakNum, emoji) {
     if(sayHelloTag) {
         // 检测是否自己发送过消息
-        let msgs = 获取消息();
-        tlog(msgs);
+        let msgList = 获取消息();
+        tlog(msgList);
         // 检测是否存在自己发送的消息，或者对方的消息过多
-        if(3 < msgs.length) {
+        if(3 < msgList.length) {
             return false;
         } else {
             // 检测是否有自己的消息
