@@ -41,7 +41,7 @@ var tempSave = {
         "修复连续回复",
         "测试配置-还没有开启授权验证",
         "测试4-顺序回复&&循环运行次数&&优化",
-        "测试7-切版本&&回复",
+        "测试8-回复",
     ];
     tempSave.version += logs.pop();
     events.broadcast.emit("unlockOK", "run...");
@@ -6143,8 +6143,8 @@ function readRequiredLabelsFile(path){
     // 没有 tempSave.LabelsData 数组或者长度为0，都将从服务器获取数据
     if(!tempSave.LabelsData || tempSave.LabelsData.length < 1) {
         // 从服务器拿到标签集合
-        // let ls = server.get("label/list").rows;
-        let ls = server.get("labelInfo/labellist").rows;
+        let ls = server.get("label/list").rows;
+        // let ls = server.get("labelInfo/labellist").rows;
         tempSave.LabelsData = [];
         // 将每一个标签转成对象储存
         for (let i = 0; i < ls.length; i++) {
@@ -6268,6 +6268,9 @@ function getLabelList() {
                 // 切割消息
                 if(tempSave.LabelsData[i].ask) tempSave.LabelsData[i].ask = tempSave.LabelsData[i].ask.split(",");
                 if(tempSave.LabelsData[i].reply) tempSave.LabelsData[i].reply = tempSave.LabelsData[i].reply.split(",");
+                reList.push(tempSave.LabelsData[i]);
+            } else {
+                // 没有关键词的就不进行防止空属性处理
                 reList.push(tempSave.LabelsData[i]);
             }
         }
@@ -8691,9 +8694,6 @@ function objToUri(obj) {
 }
 
 function nextAccount() {
-    console.warn("测试切版本");
-    return "end";
-
     返回首页(300)
 
     // 账号不完整的时候进行检测
