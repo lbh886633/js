@@ -3972,8 +3972,8 @@ function getFansList(fansNameList, fansList, all) {
 
             log("----------")
             log("保存数量：", score,"当前进展：", getFansNum, "总进展：", countGetFansNum, 
-            "当前账号粉丝已保存：", (saveNumber / fansTotal*100).toFixed(2),"%")
-            log(ui.sayHiNumber.text(), (ui.sayHiNumber.text()/getFansNum).toFixed(2) + "%")
+                    "当前账号粉丝已保存：", (saveNumber / fansTotal*100).toFixed(2),"%")
+            log(ui.sayHiNumber.text(), (getFansNum/ui.sayHiNumber.text()*100).toFixed(2) + "%")
             log(ui.sayHiNumber.text() < getFansNum)
             if(ui.sayHiNumber.text() < getFansNum){
                 log("已达到目标粉丝个数，停止继续遍历");
