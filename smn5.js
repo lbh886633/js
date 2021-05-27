@@ -34,8 +34,7 @@ var tempSave = {
         "遇到say hi也进行回复",
         "测试配置-还没有开启授权验证",
         "测试环节",
-        "测试3-打招呼粉丝个数",
-
+        "测试4-打招呼粉丝个数",
     ];
     tempSave.version += logs.pop();
     events.broadcast.emit("unlockOK", "run...");
@@ -548,7 +547,7 @@ ui.layout(
 
                                 <linear padding="2 0 0 0">
                                     <text textColor="black" text="打招呼数量: " />
-                                    <input lines="1" id="sayHiNumber" w="*" text="20"/>
+                                    <input lines="1" id="sayHiNumber" w="*" text="5"/>
                                 </linear>
                                 <linear padding="2 0 0 0">
                                     <text textColor="black" text="关注用户数量: " />
@@ -4891,26 +4890,20 @@ function sendMsg(msg, sayHelloTag, breakNum, emoji) {
     if(sayHelloTag) {
         // 检测是否自己发送过消息
         let msgs = 获取消息();
+        tlog(msgs);
         // 检测是否存在自己发送的消息，或者对方的消息过多
         if(3 < msgs.length) {
             return false;
         } else {
-            try{
-                // 先拿到第一个名字
-                let temp, sender;
-                // 如果消息全部拿完则继续发送
-                while((temp == msgs.pop())) {
-                    if(!sender) {
-                        sender = temp.sender;
-                    }
-                    // 如果有一个发送人不同，且消息为有效，则跳出，不进行发送消息
-                    if(temp.status && sender != temp.sender) {
-                        return false;
+            // 检测是否有自己的消息
+            // 拿到最后一个消息，从上往下，也就是最新的一个消息
+            for (let tempi = msgList.length -1; 0 <= tempi; tempi--) {
+                if(msgList[tempi].sender == accountInfo.name || msgList[tempi].sender == accountInfo.username) {
+                    if(msgList[tempi].status) {
+                        // 发送成功
+                        return msgList[tempi];
                     }
                 }
-            }catch(err) {
-                log(err)
-                console.verbose(msgs)
             }
         }
     }
@@ -4920,14 +4913,14 @@ function sendMsg(msg, sayHelloTag, breakNum, emoji) {
         // 检测消息页面（需要判断是否存在输入框）
         action = text("Send a message...").findOne(1000);
         if(action) {
-            log("消息输入框")
+            tlog("消息输入框")
             if(emoji) {
                 action.setText(emoji + "\n" + msg);
             } else {
                 action.setText(msg);
             }
         } else {
-            log("消息输入框强制输入")
+            tlog("消息输入框强制输入")
             if(emoji) {
                 setText(emoji + "\n" + msg);
             } else {
@@ -4961,7 +4954,7 @@ function sendMsg(msg, sayHelloTag, breakNum, emoji) {
     action = text("Resend").clickable(true).findOne(300)  
     if(action) action.click()
 
-    sleep(2000);
+    //待删除 sleep(1000);
     // 切换到最底部，避免获取消息异常
     let msgAction = className("androidx.recyclerview.widget.RecyclerView").findOne(2000);
     if(msgAction){
@@ -5119,8 +5112,16 @@ function 获取消息(){
         }
     }
     // 如果存在按钮x则优先点击
-    if(lh_find(id("a0_"),"关闭打招呼提示",0,1000)){
-        sleep(300);
+    // if(lh_find(id("a0_"), "关闭打招呼提示", 0, 1000)) {
+    //     sleep(300);
+    // }
+    // TODO
+    {
+        let uo = id("a0_").findOne(300);
+        if(uo) {
+            uo.click();
+            sleep(300);
+        }
     }
     let msgList = [];
     let msgListUO;
@@ -7985,7 +7986,7 @@ function clickAction(getActionFun, s, ds,pack) {
             let us = getActionFun;
             getActionFun = function() {
                 if(pack)
-                return us.packageName(pack).findOne(s)
+                    return us.packageName(pack).findOne(s)
                 return us.findOne(s)
             };
         }
