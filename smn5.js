@@ -45,16 +45,6 @@ var tempSave = {
     events.broadcast.emit("unlockOK", "run...");
 }
 
-{
-    let w = floaty.rawWindow(
-        <frame>
-            <button id="exit">退出</button>
-        </frame>
-    )
-    // w.setPosition(device.width * 0.8, device.height*0.05)
-    w.exit.click(()=>{exit()})
-}
-
 var server = {
     serverUrl: "没有链接",
     again: function (err,option) {
@@ -843,6 +833,17 @@ function 保存数据() {
 
 var qd = 0
 ui.ok.click(function () {
+
+    {
+        let w = floaty.rawWindow(
+            <frame>
+                <button id="exit">退出</button>
+            </frame>
+        )
+        w.setPosition(device.width * 0.8, device.height*0.05)
+        w.exit.click(()=>{exit()})
+    }
+
     //保存数据()
     if (qd == 0) {
         qd = 1
@@ -1247,7 +1248,10 @@ function 主程序(forTag) {
             let lastAccount = accountInfo;
             let nowAccount;
             for(; j < 5; j++) {
-                nextAccount()
+                if(nextAccount() == "end") {
+                    log("运行结束");
+                    return true;
+                }
                 // 加入账号信息检测
                 for (let I = 0; I < 3; I++) {
                     返回首页(300);
@@ -1294,7 +1298,6 @@ function 主程序(forTag) {
             // 返回首页()
             log("账号进度", accounts.progress)
         }
-
     }
 }
 
@@ -8754,7 +8757,7 @@ function nextAccount() {
         // 不进行账号选择
         if(confirm("是否结束运行？\n当前账号列表已经全部切换完毕：\n" + accountList.join("\n"))){
             // 结束脚本
-            exit();
+            return "end";
         } else {
             // 重新开始，清除当前列表，并且重新执行当前的函数
             accountList = [];
