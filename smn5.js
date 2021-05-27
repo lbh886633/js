@@ -39,7 +39,7 @@ var tempSave = {
         "遇到say hi也进行回复",
         "修复连续回复",
         "测试配置-还没有开启授权验证",
-        "测试-顺序回复&&循环运行次数",
+        "测试-顺序回复&&循环运行次数&&优化",
     ];
     tempSave.version += logs.pop();
     events.broadcast.emit("unlockOK", "run...");
@@ -361,8 +361,10 @@ threads.start(function () {
         }
         try{
             if((i++) % 15 == 0) {
-                tempSave.switchVersion = -1 < appPackage.indexOf("zhiliaoapp") ? "长版本" : "短版本";
-                console.verbose("模式：" + tempSave.model + " --- 版本：" + tempSave.switchVersion + " --- 包名：" +appPackage);
+                if(appPackage) {
+                    tempSave.switchVersion = -1 < appPackage.indexOf("zhiliaoapp") ? "长版本" : "短版本";
+                    console.verbose("模式：" + tempSave.model + " --- 版本：" + tempSave.switchVersion + " --- 包名：" +appPackage);
+                }
             } else if(i % 5 == 0) console.verbose("模式：" + tempSave.model + " --- 版本：" + tempSave.switchVersion);
             popupDetection(null, "关闭异常日志");
             {
@@ -488,7 +490,9 @@ ui.layout(
                                     <radio id="detectionException" text="检测异常" />
                                 </radiogroup>
                                 {/* 测试时使用，将h="0"改成 h="auto"即可 */}
-                                <radiogroup orientation="horizontal" h="*">
+                                <radiogroup orientation="horizontal" h="auto">
+                                    <radio id="mi6_null" checked="true" text="空" />
+                                    <radio id="functionTest" text="测试函数" />
                                 </radiogroup>
                                 <radiogroup orientation="horizontal" h="0">
                                     <radio id="ptxz" text="登号" />
@@ -830,13 +834,15 @@ function 保存数据() {
 var qd = 0
 ui.ok.click(function () {
 
-    let w = floaty.rawWindow(
-        <frame>
-            <button id="exit">退出</button>
-        </frame>
-    )
-    w.setPosition(device.width * 0.8, device.height*0.05)
-    w.exit.click(()=>{exit()})
+    {
+        let w = floaty.rawWindow(
+            <frame>
+                <button id="exit">退出</button>
+            </frame>
+        )
+        w.setPosition(device.width * 0.8, device.height*0.05)
+        w.exit.click(()=>{exit()})
+    }
 
     //保存数据()
     if (qd == 0) {
@@ -860,7 +866,6 @@ function 悬浮() {
     //console.show()
     var window = floaty.window(
         <vertical w="*">
-
             <linear id="h" gravity="center">
                 <button id="action" text="启动" textSize="20sp" />
             </linear>
