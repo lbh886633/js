@@ -39,7 +39,7 @@ var tempSave = {
         "遇到say hi也进行回复",
         "修复连续回复",
         "测试配置-还没有开启授权验证",
-        "测试2-顺序回复&&循环运行次数&&优化",
+        "测试3-顺序回复&&循环运行次数&&优化",
     ];
     tempSave.version += logs.pop();
     events.broadcast.emit("unlockOK", "run...");
@@ -1548,6 +1548,7 @@ function 还原模式() {
                 if (ui.replymsg.checked) {
                     // 对标签对象进行加载
                     tempSave.RequiredLabels = readRequiredLabelsFile(路径.标签);
+                    log(tempSave.RequiredLabels);
                     log("回复消息")
                     回复消息()
                 }
@@ -6122,7 +6123,8 @@ function readRequiredLabelsFile(path){
     // 没有 tempSave.LabelsData 数组或者长度为0，都将从服务器获取数据
     if(!tempSave.LabelsData || tempSave.LabelsData.length < 1) {
         // 从服务器拿到标签集合
-        let ls = server.get("label/list").rows;
+        // let ls = server.get("label/list").rows;
+        let ls = server.get("labelInfo/labellist").rows;
         tempSave.LabelsData = [];
         // 将每一个标签转成对象储存
         for (let i = 0; i < ls.length; i++) {
@@ -8760,8 +8762,8 @@ function nextAccount() {
         循环执行(操作);
     } else {
         // 不进行账号选择
-        if(confirm("是否结束运行？\n当前账号列表已经全部切换完毕：\n" + accountList.join("\n"))){
-            // 结束脚本
+        if(autoConfirm(5000, true, "是否结束运行？\n当前账号列表已经全部切换完毕：\n" + accountList.join("\n"))){
+            // 结束当前版本
             return "end";
         } else {
             // 重新开始，清除当前列表，并且重新执行当前的函数
