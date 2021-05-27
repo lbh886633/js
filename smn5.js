@@ -34,7 +34,7 @@ var tempSave = {
         "遇到say hi也进行回复",
         "测试配置-还没有开启授权验证",
         "测试环节",
-        "测试7-打招呼粉丝个数",
+        "测试8-打招呼粉丝个数",
     ];
     tempSave.version += logs.pop();
     events.broadcast.emit("unlockOK", "run...");
@@ -3847,6 +3847,8 @@ function getFansList(fansNameList, fansList, all) {
     // while(true){ // 无限采集
     let saveNumberMax = saveNumber + ui.fanslistnumber.text();
     while(saveNumber < saveNumberMax) {
+console.error(saveNumber , saveNumberMax)
+console.warn(saveNumber , saveNumberMax)
         sleep(200)
         等待加载(100, 500);
         // 获取粉丝列表父控件
@@ -3973,8 +3975,8 @@ function getFansList(fansNameList, fansList, all) {
             log("保存数量：", score,"当前进展：", getFansNum, "总进展：", countGetFansNum, 
                     "当前账号粉丝已保存：", (saveNumber / fansTotal*100).toFixed(2),"%")
             log(ui.sayHiNumber.text(), (getFansNum/ui.sayHiNumber.text()*100).toFixed(2) + "%")
-            log(ui.sayHiNumber.text() < getFansNum)
-            if(ui.sayHiNumber.text() < getFansNum){
+            log(ui.sayHiNumber.text() < getFansNum, saveNumber < saveNumberMax)
+            if(ui.sayHiNumber.text() < getFansNum || saveNumber < saveNumberMax){
                 log("已达到目标粉丝个数，停止继续遍历");
                 break;
             }
