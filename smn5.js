@@ -4812,10 +4812,10 @@ function getHelloMessage() {
     let msg, flag = "a";
     // 从服务器拿一条消息
     if(ui.sayContact.checked) {
-        msg = server.get("hello/massage").message;
-    } else {
         // 所有冗余字段A存在文字 a 则获取，其它的不管
         msg = server.get("hello/massage/"+flag).message;
+    } else {
+        msg = server.get("hello/massage").message;
     }
     if(!msg){
         // 确保缓存存在
