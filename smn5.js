@@ -4,10 +4,10 @@
 
 var fasle = false;
 var testLog = true;
-    testLog = false;
+    // testLog = false;
 var tempSave = {
-    test: testLog,
-    // test: false,
+    // test: testLog,
+    test: false,
     // 版本号
     version: "104",
     firstEnvi: 0,
@@ -39,7 +39,7 @@ tempSave.h = tempSave.test ? 30 : 0;
         "增加日志",
         "修改部分配置",
         "优化标签问题",
-        "测试1",
+        "优化",
     ];
     events.broadcast.emit("unlockOK", "run..." + tempSave.version);
     tempSave.version += "__" +logs.pop();
@@ -525,7 +525,36 @@ ui.layout(
                                 <Switch id="autoService" textColor="red" text="无障碍服务（注意！必须开启才能正常运行脚本）" checked="{{auto.service != null}}" />
                             </linear>
                             
-
+<vertical id="modelmenu" bg="#404EC9A2"  h="0">
+    <radiogroup orientation="horizontal">
+        <radio id="mi6_null" checked="true" text="空" />
+        <radio id="mi6_reg" text="注册" />
+        <radio id="mi6_dat" text="资料" />
+        <radio id="mi6_vid" text="视频" />
+        <radio id="mi6_foc" text="关注" />
+        <radio id="mi6_fan" text="粉丝" />
+        <radio id="mi6_task" text="任务" />
+        <radio id="mi6_rep"  text="回复" />
+        <radio id="getUserList" text="采集用户" />
+        <radio id="focusUser" text="关注用户" />
+        <radio id="detectionException" text="检测异常" />
+        <radio id="functionTest" text="测试函数" />
+    </radiogroup>
+    <radiogroup orientation="horizontal" h="0">
+        <radio id="ptxz" text="登号" />
+        <radio id="ptxz1" text="采集" />
+        <radio id="ptxz2" text="还原" />
+        <radio id="ptxz5" text="单注册" />
+        <radio id="ptxz6" text="注册_7" />
+        <radio id="ptxz3" text="注册" />
+    </radiogroup>
+</vertical>
+<linear padding="5 0 0 0">
+    <button id="modeSelection" textColor="black" w="*" gravity="center" textSize="20" 
+        text="模式选择" style="Widget.AppCompat.Button.Colored"/>
+        {/* text="模式选择"/> */}
+</linear>
+{/*
                             <vertical id="modelmenu" bg="#404EC9A2">
                                 <linear padding="5 0 0 0" >
                                     <text textColor="black" textSize="20" text="模式选择" />
@@ -544,13 +573,14 @@ ui.layout(
                                     <radio id="mi6_rep"  text="回复" />
                                     <radio id="getUserList" text="采集用户" />
                                     <radio id="focusUser" text="关注用户" />
-                                    <radio id="detectionException" text="检测异常" />
                                 </radiogroup>
-                                {/* 测试时使用，将h="0"改成 h="auto"即可 */}
-                                <radiogroup orientation="horizontal" h="{{tempSave.h}}">
+                                {/* 测试时使用，将h="0"改成 h="auto"即可
+                                <radiogroup orientation="horizontal" >
                                     <radio id="mi6_null" checked="true" text="空" />
-                                    <radio id="functionTest" text="测试函数" />
+                                    <radio id="detectionException" text="检测异常" />
+                                    <radio id="functionTest" text="测试函数" h="{{tempSave.h}}"/>
                                 </radiogroup>
+                            */}{/*
                                 <radiogroup orientation="horizontal" h="0">
                                     <radio id="ptxz" text="登号" />
                                     <radio id="ptxz1" text="采集" />
@@ -558,9 +588,10 @@ ui.layout(
                                     <radio id="ptxz5" text="单注册" />
                                     <radio id="ptxz6" text="注册_7" />
                                     <radio id="ptxz3" text="注册" />
-                                    {/* <radio id="ptxz4" text="分身注册" /> */}
+                                    {/* <radio id="ptxz4" text="分身注册" /> */}{/*
                                 </radiogroup>
                             </vertical>
+                        */}
                             <linear>
                                     <checkbox id="switchVersionzl" text="长版本号" />
                                     <checkbox id="switchVersion" text="短版本号" />
@@ -739,6 +770,53 @@ ui.layout(
         </vertical>
     </drawer>
 );
+
+let 模式菜单 = {
+        "空":     "mi6_null"
+    , "注册":     "mi6_reg"
+    , "资料":     "mi6_dat"
+    , "视频":     "mi6_vid"
+    , "关注":     "mi6_foc"
+    , "粉丝":     "mi6_fan"
+    , "任务":     "mi6_task"
+    , "回复":     "mi6_rep"
+    , "采集用户": "getUserList"
+    , "关注用户": "focusUser"
+    , "检测异常": "detectionException"
+}
+if(tempSave.test) {
+    // 测试模式
+    模式菜单["测试函数"] = "functionTest";
+}
+ui.modeSelection.click((v)=>{
+// 从模式菜单中获取菜单名字
+let menu = [];
+for (let key in 模式菜单) {
+    menu.push(key);
+}
+dialogs.select("请选择一个选项", menu)
+.then(i => {
+    let key = menu[i];
+    ui[模式菜单[key]].checked = true;
+    v.setText(key);
+
+    // 将其它单选项隐藏掉，保留当前单选项列表
+    for (let forkey in 模式菜单) {
+        try{
+            let params = ui[forkey].getLayoutParams();
+            if(key == "空" || forkey == key) {
+                // 显示
+                params.height = uoHeight[forkey];
+            } else {
+                // 隐藏
+                params.height = 0;
+            }
+            ui[forkey].setLayoutParams(params)
+        }catch(e){}
+    }
+});
+
+})
 
 // ui绑定
 ui.ptxz.click(()=>{
@@ -5048,6 +5126,7 @@ function sendMsg(msg, sayHelloTag, breakNum, emoji) {
 
     // 检测消息发送异常
     detectionMsgStatus();
+    // TODO ！！！！！！！！！！！！！！！！！
     try{
         sleep(500)
         msgList = 获取消息();
@@ -5080,7 +5159,7 @@ function sendMsg(msg, sayHelloTag, breakNum, emoji) {
             // 消息已发送成功
             return m;
         }
-        exit()
+
         if(typeof breakNum != "number") breakNum = 0;
         if(breakNum < 2) {
             return sendMsg(msg, sayHelloTag, ++breakNum, emojiData[random(0, emojiData.length-1)]);
@@ -9192,14 +9271,15 @@ function 循环执行(数组, 等待时间) {
  
         进度++;
     }
-}
+}https://m.tiktok.com/i18n/share/user/107086544464683008/?_d=dg4l9kja494c8j&language=cn&sec_uid=MS4wLjABAAAA8mZdtAmcupZA070ITXDPa58KICGuS45gtHkHTJAsi6EFadZ6ptQAoMTT_u4eUqXr&timestamp=1610242123&user_id="+uid+"&sec_user_id="+sec_uid+"&utm_source=copy&utm_campaign=client_share&utm_medium=android&share_app_name=tiktok&share_link_id=49d25c5e-8370-4f3e-b0e5-69ebb77d265a&belong=trill&persist=1&os_api=22&device_type=VOG-AL10&ssmix=a&manifest_version_code=160703&dpi=320&uoo=0&carrier_region=TW&region=TW&uuid=866174010207138&carrier_region_v2=460&app_skin=white&app_name=trill&version_name=16.7.3&timezone_offset=28800&ts=1610242127&ab_version=16.7.3&residence=TW&pass-route=1&cpu_support64=false&pass-region=1&current_region=CN&storage_type=0&ac2=wifi&app_type=normal&ac=wifi&host_abi=armeabi-v7a&update_version_code=160703&channel=googleplay&_rticket=1610242129641&device_platform=android&build_number=16.7.3&locale=cn&op_region=TW&version_code=160703&mac_address=02:00:00:00:00:00&timezone_name=Asia/Shanghai&sys_region=TW&app_language=en&resolution=900*1600&os_version=5.1.1&language=zh-Hant&device_brand=HUAWEI&aid=1180&mcc_mnc=46007
 function openUrlAndSleep3s(url, user) {
     // 如果是id sec_id 的话就使用另外一个模式
     if(ui.urlId.checked) {
         if(user && user.id) {
             // 通过user对象进行打开
             console.info("当前用户的地区：", user.area);
-            url = "https://" + (appPackage.indexOf("zhiliaoapp") > -1 ? "m":"t") + ".tiktok.com/i18n/share/user/"
+            // url = "https://" + (appPackage.indexOf("zhiliaoapp") > -1 ? "m":"t") + ".tiktok.com/i18n/share/user/"
+            url = "https://t.tiktok.com/i18n/share/user/"
                 + user.id
                 + '/?_d=dg4l9kja494c8j&language=cn&sec_uid='
                 + user.secId.replace("\r","")
