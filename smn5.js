@@ -9,7 +9,7 @@ var testLog = true;
 var tempSave = {
     // test: testLog,
     test: false,
-    // 版本号 A线走公司回复修复
+    // 版本号 A线走公司回复修复-回复速度
     version: "124.A",
     firstEnvi: 0,
     privacy: 30,
@@ -55,7 +55,7 @@ tempSave.showLoginTool = tempSave.test ? "true" : "false";
         "修复上传头像",
         "key显示关注情况",
         "修复资料",
-        "测试回复速度",
+        "测试1_回复速度",
     ];
     events.broadcast.emit("unlockOK", "run..." + tempSave.version); // 4.3 以前的启动成功通知
     storages.create("T_T").put("runStatus", true);                  // 4.3 及以后的启动成功通知
@@ -640,7 +640,7 @@ ui.layout(
                                     <input lines="1" id="serverUrl" w="*" lines="2" text="{{server.serverUrl}}"/>
                                 </linear>
                                 <linear padding="2 0 0 0">
-                                    <text textColor="black" text="停留时间: " />
+                                    <text textColor="black" text="停留时间（分钟）: " />
                                     <input lines="1" id="stopTime" w="*" text="1" inputType="number|numberDecimal"/>
                                 </linear>
                                 <linear padding="2 0 0 0">
@@ -1154,7 +1154,7 @@ function 主程序(forTag) {
             log(
                 "测试结果：",
                 // 打开链接
-                上传视频()
+                mi6ReplyMsg()
             )
 
         }catch(e){
@@ -6120,7 +6120,34 @@ function mi6ReplyMsg() {
     // 拿顶部的用户名字,数据库中没有信息则进入右上角拿对方账号信息
     let fans;
     threads.start(function() {
-        fans = getFansInfoByFansMsgView();
+        fans = getFansUsernameAndNameByMsgView();
+
+        // 获取粉丝数据
+        try{
+            fans = server.get("fans/name?name=" + fansName + "&accountUsername=" + accountInfo.username)
+        }catch(e){log("通过name获取粉丝信息失败")}
+        if(!fans) fans = server.get("fans/username?username=" + username + "&accountUsername=" + accountInfo.username)
+
+        // 如果获取失败则创建一个粉丝信息
+        if(!fans || !fans.username) {
+            console.warn("无粉丝对象，创建一个粉丝对象")
+            fans = {
+                username: username,
+                name: name,
+                accountUsername: accountInfo.username,
+                device: "聊天界面创建",
+                noMessages: true    // 标记当前账号没有消息，是新创建的
+            }
+            // 将当前粉丝信息保存到服务器
+            console.verbose("保存新增的粉丝信息");
+            // 上传失败时,可能会造成没有粉丝只有聊天记录...
+            setTimeout(()=>{server.add("fans", server.excludeNull(fans))}, 10)
+            // threads.start(function(){
+                // server.add("fans", server.excludeNull(fans));
+            // })
+        }
+
+        // 获取粉丝消息
         if(!fans.noMessages) {
             // 获取消息
             fans.messages = server.get("record/doubleusername?fansUsername=" 
@@ -6129,6 +6156,9 @@ function mi6ReplyMsg() {
             fans.noMessages = true;
         }
     })
+
+    // 在等待粉丝信息时，提前获取
+    let 新消息列表 = 获取消息();
 
     // 如果上一条消息是自己发送的则跳出
     if(上一条消息是否为自己发送的()) {
@@ -6158,8 +6188,8 @@ function mi6ReplyMsg() {
     } catch (err) {
         log("获取聊天记录异常：", err)
     }
-    let 新消息列表 = 获取消息();
-    
+
+{
     /*
     [ 
         { 
@@ -6180,6 +6210,8 @@ function mi6ReplyMsg() {
         } 
     ]
      */
+}
+
     // 对当前的消息做去重处理
     if(总消息.length == 0){
         总消息 = 总消息.concat(新消息列表);
@@ -6394,6 +6426,33 @@ function replyMsg() {
     addFans(fans,Fans)
 }
 */}
+/**
+ * 聊天界面获取粉丝的账号和昵称
+ */
+function getFansUsernameAndNameByMsgView(){
+    desc("More").findOne(1000).click()
+    let fans;
+    for (let index = 0; index < 5; index++) {
+        sleep(300)
+        let action = className("com.bytedance.ies.dmt.ui.widget.DmtTextView").findOne(2000);
+        if(action){
+            let textUO = action.parent().parent().find(className("android.widget.TextView"));
+            // 拿到账号与用户名
+            try{
+                fans = {
+                    username: textUO[0].text(),
+                    name: textUO[1].text()
+                }
+                // 返回上一级，聊天界面
+                back();
+                break;
+            } catch (err) {
+                console.verbose("获取对方账号异常", err)
+            }
+        }
+    }
+    return fans;
+}
 
 /**
  * 聊天界面
@@ -6414,10 +6473,16 @@ function getFansInfoByFansMsgView() {
             try{
                 username = textUO[0].text();
                 name = textUO[1].text();
+                // 返回上一级，聊天界面
+                back();
+
                 // 拿粉丝数据
                 // 从服务器拿到粉丝的信息 包含聊天记录  msg = server.get("record/
                 // 通过粉丝账号以及tiktok账号找粉丝信息http://localhost:8081/tiktokjs/fans/username/ivethgrijalva9?accountUsername=kwepixzr76675
-                fans = server.get("fans/username?username=" + username + "&accountUsername=" + accountInfo.username)
+                try{
+                    fans = server.get("fans/name?name=" + fansName + "&accountUsername=" + accountInfo.username)
+                }catch(e){log("通过name获取粉丝信息失败")}
+                if(!fans) fans = server.get("fans/username?username=" + username + "&accountUsername=" + accountInfo.username)
                 break;
             } catch (err) {
                 console.verbose("获取对方账号异常", err)
@@ -6443,9 +6508,6 @@ function getFansInfoByFansMsgView() {
             server.add("fans", server.excludeNull(fans));
         })
     }
-    // 返回上一级，聊天界面
-    back();
-    sleep(2000);
     return fans;
 }
 
