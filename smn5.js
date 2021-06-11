@@ -9,8 +9,8 @@ var testLog = true;
 var tempSave = {
     // test: testLog,
     test: false,
-    // 版本号
-    version: "123.A",
+    // 版本号 A线走公司回复修复
+    version: "124.A",
     firstEnvi: 0,
     privacy: 30,
     NUMBER: 0,
@@ -54,6 +54,7 @@ tempSave.showLoginTool = tempSave.test ? "true" : "false";
         "修复key重复生成",
         "修复上传头像",
         "key显示关注情况",
+        "修复资料",
         "测试回复速度",
     ];
     events.broadcast.emit("unlockOK", "run..." + tempSave.version); // 4.3 以前的启动成功通知
@@ -1153,10 +1154,9 @@ function 主程序(forTag) {
             log(
                 "测试结果：",
                 // 打开链接
-                1
+                上传视频()
             )
 
-            
         }catch(e){
             log(e)
         }
@@ -3190,7 +3190,8 @@ function 上传视频() {
                 let re = this.uo.click();
                 log("点击" + this.标题, re)
                 if (re) {
-                    
+                    // 这里影响选封面的速度
+                    sleep(2000)
                 }
             }
         },
@@ -3303,15 +3304,15 @@ function 上传视频() {
                 let re = this.uo.parent().click();
                 log("点击" + this.标题, re)
                 if (re) {
-                    
+                    sleep(100);
                 }
             }
         },
         {
-            标题: "视频",
+            标题: "视频列表",
             uo: null,
             检测: function() {
-                this.uo = text("视频").visibleToUser().findOne(2000)
+                this.uo = text("视频列表").visibleToUser().findOne(2000)
                 return this.uo
             },
             执行: function() {
@@ -3337,6 +3338,84 @@ function 上传视频() {
                 }
             }
         },
+        step(
+            "视频列表"
+            , function () {return (this.uo = text("视频列表").findOne(200))}
+            , function(){
+                // 深度 7 等于已经选择
+                // if(text("视频列表").depth(7).findOne(200)) {
+                if(9 < this.uo.depth()) {
+                    if(!clickOn(this.uo)){
+                        console.warn("点击视频列表失败")
+                    }
+                }
+                let randomNumber;
+                // 获取到控件
+                let rv = className("androidx.recyclerview.widget.RecyclerView").filter(function(uo){
+                    return ( uo.depth() == 11 || uo.depth() == 12)
+                        &&device.width*0.5 < uo.bounds().right - uo.bounds().left
+                }).findOne(2000)
+                if(10 < rv.children().length){
+                    if(!rv) {
+                        console.error("视频列表控件获取失败")
+                        return false;
+                    }
+                    // 先往下滑动   向上 scrollBackward()
+                    let max = 0;
+                    while (rv.scrollForward()) {
+                        max++
+                        sleep(1000)
+                    }
+                    randomNumber = random(0,max);
+                    log("滑动次数", randomNumber)
+                    for (let i = randomNumber; 0 < i; i--) {
+                        rv.scrollBackward()
+                        sleep(1000)
+                    }
+                    // 重新获取
+                    rv = className("androidx.recyclerview.widget.RecyclerView").filter(function(uo){
+                        return ( uo.depth() == 11 || uo.depth() == 12)
+                            &&device.width*0.5 < uo.bounds().right - uo.bounds().left
+                    }).findOne(1000);
+                    // 最上面的3个点不到，除非是在同一个页面
+                    randomNumber = random(3, rv.children().length - 1)
+                } else {
+                    randomNumber = random(0, rv.children().length - 1)
+                }
+                log("选择视频", randomNumber)
+                let imgUO = rv.children()[randomNumber].find(className("android.widget.TextView").visibleToUser().clickable(true));
+                let re = imgUO.click()
+                log("视频点击结果",re)
+                if (re) {
+                    // 2s 可能会慢一点
+                    let sel = text("Select").findOne(2000);
+                    if(sel) sel.parent().click();
+                    for (let next = 0; next < 5; next++) {
+                        下一步 = null;
+                        下一步 = text("Next").visibleToUser().clickable(true).findOne(5000);
+                        if(下一步) {
+                            log("下一步 " + 下一步.click());
+                            sleep(3000);
+                            next--;
+                        } else {
+                            下一步 = classNameEndsWith("FrameLayout").clickable(true).visibleToUser().findOne(2000);
+                            if(下一步) {
+                                下一步.click();
+                            } else {
+                                back();
+                            }
+                        }
+                        if(text("Post").findOnce()) {
+                            break;
+                        }
+                    }
+                    console.info("选择完毕，进入下一阶段")
+                    循环执行(选择后操作)
+                    console.info("第二阶段结束")
+                    return "跳出循环执行";
+                }
+            }
+        ),
         {
             标题: "选择",
             uo: null,
@@ -3443,146 +3522,150 @@ function 上传视频() {
     for (var i = 0; i < 上传次数; i++) {
         返回首页() 
         log("上传视频")
-        移动文件(路径.文件夹.视频列表, 路径.文件夹.视频)
-        let 拍摄;
-        // 拍摄 = classNameEndsWith("FrameLayout").clickable(true).depth(8).drawingOrder(3).findOne(30000)
-        if (false && 拍摄) {
+        if(true) { 
+            循环执行(打开视频列表操作)
+        } else {
             移动文件(路径.文件夹.视频列表, 路径.文件夹.视频)
-            sleep(random(2000, 3000))
-            log("拍摄 " + 拍摄.click())
-            sleep(random(2000, 3000))
-            let allow;
-            for (let i = 0; i < 5; i++) {
-                if(text("Upload").visibleToUser().findOne(1000)){
-                    break;
-                }
-                lh_find(text("允许"),"",0,1000)
-                lh_find(text("ALLOW"),"",0,1000)
-                lh_find(text("Allow"),"",0,1000)
-                sleep(1000)
-            }
-            
-            var 上傳 = text("Upload").visibleToUser().findOne(30000)
-            if (上傳) {
-
-                log("上傳 " + 上傳.parent().parent().click())
+            let 拍摄;
+            // 拍摄 = classNameEndsWith("FrameLayout").clickable(true).depth(8).drawingOrder(3).findOne(30000)
+            if (false && 拍摄) {
+                移动文件(路径.文件夹.视频列表, 路径.文件夹.视频)
                 sleep(random(2000, 3000))
-                var All = text("All").visibleToUser().findOne(30000)
-                if (All) {
-                    log("All " + All.parent().click())
-                    sleep(random(1500, 2000))
-                    var 视频 = text("视频").visibleToUser().findOne(30000)
-                    if (视频) {
-                        log("视频 " + 视频.parent().click())
+                log("拍摄 " + 拍摄.click())
+                sleep(random(2000, 3000))
+                let allow;
+                for (let i = 0; i < 5; i++) {
+                    if(text("Upload").visibleToUser().findOne(1000)){
+                        break;
+                    }
+                    lh_find(text("允许"),"",0,1000)
+                    lh_find(text("ALLOW"),"",0,1000)
+                    lh_find(text("Allow"),"",0,1000)
+                    sleep(1000)
+                }
+                
+                var 上傳 = text("Upload").visibleToUser().findOne(30000)
+                if (上傳) {
+
+                    log("上傳 " + 上傳.parent().parent().click())
+                    sleep(random(2000, 3000))
+                    var All = text("All").visibleToUser().findOne(30000)
+                    if (All) {
+                        log("All " + All.parent().click())
                         sleep(random(1500, 2000))
-                    }
-                }
-                var 影片 = text("Videos").visibleToUser().findOne(30000)
-                if (影片) {
-                    log("影片 " + 影片.parent().click())
-                    sleep(random(1500, 2000))
-                }
-                var 选择 = classNameEndsWith("FrameLayout").clickable(true).visibleToUser().findOne(2000)
-                if (选择) {
-                    log("选择 " + 选择.click())
-                    sleep(random(1500, 2000))
-                    let sel = text("Select").findOne(5000)
-                    if(sel) sel.parent().click();
-                    let 下一步;
-                    for (let next = 0; next < 5; next++) {
-                        下一步 = null;
-                        下一步 = text("Next").visibleToUser().clickable(true).findOne(5000);
-                        if(下一步) {
-                            log("下一步 " + 下一步.click())
-                            sleep(3000)
-                            next--;
-                        } else {
-                            下一步 = classNameEndsWith("FrameLayout").clickable(true).visibleToUser().findOne(2000)
-                            if(下一步) {
-                                下一步.click()
-                            } else {
-                                back();
-                            }
-                        }
-                        if(text("Post").findOnce()) {
-                            break;
-                        }
-                    }
-                    var 编辑框 = classNameEndsWith("EditText").visibleToUser().findOne(5000)
-                    if (编辑框) {
-                        sleep(1000)
-                        setText(话题内容)
-                        sleep(random(1000, 1500))
-                        if(false){
-                            var 好友 = text("Friends").visibleToUser().findOne(5000)
-                            if (好友) {
-                                log("好友 " + 好友.click())
-                                sleep(random(1500, 2000))
-                                setText(at)
-                                sleep(random(5000, 6000))
-                                var 第一个 = classNameEndsWith("LinearLayout").visibleToUser().clickable(true).findOne(5000)
-                                if (第一个) {
-                                    log("第一个 " + 第一个.click())
-                                    sleep(random(1500, 2000))
-                                }
-                                var 没用户 = textContains("No more update").visibleToUser().findOne(500)
-                                if (没用户) {
-                                    log("没用户 " + back())
-                                    sleep(random(1500, 2000))
-                                }
-                                var 發佈 = text("Post").visibleToUser().depth(10).findOne(500)
-                                if (!發佈) {
-                                    log("选择失败 " + back())
-                                    sleep(random(1500, 2000))
-                                }
-                            }
-                        }
-                    }
-                    var 去往封面 = text("Select cover").clickable(true).findOne(2000)
-                    if (去往封面) {
-                        log("去往封面 " + 去往封面.click())
-                        sleep(5000)
-                        var 封面 = classNameEndsWith("ImageView").idContains("bg6").find()
-                        if (封面.length > 5) {
-                            var 坐标 = 封面[2].bounds()
-                            click(坐标.centerX(), 坐标.centerY())
+                        var 视频 = text("视频").visibleToUser().findOne(30000)
+                        if (视频) {
+                            log("视频 " + 视频.parent().click())
                             sleep(random(1500, 2000))
                         }
-                        var 保存 = text("Save").clickable(true).findOne(2000)
-                        if (保存) {
-                            log("保存 " + 保存.click())
-                            sleep(random(1800, 2000))
-                        }
                     }
-                    var 發佈 = text("Post").visibleToUser().depth(10).findOne(5000)
-                    if (發佈) {
-                        var 儲存到裝置中開啟 = desc("Save to deviceOn").visibleToUser().clickable(true).findOne(2000)
-                        if (儲存到裝置中開啟) {
-                            log("儲存到裝置中開啟 " + 儲存到裝置中開啟.click())
-                            sleep(random(1000, 1500))
-                        }
-                        log("發佈 " + 發佈.parent().parent().click() + "进度 " + (i + 1) + "/" + 上传次数)
-                        lh_find(text("Post Now"),"Post Now", 0);
-                        while (true) {
-                            sleep(3000)
-                            var 上传中 = textContains("%").visibleToUser().findOne(1000)
-                            if (上传中) {
-                                log("上传中 " + 上传中.text())
+                    var 影片 = text("Videos").visibleToUser().findOne(30000)
+                    if (影片) {
+                        log("影片 " + 影片.parent().click())
+                        sleep(random(1500, 2000))
+                    }
+                    var 选择 = classNameEndsWith("FrameLayout").clickable(true).visibleToUser().findOne(2000)
+                    if (选择) {
+                        log("选择 " + 选择.click())
+                        sleep(random(1500, 2000))
+                        let sel = text("Select").findOne(5000)
+                        if(sel) sel.parent().click();
+                        let 下一步;
+                        for (let next = 0; next < 5; next++) {
+                            下一步 = null;
+                            下一步 = text("Next").visibleToUser().clickable(true).findOne(5000);
+                            if(下一步) {
+                                log("下一步 " + 下一步.click())
+                                sleep(3000)
+                                next--;
                             } else {
-                                log("上传完成....")
-                                break
+                                下一步 = classNameEndsWith("FrameLayout").clickable(true).visibleToUser().findOne(2000)
+                                if(下一步) {
+                                    下一步.click()
+                                } else {
+                                    back();
+                                }
+                            }
+                            if(text("Post").findOnce()) {
+                                break;
                             }
                         }
+                        var 编辑框 = classNameEndsWith("EditText").visibleToUser().findOne(5000)
+                        if (编辑框) {
+                            sleep(1000)
+                            setText(话题内容)
+                            sleep(random(1000, 1500))
+                            if(false){
+                                var 好友 = text("Friends").visibleToUser().findOne(5000)
+                                if (好友) {
+                                    log("好友 " + 好友.click())
+                                    sleep(random(1500, 2000))
+                                    setText(at)
+                                    sleep(random(5000, 6000))
+                                    var 第一个 = classNameEndsWith("LinearLayout").visibleToUser().clickable(true).findOne(5000)
+                                    if (第一个) {
+                                        log("第一个 " + 第一个.click())
+                                        sleep(random(1500, 2000))
+                                    }
+                                    var 没用户 = textContains("No more update").visibleToUser().findOne(500)
+                                    if (没用户) {
+                                        log("没用户 " + back())
+                                        sleep(random(1500, 2000))
+                                    }
+                                    var 發佈 = text("Post").visibleToUser().depth(10).findOne(500)
+                                    if (!發佈) {
+                                        log("选择失败 " + back())
+                                        sleep(random(1500, 2000))
+                                    }
+                                }
+                            }
+                        }
+                        var 去往封面 = text("Select cover").clickable(true).findOne(2000)
+                        if (去往封面) {
+                            log("去往封面 " + 去往封面.click())
+                            sleep(5000)
+                            var 封面 = classNameEndsWith("ImageView").idContains("bg6").find()
+                            if (封面.length > 5) {
+                                var 坐标 = 封面[2].bounds()
+                                click(坐标.centerX(), 坐标.centerY())
+                                sleep(random(1500, 2000))
+                            }
+                            var 保存 = text("Save").clickable(true).findOne(2000)
+                            if (保存) {
+                                log("保存 " + 保存.click())
+                                sleep(random(1800, 2000))
+                            }
+                        }
+                        var 發佈 = text("Post").visibleToUser().depth(10).findOne(5000)
+                        if (發佈) {
+                            var 儲存到裝置中開啟 = desc("Save to deviceOn").visibleToUser().clickable(true).findOne(2000)
+                            if (儲存到裝置中開啟) {
+                                log("儲存到裝置中開啟 " + 儲存到裝置中開啟.click())
+                                sleep(random(1000, 1500))
+                            }
+                            log("發佈 " + 發佈.parent().parent().click() + "进度 " + (i + 1) + "/" + 上传次数)
+                            lh_find(text("Post Now"),"Post Now", 0);
+                            while (true) {
+                                sleep(3000)
+                                var 上传中 = textContains("%").visibleToUser().findOne(1000)
+                                if (上传中) {
+                                    log("上传中 " + 上传中.text())
+                                } else {
+                                    log("上传完成....")
+                                    break
+                                }
+                            }
+                        }
+                    } else {
+                        log("没找到视频序号,放弃本次上传")
+                        exit()
                     }
-                } else {
-                    log("没找到视频序号,放弃本次上传")
-                    exit()
                 }
+            }else {
+                循环执行(打开视频列表操作)
             }
-        }else {
-            循环执行(打开视频列表操作)
+            sleep(1000)
         }
-        sleep(1000)
     }
 }
 /**
@@ -3802,7 +3885,7 @@ function 获取用户名bak(path) {
     }
 }
 */}
-{/* 
+{/* 文件对比中，这里不用管
 
 function 更换头像() {
     循环执行([
