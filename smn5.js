@@ -2746,12 +2746,14 @@ function focusUser(max) {
             let state;
             let nowTime = Date.now();
             let clickNumber = 0;
-
-            state = dfs(words);
+            // 先等4秒再开始检测
+            sleep(4000)
+            state = dfs(words,true,6*1000);
             try{
                 if(state && state.text()=="Follow"){
+                    tlog(state)
                     // 点击
-                    if(state.click()) {
+                    if(clickOn(state)) {
                         console.verbose("点击关注");
                         // 点击关注，清空状态
                         state = null;
@@ -2780,7 +2782,7 @@ function focusUser(max) {
                     })
                 }
             }catch(e){
-                tlog("关注模式打开用户异常", e)
+                log("关注模式打开用户异常", e)
             }
 
 {/* 
