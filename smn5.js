@@ -2747,6 +2747,43 @@ function focusUser(max) {
             let nowTime = Date.now();
             let clickNumber = 0;
 
+            state = dfs(words);
+            try{
+                if(state && state.text()=="Follow"){
+                    // 点击
+                    if(state.click()) {
+                        console.verbose("点击关注");
+                        // 点击关注，清空状态
+                        state = null;
+                        if( 2 < clickNumber++) {
+                            // 关注异常
+                            log("关注异常！")
+                            focusException++;
+                            // 向服务器取消持有
+                            if(ui.urlId.checked) {
+                                log("归还ID用户", server.get("idList/regain?id=" + user.id || -1));
+                            } else {
+                                log("归还用户", server.get("focusList/regain?id=" + user.id || -1));
+                            }
+                        } else {
+                            sleep(1000)
+                        }
+                    }
+                } else if (state && state.text() == "Edit profile") {
+                    // 直接跳出，进度减一
+                    focusNumber--;
+                } else {
+                    user.label = state.text();
+                    // 上传当前状态
+                    threads.start(function () {
+                        log(server.post((ui.urlId.checked ? "idList":"focusList") + "/use?id="+user.id+"&label="+user.label,{}).json());
+                    })
+                }
+            }catch(e){
+                tlog("关注模式打开用户异常", e)
+            }
+
+{/* 
             do {
                 // state = detectionFollowStatus(true);
                 // 超时检测
@@ -2818,6 +2855,8 @@ function focusUser(max) {
                 }
                 
             } while (!state);
+ */}
+
             focusNumber++;
             log("进度：" + focusNumber + "/" + max);
             返回首页(300);
