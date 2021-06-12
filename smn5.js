@@ -34,7 +34,7 @@ tempSave.showLoginTool = tempSave.test ? "true" : "false";
         "修复回复模式上传消息失败", // 2021年6月12日 22:20:10
         "修复回复消息模式居中时不发送消息", // 2021年6月13日 01:48:38
         "优化粉丝界面加载（粉丝模式）", // 2021年6月13日 02:34:16
-        "测试_更改关注用户等待时长"
+        "优化关注用户等待时长",
     ];
     events.broadcast.emit("unlockOK", "run..." + tempSave.version); // 4.3 以前的启动成功通知
     storages.create("T_T").put("runStatus", true);                  // 4.3 及以后的启动成功通知
@@ -2747,10 +2747,12 @@ function focusUser(max) {
             let nowTime = Date.now();
             let clickNumber = 0;
             // 先等4秒再开始检测
-            sleep(5000)
+            sleep(4000)
             state = dfs(words,true,2*1000);
             try{
-                if(state && state.text()=="Follow"){
+                if(!state){
+                    focusNumber--;
+                } else if(state && state.text()=="Follow"){
                     tlog(state)
                     // 点击
                     if(clickOn(state)) {
@@ -10196,7 +10198,7 @@ function openUrlAndSleep3s(url, user, noWait) {
 function dfs(words, wait, time) {
     // let result = 0,
     let result,
-        t = 200, maxTime = Date.now(), stepTime = time || 1000*10;  // stepTime 打开链接所等待的时间
+        t = 100, maxTime = Date.now(), stepTime = time || 1000*10;  // stepTime 打开链接所等待的时间
     let 操作 = [
         step(
             "获取状态"
