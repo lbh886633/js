@@ -2741,7 +2741,7 @@ function focusUser(max) {
                 return false;
             }
             // 打开链接
-            openUrlAndSleep3s(user.url, user);
+            openUrlAndSleep3s(user.url, user, true);
             // 检测当前界面，如果当前界面不是用户信息页面则等待，
             let state;
             let nowTime = Date.now();
@@ -2862,9 +2862,9 @@ function focusUser(max) {
             返回首页(300);
         }
 
-        if(focusNumber < max) {
-            sleep((5000*i) + 1)
-        }
+        // if(focusNumber < max) {
+        //     sleep((5000*i) + 1)
+        // }
     }
     
     // 取消使用
@@ -10116,7 +10116,7 @@ function 循环执行(数组, 等待时间) {
 }
 
 // https://m.tiktok.com/i18n/share/user/107086544464683008/?_d=dg4l9kja494c8j&language=cn&sec_uid=MS4wLjABAAAA8mZdtAmcupZA070ITXDPa58KICGuS45gtHkHTJAsi6EFadZ6ptQAoMTT_u4eUqXr&timestamp=1610242123&user_id="+uid+"&sec_user_id="+sec_uid+"&utm_source=copy&utm_campaign=client_share&utm_medium=android&share_app_name=tiktok&share_link_id=49d25c5e-8370-4f3e-b0e5-69ebb77d265a&belong=trill&persist=1&os_api=22&device_type=VOG-AL10&ssmix=a&manifest_version_code=160703&dpi=320&uoo=0&carrier_region=TW&region=TW&uuid=866174010207138&carrier_region_v2=460&app_skin=white&app_name=trill&version_name=16.7.3&timezone_offset=28800&ts=1610242127&ab_version=16.7.3&residence=TW&pass-route=1&cpu_support64=false&pass-region=1&current_region=CN&storage_type=0&ac2=wifi&app_type=normal&ac=wifi&host_abi=armeabi-v7a&update_version_code=160703&channel=googleplay&_rticket=1610242129641&device_platform=android&build_number=16.7.3&locale=cn&op_region=TW&version_code=160703&mac_address=02:00:00:00:00:00&timezone_name=Asia/Shanghai&sys_region=TW&app_language=en&resolution=900*1600&os_version=5.1.1&language=zh-Hant&device_brand=HUAWEI&aid=1180&mcc_mnc=46007
-function openUrlAndSleep3s(url, user) {
+function openUrlAndSleep3s(url, user, noWait) {
     // 如果是id sec_id 的话就使用另外一个模式
     if(ui.urlId.checked) {
         if(user && user.id) {
@@ -10188,7 +10188,7 @@ function openUrlAndSleep3s(url, user) {
     // 在打开链接之后等待加载出来用户信息界面
     let words = ["Follow","Message","Requested"];
     
-    console.info("链接打开结束", dfs(words, true))
+    log("链接打开结束", noWait ? "不等待" : dfs(words, true))
 }
 function dfs(words, wait, time) {
     // let result = 0,
