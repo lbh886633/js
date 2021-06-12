@@ -2747,8 +2747,8 @@ function focusUser(max) {
             let nowTime = Date.now();
             let clickNumber = 0;
             // 先等4秒再开始检测
-            sleep(4000)
-            state = dfs(words,true,6*1000);
+            sleep(5000)
+            state = dfs(words,true,2*1000);
             try{
                 if(state && state.text()=="Follow"){
                     tlog(state)
@@ -2768,7 +2768,8 @@ function focusUser(max) {
                                 log("归还用户", server.get("focusList/regain?id=" + user.id || -1));
                             }
                         } else {
-                            sleep(1000)
+                            // ？
+                            // sleep(1000)
                         }
                     }
                 } else if (state && state.text() == "Edit profile") {
@@ -10195,7 +10196,7 @@ function openUrlAndSleep3s(url, user, noWait) {
 function dfs(words, wait, time) {
     // let result = 0,
     let result,
-        t = 300, maxTime = Date.now(), stepTime = time || 1000*10;  // stepTime 打开链接所等待的时间
+        t = 200, maxTime = Date.now(), stepTime = time || 1000*10;  // stepTime 打开链接所等待的时间
     let 操作 = [
         step(
             "获取状态"
@@ -10243,9 +10244,12 @@ function dfs(words, wait, time) {
         )
         , step(
             "Open App || ALWAYS || 打开"
-            , function(){return (this.uo = text("ALWAYS").findOne(t) 
-                                        || text("Open App").findOne(t) 
-                                        || text("打开").findOne(t))}
+            , function(){return (this.uo = filter(function(uo){
+                return uo.text() == "ALWAYS"
+                || uo.text() == "Open App"
+                || uo.text() == "打开" 
+                }).findOne(t)
+            )}
             , function(){
                 sleep(100); // 慢一点...
                 clickOn(this.uo);
