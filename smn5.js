@@ -627,7 +627,7 @@ ui.layout(
                                 </linear>
                                 <linear padding="2 0 0 0">
                                     <text textColor="black" text="关注用户数量: " />
-                                    <input lines="1" id="focusUserNumber" w="*" text="100"/>
+                                    <input lines="1" id="focusUserNumber" w="*" text="150"/>
                                 </linear>
                                 <linear padding="2 0 0 0">
                                     <text textColor="black" text="指定国家: " />
