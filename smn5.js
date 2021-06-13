@@ -3520,9 +3520,22 @@ function 上传视频() {
                     sleep(2000);
                     let sel = text("Select").findOne(5000);
                     if(sel) sel.parent().click();
+                    let 下一步;
                     for (let next = 0; next < 5; next++) {
                         下一步 = null;
-                        下一步 = text("Next").visibleToUser().clickable(true).findOne(5000);
+                        下一步 = boundsInside(device.width*0.5, device.height*0.8, device.width, device.height)
+                                .clickable(true).visibleToUser().filter(function(uo){
+                            return (
+                                (   
+                                    uo.text() == "Next"
+                                    || uo.className() == "android.view.View"
+                                ) && (
+                                    uo.depth() == 8
+                                    || uo.depth() == 9
+                                    || uo.depth() == 10
+                                )
+                            )
+                        }).findOne(3000)
                         if(下一步) {
                             log("下一步 " + 下一步.click());
                             sleep(3000);
