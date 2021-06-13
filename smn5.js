@@ -9,7 +9,7 @@ var testLog = true; // 日志的显示模式
 var tempSave = {
     // test: testLog,   // 跟随日志模式
     test: false,    // 显示上号器
-    version: "129",
+    version: "130",
     firstEnvi: 0,
     privacy: 30,
     NUMBER: 0,
@@ -1362,8 +1362,8 @@ function 主程序(forTag) {
 
                 if (ui.mi6_dat.checked) {
                     switchModel("修改资料")
-                    修改资料()
                     更换头像()
+                    修改资料()
                 }
 
                 if (ui.mi6_vid.checked) {
@@ -3785,6 +3785,49 @@ function 修改资料(注册模式标记) {
         sleep(random(1000, 1500))
     }
 
+
+    var 編輯個人檔案 = textContains(" profile").visibleToUser().findOne(2000)
+    if (編輯個人檔案) {
+        log("編輯個人檔案 " + clickOn(textContains(" profile")))
+
+        sleep(random(1000, 1500))
+
+        // 参数：控件文字 日志的文字信息
+        function clickSC(textByUO, textByLog) {
+            let uo = text(textByUO).visibleToUser().clickable(true).findOne(2000)
+            if (uo) textByUO = uo.click();
+            if (textByLog) console.verbose(textByLog, textByUO==true)
+            return textByUO == true;
+        }
+        // 参数 控件文字 要输入的信息
+        function editInfo(textByUO, textInfo) {
+            let action = text(textByUO).visibleToUser().findOne(2000)
+            if(action){
+                log(action.parent().parent().click(), textByUO, textInfo);
+                sleep(random(1500, 2000))
+
+                setText(textInfo)
+                sleep(1000)
+                if(!clickSC("Save","储存"))
+                    clickSC("Cancel", "后退")
+                sleep(random(2000, 2500))
+            } else {
+                log("未找到",textByUO)
+            }
+        }
+
+        if (用户名) {
+            用户名 = 获取用户名(路径.用户名)
+            if (用户名 != "不设置") editInfo("Name", 用户名)
+        }
+        if (用户账号) {
+            用户账号 = 获取用户名(路径.用户账号)
+            if (用户账号 != "不设置") editInfo("Username", 用户账号)
+        }
+
+    }
+    
+    返回首页()
     if(网站) {
         var 右上角 = classNameEndsWith("RelativeLayout").drawingOrder(7).clickable(true).findOne(2000)
         if (右上角) {
@@ -3862,6 +3905,110 @@ function 修改资料(注册模式标记) {
         log("編輯個人檔案 " + 編輯個人檔案.click())
         // 改完专业模式的话可能需要再点一下
         clickOn(textContains(" profile"))
+        if(网站) editInfo("Website", 网站)
+        editInfo("Bio", 简介)
+    }
+
+    // 如果修改了账号则需要进行更新
+    if (!注册模式标记 && 用户账号) {
+        返回首页();
+        // 重新检查当前用户名
+        runTikTok();
+        server.get("account/update?username=" + nowUsername +"&newUsername=" + accountInfo.username);
+    }
+}
+{/* 
+function 修改资料(注册模式标记) {
+    let nowUsername;
+    if(ui.yhm) var 用户名 = "不设置";   // 存放内容，用于开启标记
+    if(ui.yhzh) {
+        var 用户账号 = "不设置";
+        nowUsername = accountInfo.username; // 修改账号的话就可以保存
+    }
+    var 网站 = ui.wz.text()
+    var 简介 = ui.jj.text()
+    返回首页()
+    var 我 = text("Me").findOne(30000)
+    if (我) {
+        log("Me " + 我.parent().click())
+        sleep(random(1000, 1500))
+    }
+    
+    if(网站) {
+        var 右上角 = classNameEndsWith("RelativeLayout").drawingOrder(7).clickable(true).findOne(2000)
+        if (右上角) {
+            log("右上角 " + 右上角.click())
+            sleep(random(1000, 1500))
+            var 管理我的帳號 = textContains("account").visibleToUser().findOne(2000)
+            if (管理我的帳號) {
+                log("管理我的帳號 " + 管理我的帳號.parent().parent().click())
+                sleep(random(1000, 1500))
+                var 切換到專業帳號 = text("Switch to Pro Account").visibleToUser().findOne(2000)
+
+                if (切換到專業帳號) {
+                    log("切換到專業帳號 " + 切換到專業帳號.parent().parent().click())
+                    sleep(random(1000, 1500))
+                    等待加载()
+                    log("等待加载出切换界面(最高1小时)，如果一直加载不出来，请手动切换网络后手动进入切换账号版本页面。也可以手动切换后返回主页。");
+                    var 下一步;
+                    for (let nextI = 0; nextI < 30*60; nextI++) {
+                        popupDetection();
+                        下一步 = text("Business").packageName(appPackage).findOne(3000)
+                        if(下一步) {
+                            log("已进入切换页面");
+                            break;
+                        }
+                        if(text("Me").packageName(appPackage).findOne(3000)){
+                            if(confirm("是否已手动切换到专业版？")){
+                                break;
+                            }
+                        }
+                    }
+
+                    if (下一步) {
+                        console.verbose("界面加载完成，继续执行下一步");
+                        // log("下一步 " + 下一步.parent().findOne(text("Next")).click())
+                        log("下一步 " + 下一步.parent().click())
+                        sleep(random(2000, 3000))
+                        let 购物;
+                        for (var i = 0; i < 3; i++) {
+                            popupDetection();
+                            log("滑动", scrollable(true).scrollForward())
+                            购物 = textContains("Shopping").packageName(appPackage).findOne(1500)
+                            if(购物) break;
+                        }
+                        if (购物) {
+                            clickOn(购物)
+                            // var 坐标 = 购物.bounds()
+                            // click(坐标.centerX(), 坐标.centerY())
+                            // sleep(random(1000, 1500))
+                        }
+
+                        // lh_find(text("Next"), "Next", 1, 5000)
+                        // sleep(random(3000, 4000))
+                        for (let i = 0; i < 3; i++) {
+                            clickOn(text("Next"));
+                            if(textContains("Welcom to your").findOne(3000)){
+                                // 跳出等待
+                                break;
+                            }
+                        }
+                    }else{
+                        console.verbose("找不到Business控件！")
+                        log("尝试直接修改");
+                        返回首页();
+                    }
+                } else {
+                    log("切换不到专业账号或者已经是专业了")
+                    返回首页()
+                }
+            }
+        }
+    }
+
+    var 編輯個人檔案 = textContains(" profile").visibleToUser().findOne(2000)
+    if (編輯個人檔案) {
+        log("編輯個人檔案 " + 編輯個人檔案.click())
 
         sleep(random(1000, 1500))
 
@@ -3898,10 +4045,16 @@ function 修改资料(注册模式标记) {
             if (用户账号 != "不设置") editInfo("Username", 用户账号)
         }
 
+    }
+    var 編輯個人檔案 = textContains(" profile").visibleToUser().findOne(2000)
+    if (編輯個人檔案) {
+        log("編輯個人檔案 " + 編輯個人檔案.click())
+        // 改完专业模式的话可能需要再点一下
+        clickOn(textContains(" profile"))
         if(网站) editInfo("Website", 网站)
         editInfo("Bio", 简介)
-
     }
+
     // 如果修改了账号则需要进行更新
     if (!注册模式标记 && 用户账号) {
         返回首页();
@@ -3910,7 +4063,7 @@ function 修改资料(注册模式标记) {
         server.get("account/update?username=" + nowUsername +"&newUsername=" + accountInfo.username);
     }
 }
-
+ */}
 function 获取用户名(path) {
     let key = "文本数据_" + path.substring(path.lastIndexOf("/") + 1);
     let logData = {
@@ -4285,7 +4438,7 @@ function 更换头像() {
             标题: "编辑个人档案",
             uo: null,
             检测: function() {
-                this.uo = textContains(" profile").visibleToUser().findOne(2000)
+                this.uo = textContains(" profile").visibleToUser().findOne(1000)
                 return this.uo
             },
             执行: function() {
@@ -4297,7 +4450,7 @@ function 更换头像() {
             标题: "全部",
             uo: null,
             检测: function() {
-                this.uo = text("All media").visibleToUser().findOne(2000)
+                this.uo = text("All media").visibleToUser().findOne(1000)
                 return this.uo && 6 < this.uo.depth()
             },
             执行: function() {
@@ -4311,7 +4464,7 @@ function 更换头像() {
             检测: function() {
                 this.uo = classNameEndsWith("ImageView").visibleToUser().clickable(true).filter(function(uo){
                     return uo.depth()==11 || uo.depth()==12;   
-                }).findOne(2000)
+                }).findOne(1000)
                 return this.uo
             },
             执行: function() {
@@ -4327,7 +4480,7 @@ function 更换头像() {
             标题: "从图库中选取",
             uo: null,
             检测: function() {
-                this.uo = text("Select from Gallery").findOne(2000)
+                this.uo = text("Select from Gallery").findOne(1000)
                 return this.uo
             },
             执行: function() {
