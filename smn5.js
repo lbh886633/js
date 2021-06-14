@@ -9,7 +9,7 @@ var testLog = true; // 日志的显示模式
 var tempSave = {
     // test: testLog,   // 跟随日志模式
     test: false,    // 显示上号器
-    version: "130",
+    version: "131",
     firstEnvi: 0,
     privacy: 30,
     NUMBER: 0,
@@ -35,9 +35,10 @@ tempSave.showLoginTool = tempSave.test ? "true" : "false";
         "修复回复消息模式居中时不发送消息", // 2021年6月13日 01:48:38
         "优化粉丝界面加载（粉丝模式）", // 2021年6月13日 02:34:16
         "修复回复消息发送失败", // 2021年6月14日 00:21:36
-        "优化关注用户等待时长",
-        "修复资料编辑",
-        "优化头像视频"
+        "修复资料编辑，优化头像视频",
+        // "测试_更改关注用户等待时长",
+        "新增卸载重装", // 2021年6月14日 14:19:07
+        "修复请求超时时不会重试", // 2021年6月14日 14:35:48
     ];
     events.broadcast.emit("unlockOK", "run..." + tempSave.version); // 4.3 以前的启动成功通知
     storages.create("T_T").put("runStatus", true);                  // 4.3 及以后的启动成功通知
@@ -63,8 +64,8 @@ var server = {
             // 最多重试60秒
             option.timeout = option.timeout || Date.now() + 60*1000;
             // 10次上限
-            log("重试中：", option.number,"超时时长：", ((option.timeout - Date.now()) / 1000).toFixed(2), "s")
-            if(option.number < 10 && (option.timeout - Date.now()) < 0 /* && err */) {
+            log("重试中：", option.number + 1,"超时等待时长：", ((option.timeout - Date.now()) / 1000).toFixed(2), "s")
+            if(option.number < 10 && 0 < (option.timeout - Date.now())/* && err */) {
                 option.number++;
                 return option;
             }
@@ -1139,6 +1140,18 @@ function 运行前(){
 }
 function 主程序(forTag) {
 
+    if(!forTag)
+    if(ui.switchVersionzl.checked){
+        log("切换zl版本");
+        appPackage = "com.zhiliaoapp.musically";
+    }
+
+    if(!forTag)
+    if(ui.switchVersion.checked){
+        log("切换ss版本");
+        appPackage = "com.ss.android.ugc.trill";
+    }
+
     if(ui.functionTest.checked) {
         switchModel("测试");
         // 在执行完之后如果还为true则等待继续
@@ -1190,6 +1203,8 @@ function 主程序(forTag) {
             log(
                 "测试结果：",
                 tempSave.version
+                // 更换头像()
+                // getFansInfo("buggabooxdixie",null,null,true)
             )
 
         }catch(e){
@@ -1202,17 +1217,6 @@ function 主程序(forTag) {
     if(!forTag) 
     console.hide()
 
-    if(!forTag)
-    if(ui.switchVersionzl.checked){
-        log("切换zl版本");
-        appPackage = "com.zhiliaoapp.musically";
-    }
-
-    if(!forTag)
-    if(ui.switchVersion.checked){
-        log("切换ss版本");
-        appPackage = "com.ss.android.ugc.trill";
-    }
 
     if(ui.readLocalAccountRecord.checked) {
         switchModel("读取本地账号记录");
@@ -1875,11 +1879,13 @@ function 关注结果检测(){
         log("账号关注情况", reservedA);
         startThreads(()=>{
             // (提交当前关注数) 在备注字段中增加 reservedA 备注
-        server.post("accountKey/focusReservedA", {
-            keyName: tempSave.accountKey.keyName,
-            reservedA: reservedA
+            server.post("accountKey/focusReservedA", {
+                keyName: tempSave.accountKey.keyName,
+                reservedA: reservedA
+            })
         })
-        })
+        if(reinstallTikTok) log("重新安装TikTok", reinstallTikTok())
+        else log("重装函数制作中...")
     } else {
         返回首页();
         let info = getFansInfo("个人信息", true);
@@ -3536,8 +3542,17 @@ function 上传视频() {
                                 )
                             )
                         }).findOne(3000)
+                        if(!下一步) {
+                            let stickersUO = text("Stickers").findOne(1000)
+                            stickersUO.parent().parent().parent().parent().children().forEach((uo)=>{
+                                if(uo.clickable()){
+                                    下一步 = uo;
+                                    return false;
+                                }
+                            })
+                        }
                         if(下一步) {
-                            log("下一步 " + 下一步.click());
+                            log("下一步 " + click(下一步));
                             sleep(3000);
                             next--;
                         } else {
@@ -11007,4 +11022,65 @@ function 登号器登录账号(switchVPN, key){
     循环执行(操作);
 
     if(switchVPN) connectVPNByClash(true);
+}
+
+// function taskThreads(){
+    // 在tempSave.taskList数组中保存箭头函数，
+    // 如果没有启动线程或者线程死亡则重启线程，
+    // 线程的主要功能是将里面的箭头函数进行调用，
+    // 每一个函数的调用都需要捕获异常，输出日志。
+// }
+// 启动线程
+function startThreads(f){
+    threads.start(function(){
+        try{
+            f()
+        }catch(e){
+            console.error("线程异常")
+            console.verbose(e)
+        }
+    });
+}
+// 卸载{appPackage}软件
+function uninstallApp(){
+    let reInfo = uninstallAppByShell(appPackage);
+    tlog(appPackage+"卸载情况", reInfo);
+    return reInfo.result.replace(/(^\s*)|(\s*$)/g, "") == "Success";
+}
+// 从指定目录下安装带有{appPackage}文字的apk软件
+function installApp(dir){
+    // 从{dir}或者"/sdcard/"路径下找到名字带有{appPackage}的apk文件
+    let pathList;
+    dir = dir || "/sdcard/";
+    pathList = files.listDir(dir, function(name){
+        return name.endsWith(".apk") 
+            && -1 < name.indexOf(appPackage)
+            && files.isFile(files.join(dir, name));
+    })
+    if(pathList.length < 1) {
+        console.error("未找到文件名包含", appPackage, "的apk文件")
+        return false;
+    }
+    // 安装这个apk文件，如果找到多个则选择第一个
+    let reInfo = installAppByShell(files.join(dir, pathList[0]))
+    tlog(appPackage+"安装情况", reInfo);
+    return reInfo.result.replace(/(^\s*)|(\s*$)/g, "") == "Success";
+}
+// 卸载指定包的软件
+function uninstallAppByShell(pkg){
+    log("卸载", pkg)
+    return shell("pm uninstall " + pkg, true);
+}
+// 安装指定路径的软件
+function installAppByShell(path){
+    log("安装", path)
+    return shell("pm install -r '" + path+"'", true);
+}
+// 重装TikTok
+function reinstallTikTok(){
+    let ua = uninstallApp()
+    let ia = installApp()
+    console.verbose("卸载结果", ua)
+    console.verbose("安装结果", ia)
+    return ua && ia;
 }
