@@ -10024,6 +10024,9 @@ function runTikTok(run,tag) {
     while (true) {
 
         log("账号信息检测")
+
+        if (text("Swipe up for more").findOne(300)) 随机滑动();
+
         try{
             // 点击个人信息，没有点击的情况下不会去尝试获取信息
             if(text("Me").findOne(2000).parent().click()) {
@@ -10620,6 +10623,7 @@ function popupDetection(time, exceptionLog) {
             }catch(err){
                 // 避免因为某一个的错误导致整个崩溃
                 if(!exceptionLog) console.info("2");
+                console.verbose(err);
             }
         }
     }catch(err){
